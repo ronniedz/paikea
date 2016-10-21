@@ -1,0 +1,191 @@
+package cab.bean.srvcs.tube4kids.core;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import lombok.NonNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@Entity
+@Table(name = "video")
+@NamedQueries({ @NamedQuery(
+	name = "cab.bean.srvcs.tube4kids.core.Video.findAll",
+	query = "SELECT vid FROM Video vid")
+})
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
+public class Video {
+    
+    @JsonIgnore
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // Gen ID
+
+    @NonNull
+    @JsonProperty
+    @Column(name = "etag", nullable = false)
+    private String etag;
+
+    @NonNull
+    @Column(name = "video_id", nullable = false)
+    private String videoId;
+
+    
+    @Column(name = "published_at", nullable = false)
+    private String publishedAt; // snippetType.publishedAt
+
+    @NonNull
+    @Column(name = "title", nullable = false)
+    private String title; // snippetType.title
+
+    @Column(name = "description", nullable = false)
+    private String description; // snippetType.description
+
+    //Column(name = "default_thumb", nullable = false)
+    @NonNull
+    @Transient
+    private Map defaultThumb = new HashMap(); // snippetType.thumbnails['default']
+
+
+    //Column(name = "thumb_url", nullable = false)
+    @Column(name = "default_thumb")
+    private String thumbUrl;
+
+    public String getThumbUrl() {
+	return (String) this.defaultThumb.get("url");
+    }
+    
+    public void setThumbUrl(String thumb) {
+	this.defaultThumb.put("url", thumb);
+    }
+    
+    public Video(String etag) {
+	this.etag = etag;
+    }
+
+    public Video() {  }
+
+    @JsonProperty(value ="id", access=JsonProperty.Access.WRITE_ONLY)
+    public void setVidId(Map<String, Object> foo) {
+	this.videoId  = (String) foo.get("videoId");
+    }
+    
+    public String getPublishedAt() {
+        return publishedAt;
+    }
+
+    @JsonProperty(value="snippet", access=JsonProperty.Access.WRITE_ONLY)
+    public void setSnippet(Map<String, Object> foo) {
+	this.publishedAt  = (String) foo.get("publishedAt");
+	this.title  = (String) foo.get("title");
+	this.description  = (String) foo.get("description");
+	this.defaultThumb = (Map) ((Map) foo.get("thumbnails")).get("default");
+    }
+ 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @JsonProperty 
+    public String getEtag() {
+        return etag;
+    }
+
+    @JsonProperty 
+    public String getVideoId() {
+        return videoId;
+    }
+
+    public Video setEtag(String etag) {
+        this.etag = etag;
+        return this;
+    }
+
+    public Video setVideoId(String videoId) {
+        this.videoId = videoId;
+        return this;
+    }
+
+    public Video setPublishedAt(String publishedAt) {
+        this.publishedAt = publishedAt;
+        return this;
+    }
+
+    public Video setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public Video setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public Video setDefaultThumb(Map defaultThumb) {
+        this.defaultThumb = defaultThumb;
+        return this;
+    }
+
+    @JsonProperty 
+    public String getTitle() {
+        return title;
+    }
+
+    @JsonProperty 
+    public String getDescription() {
+        return description;
+    }
+
+
+    @JsonProperty 
+    public Map getDefaultThumb() {
+        return defaultThumb;
+    }
+
+    @Override
+    public String toString() {
+	return "Video [ etag=" + etag + ", videoId=" + videoId
+		+ ", publishedAt=" + publishedAt + ", title=" + title
+		+ ", description=" + description + ", defaultThumb="
+		+ defaultThumb + "]";
+    }
+
+
+	// ------------------  JOINS ----------------------- //
+	@JsonIgnore
+	@Transient
+	@ManyToMany(
+		mappedBy="videos",
+		targetEntity=cab.bean.srvcs.tube4kids.core.Playlist.class
+	)
+	private Set<Playlist> playlists;
+	
+	@JsonIgnore
+	@Transient
+	public Set<Playlist>getPlaylists() {
+	    return playlists;
+	}
+	
+
+	
+}
