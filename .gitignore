@@ -5,3 +5,8 @@ target
 .classpath
 .settings
 .project
+**/.project
+**/.settings
+**/.classpath
+**/.checkstyle
+.checkstyle
