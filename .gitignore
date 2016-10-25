@@ -1,0 +1,14 @@
+target
+*.iml
+*.ipr
+.idea
+.classpath
+.settings
+.project
+*/.project
+**/.project
+**/.settings
+*/.settings
+**/.classpath
+**/.checkstyle
+.checkstyle

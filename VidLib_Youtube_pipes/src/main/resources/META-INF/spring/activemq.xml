@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+			Manage/route client-requests for videos.
+			This permits 1000s of simultaneous requests to be handles by a single YT agent or
+			pool of agents  
+-->
+<beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:amq="http://activemq.apache.org/schema/core"
+	xmlns:cxf="http://camel.apache.org/schema/cxf"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans		http://www.springframework.org/schema/beans/spring-beans.xsd
+http://activemq.apache.org/schema/core 				http://activemq.apache.org/schema/core/activemq-core.xsd
+http://camel.apache.org/schema/cxf 						http://camel.apache.org/schema/cxf/camel-cxf.xsd
+http://cxf.apache.org/jaxrs 									http://cxf.apache.org/schemas/jaxrs.xsd
+http://camel.apache.org/schema/spring 				http://camel.apache.org/schema/spring/camel-spring.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+">
+
+	<!-- Need a special configurer for variables in attributes (e.g. see route below). -->
+	<bean id="bridgePropertyPlaceholder" class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
+		<property name="locations">
+	    <list>
+	      <value>classpath:yt-gateway.properties</value>
+	    </list>
+	  </property>
+	</bean>
+
+	<!-- <context:property-placeholder location="classpath:yt-gateway.properties" /> -->
+
+	<bean id="mongoBean" class="com.mongodb.Mongo">
+		<constructor-arg name="host" value="${mongodb.host}" />
+		<!-- <constructor-arg name="port" value="${mongodb.port}" /> -->
+	</bean>
+	
+	<!-- <bean id="myRoute" class="cab.bean.srvcs.pipes.MyRoute" /> -->
+	<bean id="youTubeAgentImpl" class="cab.bean.srvcs.tube4kids.resources.YouTubeAgentImpl">
+		<constructor-arg name="apiKey" value="${youtube.apiKey}" />
+	</bean>
+	
+	<bean id="ytAPICallProcessor" class="cab.bean.srvcs.pipes.processor.YouTubeAPICallProcessor">
+		<property name="youTubeAgent" ref="youTubeAgentImpl" />
+	</bean>
+	
+	<bean id="restRouteBuilder" class="cab.bean.srvcs.pipes.route.RestRouteBuilder">
+		<constructor-arg name="mongoBean"  ref="mongoBean" />
+		<constructor-arg name="dbName" value="test" />
+	</bean>
+<!--     <bean id="jpa" class="org.apache.camel.component.jpa.JpaComponent">
+       <property name="entityManagerFactory" ref="entityManagerFactory"/>
+       <property name="transactionManager" ref="jpaTxManager"/>
+    </bean>
+    <bean id="jpaTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="persistenceUnit"/>
+    </bean>
+ -->
+
+	<camelContext id="gazelle" xmlns="http://camel.apache.org/schema/spring">
+		<routeBuilder id="first" ref="restRouteBuilder"/>
+	</camelContext>
+
+</beans>
+
