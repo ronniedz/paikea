@@ -3,18 +3,11 @@
  */
 package cab.bean.srvcs.tube4kids.core;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-import org.joda.time.DateTime;
+import lombok.NonNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import lombok.NonNull;
 
 /**
  * @author ronalddennison

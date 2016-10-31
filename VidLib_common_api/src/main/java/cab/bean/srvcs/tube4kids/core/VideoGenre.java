@@ -88,9 +88,10 @@ public class VideoGenre {
     
     @JsonIgnore
     @Transient
-    public void setGenrePairs(Long[] genres) {
+    public VideoGenre setGenreIds(Long[] genres) {
 	this.genreId = genres[0];
 	this.genre2Id = genres[1];
+	return this;
     }
     
     @JsonIgnore

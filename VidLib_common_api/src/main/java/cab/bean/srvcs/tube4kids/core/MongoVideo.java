@@ -1,41 +1,43 @@
 package cab.bean.srvcs.tube4kids.core;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.ws.rs.core.UriBuilder;
 
 import lombok.Data;
-import lombok.NonNull;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import cab.bean.srvcs.tube4kids.api.ErrorBox;
+import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@Entity
 @Setter
+@JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class MongoVideo extends BasicVideo {
 
     private Long id; // Gen ID
+
+    private static final Long[] defaultGIDs = new Long[] {1L, 1L};
+
+    // TODO Add empty genres to the MongoDocument. This will allow us to use Mongo as primary source down the line
+    protected List<VideoGenre> videoGenres;
     
     @JsonProperty
     protected String publishedAt; // snippetType.publishedAt
@@ -44,11 +46,14 @@ public class MongoVideo extends BasicVideo {
 //    
     public MongoVideo() {
 	super();
+	this.videoGenres = Arrays.asList(new VideoGenre[] { new VideoGenre().setGenreIds(defaultGIDs) });
+	
 //	callback.put("open" , "");
 //	callback.put("addTo","");
     }
     
     public MongoVideo(String etag) {
+	this();
 	this.etag = etag;
     }
 
@@ -57,6 +62,15 @@ public class MongoVideo extends BasicVideo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long getId() {
         return id;
+    }
+
+    @JsonProperty
+    public List<VideoGenre> getVideoGenres() {
+	return videoGenres;
+    }
+
+    public void setVideoGenres(List<VideoGenre> videoGenres) {
+	this.videoGenres = videoGenres;
     }
 
     @JsonProperty 
