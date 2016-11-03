@@ -18,7 +18,11 @@ public class Child {
     private long id;
 
     @ManyToMany(targetEntity = cab.bean.srvcs.tube4kids.core.Playlist.class)
-    @JoinTable(name = "child_playlist", joinColumns = @JoinColumn(name = "child_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "playlist_id", referencedColumnName = "id"))
+    @JoinTable(
+	name = "child_playlist",
+	joinColumns = @JoinColumn(name = "child_id", referencedColumnName = "id"),
+	inverseJoinColumns = @JoinColumn(name = "playlist_id", referencedColumnName = "id")
+    )
     private Set<Playlist> playlists;
 
     public Set<Playlist> getPlaylists() {

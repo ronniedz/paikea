@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-
-for pidfile in "run/paikea_restsrvr.pid run/paikea_msgqueue.pid"; do
+pidfiles="run/paikea_restsrvr.pid run/paikea_msgqueue.pid"
+for pidfile in $pidfiles
+do
 	if [ -e "$pidfile" ]
 	then
-		kill -KILL "`cat ${pidfile}`" && rm ./run/${pidfile}
+		echo "Killing $pidfile"
+		kill -KILL "`cat ${pidfile}`" && rm ${pidfile} && echo "Stopped"
+		sleep 1
 	fi
 done

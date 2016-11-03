@@ -5,15 +5,6 @@ package cab.bean.srvcs.tube4kids.core;
 
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.NonNull;
-
 /**
  * @author ronalddennison
  *

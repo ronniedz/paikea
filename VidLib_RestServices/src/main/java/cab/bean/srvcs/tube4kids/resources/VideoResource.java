@@ -11,6 +11,7 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -159,7 +160,14 @@ public class VideoResource {
 	.build();
     }
     
-    
+    @Path("/{id}")
+    @DELETE
+    @UnitOfWork
+    public Response deleteRelVideo(@PathParam("id") String id) {
+    	videoDAO.delete(id);
+	return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
     @POST
     @UnitOfWork
     public Response addYTVideos(List<RelVideo> videos) {

@@ -2,6 +2,7 @@ package cab.bean.srvcs.tube4kids.db;
 
 import cab.bean.srvcs.tube4kids.core.Person;
 import io.dropwizard.hibernate.AbstractDAO;
+
 import org.hibernate.SessionFactory;
 
 import java.util.List;
@@ -18,6 +19,10 @@ public class PersonDAO extends AbstractDAO<Person> {
 
     public Person create(Person person) {
         return persist(person);
+    }
+
+    public Person delete(Person genre) {
+	return delete(genre);
     }
 
     public List<Person> findAll() {

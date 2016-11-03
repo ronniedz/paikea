@@ -9,6 +9,7 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -87,6 +88,14 @@ public class PlaylistResource {
 		.header("Location", location)
 		.entity(ImmutableMap.<String, URI> builder()
 			.put("Created", location).build()).build();
+    }
+
+    @Path("/{id}")
+    @DELETE
+    @UnitOfWork
+    public Response deletePlaylist(@PathParam("id") Long id) {
+    	playlistDAO.delete(id);
+	return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @Path("/user/{userId: [0-9]}")

@@ -56,15 +56,6 @@ public class Genre {
     private Long genreId;
 
     // ------------------ JOINS ----------------------- //
-//  @Transient
-//  @ManyToMany(fetch=FetchType.LAZY)
-//    @JoinTable(
-//        name = "video_genre",
-//        joinColumns = @JoinColumn(name = "genre_id"),
-//        inverseJoinColumns = @JoinColumn(name = "video_id")
-//    )
-//    private List<RelVideo> videos = new ArrayList<RelVideo>();
-    
     @JsonIgnore
     @OneToMany(
 	    cascade = {CascadeType.PERSIST, CascadeType.MERGE},

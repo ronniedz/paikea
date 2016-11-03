@@ -19,6 +19,16 @@ public class UserDAO extends AbstractDAO<User> {
     public User create(User user) {
         return persist(user);
     }
+    
+    public Boolean delete(Long id) {
+	Boolean rep = Boolean.FALSE;
+	User o = get(id);
+	if ( o != null ) {
+	    currentSession().delete(o);
+	    rep = Boolean.TRUE;
+	}
+	return rep;
+    }
 
     public List<User> findAll() {
         return list(namedQuery("cab.bean.srvcs.tube4kids.core.User.findAll"));

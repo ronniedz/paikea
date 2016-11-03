@@ -1,14 +1,15 @@
 package cab.bean.srvcs.tube4kids.resources;
 
-import cab.bean.srvcs.tube4kids.core.Child;
-import cab.bean.srvcs.tube4kids.core.Playlist;
-import cab.bean.srvcs.tube4kids.db.ChildDAO;
-import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
-import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -18,14 +19,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import cab.bean.srvcs.tube4kids.core.Child;
+import cab.bean.srvcs.tube4kids.db.ChildDAO;
+import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
+import cab.bean.srvcs.tube4kids.db.VideoDAO;
 
 @Path("/child")
 @Produces(MediaType.APPLICATION_JSON)
@@ -106,7 +104,14 @@ public class ChildResource {
 		)
 	.build();
     }
-
+    
+    @Path("/{id}")
+    @DELETE
+    @UnitOfWork
+    public Response deleteChild(@PathParam("id") Long id) {
+    	childDAO.delete(id);
+	return Response.status(Response.Status.NO_CONTENT).build();
+    }
     
 //    @POST
 //    @UnitOfWork

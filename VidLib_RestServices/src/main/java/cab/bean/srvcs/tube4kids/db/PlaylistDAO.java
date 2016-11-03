@@ -1,15 +1,13 @@
 package cab.bean.srvcs.tube4kids.db;
 
-import cab.bean.srvcs.tube4kids.core.Playlist;
-import cab.bean.srvcs.tube4kids.core.RelVideo;
 import io.dropwizard.hibernate.AbstractDAO;
+
+import java.util.List;
+import java.util.Optional;
 
 import org.hibernate.SessionFactory;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import cab.bean.srvcs.tube4kids.core.Playlist;
 
 public class PlaylistDAO extends AbstractDAO<Playlist> {
     
@@ -23,6 +21,16 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
 
     public Playlist create(Playlist playlist) {
         return persist(playlist);
+    }
+    
+    public Boolean delete(Long id) {
+    	Boolean rep = Boolean.FALSE;
+    	Playlist o = get(id);
+    	if ( o != null ) {
+    	    currentSession().delete(o);
+    	    rep = Boolean.TRUE;
+    	}
+    	return rep;
     }
 
     public List<Playlist> findAll() {

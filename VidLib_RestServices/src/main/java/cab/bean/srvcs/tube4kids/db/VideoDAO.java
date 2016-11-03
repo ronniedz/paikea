@@ -22,6 +22,16 @@ public class VideoDAO extends AbstractDAO<RelVideo> {
     public RelVideo create(RelVideo video) {
         return persist(video);
     }
+    
+    public Boolean delete(String id) {
+	Boolean rep = Boolean.FALSE;
+	RelVideo o = get(id);
+	if ( o != null ) {
+	    currentSession().delete(o);
+	    rep = Boolean.TRUE;
+	}
+	return rep;
+    }
 
     public List<RelVideo> findAll() {
         return list(namedQuery("cab.bean.srvcs.tube4kids.core.RelVideo.findAll"));

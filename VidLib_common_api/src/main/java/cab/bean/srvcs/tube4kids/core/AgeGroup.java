@@ -16,7 +16,10 @@ import lombok.NonNull;
 
 @Entity
 @Table(name = "age_group")
-@NamedQueries({ @NamedQuery(name = "cab.bean.srvcs.tube4kids.core.AgeGroup.findAll", query = "SELECT p FROM AgeGroup p") })
+@NamedQueries({ @NamedQuery(
+	name = "cab.bean.srvcs.tube4kids.core.AgeGroup.findAll",
+	query = "SELECT p FROM AgeGroup p")
+})
 @Data
 public class AgeGroup {
 

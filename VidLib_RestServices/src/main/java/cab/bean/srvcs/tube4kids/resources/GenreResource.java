@@ -3,12 +3,19 @@ package cab.bean.srvcs.tube4kids.resources;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.dropwizard.jersey.params.LongParam;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 
 @Path("/genre")
@@ -19,6 +26,14 @@ public class GenreResource {
 
     public GenreResource(GenreDAO genreDAO) {
         this.genreDAO = genreDAO;
+    }
+    
+    @Path("/{id}")
+    @DELETE
+    @UnitOfWork
+    public Response deleteGenre(@PathParam("id") Long id) {
+    	genreDAO.delete(id);
+	return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @POST

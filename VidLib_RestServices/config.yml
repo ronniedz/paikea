@@ -5,6 +5,14 @@ defaultName: ${DW_DEFAULT_NAME:-Stranger}
 # Database settings.
 database:
 
+  properties:
+    hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+    hibernate.generate_statistics: true
+    hibernate.show_sql: true
+    hibernate.format_sql: true
+    hibernate.hbm2ddl.auto: create-drop
+    hibernate.hbm2ddl.import_files: import.sql
+
   # the name of your JDBC driver
   driverClass: com.mysql.cj.jdbc.Driver
 
@@ -16,7 +24,7 @@ database:
 
   # the JDBC URL
   url: jdbc:mysql://localhost:3306/mydb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-
+    
 # use the simple server factory if you only want to run on a single port
 #server:
 #  type: simple

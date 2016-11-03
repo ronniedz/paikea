@@ -3,12 +3,17 @@ package cab.bean.srvcs.tube4kids.resources;
 import cab.bean.srvcs.tube4kids.core.AgeGroup;
 import cab.bean.srvcs.tube4kids.db.AgeGroupDAO;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.dropwizard.jersey.params.LongParam;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import java.util.List;
 
 @Path("/age")
@@ -25,6 +30,15 @@ public class AgeGroupResource {
     @UnitOfWork
     public AgeGroup createAgeGroup(AgeGroup ageGroup) {
         return ageGroupDAO.create(ageGroup);
+    }
+
+    
+    @Path("/{id}")
+    @DELETE
+    @UnitOfWork
+    public Response deleteAgeGroup(@PathParam("id") Long id) {
+    	ageGroupDAO.delete(id);
+	return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @GET

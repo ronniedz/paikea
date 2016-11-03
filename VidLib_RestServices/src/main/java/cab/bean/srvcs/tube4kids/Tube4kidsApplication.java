@@ -43,7 +43,6 @@ import cab.bean.srvcs.tube4kids.auth.ExampleAuthorizer;
 import cab.bean.srvcs.tube4kids.cli.RenderCommand;
 import cab.bean.srvcs.tube4kids.filter.DateRequiredFeature;
 import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
-
 import cab.bean.srvcs.tube4kids.core.User;
 
 //import cab.bean.srvcs.tube4kids.core.AgeGroup;
@@ -53,21 +52,20 @@ import cab.bean.srvcs.tube4kids.db.GenreDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
-
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
-
 import cab.bean.srvcs.tube4kids.resources.AgeGroupResource;
 import cab.bean.srvcs.tube4kids.resources.ChildResource;
 import cab.bean.srvcs.tube4kids.resources.GenreResource;
 import cab.bean.srvcs.tube4kids.resources.PlaylistResource;
+import cab.bean.srvcs.tube4kids.resources.UserResource;
 import cab.bean.srvcs.tube4kids.resources.VideoResource;
 import cab.bean.srvcs.tube4kids.resources.YouTubeVideoResource;
-
 import cab.bean.srvcs.tube4kids.resources.ProtectedResource;
 import cab.bean.srvcs.tube4kids.resources.ViewResource;
 import cab.bean.srvcs.tube4kids.resources.FilteredResource;
 //import cab.bean.srvcs.tube4kids.resources.PeopleResource;
 //import cab.bean.srvcs.tube4kids.resources.PersonResource;
+
 
 import org.glassfish.jersey.server.ServerProperties;
 
@@ -139,6 +137,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
         
         jerseyConf.register(new GenreResource(genreDAO));
+        jerseyConf.register(new UserResource(userDAO));
         jerseyConf.register(new AgeGroupResource(ageGroupDAO));
         
         jerseyConf.register(new ChildResource(childDAO, videoDAO, playlistDAO));
