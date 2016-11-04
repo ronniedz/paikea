@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserDAO extends AbstractDAO<User> {
+    
     public UserDAO(SessionFactory factory) {
         super(factory);
     }

@@ -51,118 +51,13 @@ import lombok.*;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_DEFAULT)
 public class VideoGenre {
     
-    VideoGenrePk pk;
-
-    private Date lastModified = new Date();
-
-    private Long genreId;
-    
-    private Long genre2Id;
-
-    public VideoGenre() {
-	this.pk =  new VideoGenrePk();
-    }
-    
-    public VideoGenre(RelVideo video, User user) {
-	this.pk =  new VideoGenrePk(video, user);
-    }
-    
-    public VideoGenre(RelVideo video, User user, Long genreId, Long genre2Id) {
-	this.pk =  new VideoGenrePk(video, user);
-	this.genreId = genreId;
-	this.genre2Id = genre2Id;
-    }
-    
-    public VideoGenre(RelVideo video, User user,
-	    ImmutablePair<Long, Long> genreIds) {
-	this(video, user);
-	this.setGenrePairs(genreIds);
-    }
-
-    @JsonIgnore
-    @Transient
-    public void setGenrePairs(ImmutablePair<Long, Long> genres) {
-	this.genreId = genres.left;
-	this.genre2Id = genres.right;
-    }
-    
-    @JsonIgnore
-    @Transient
-    public VideoGenre setGenreIds(Long[] genres) {
-	this.genreId = genres[0];
-	this.genre2Id = genres[1];
-	return this;
-    }
-    
-    @JsonIgnore
-    @EmbeddedId
-    public VideoGenrePk getPk() {
-        return pk;
-    }
-
-    public void setPk(VideoGenrePk pk) {
-        this.pk = pk;
-    }
-
-    @JsonProperty
-    @Column(name = "genre_id", nullable = true)
-    public Long getGenreId() {
-        return genreId;
-    }
-
-    public void setGenreId(Long genreId) {
-        this.genreId = genreId;
-    }
-    
-    @JsonProperty
-    @Column(name = "genre2_id", nullable = true)
-    public Long getGenre2Id() {
-        return genre2Id;
-    }
-
-    public void setGenre2Id(Long genre2Id) {
-        this.genre2Id = genre2Id;
-    }
-
-    @JsonIgnore
-    @Transient
-    public RelVideo getVideo() {
-        return getPk().getVideo();
-    }
-
-    public void setVideo(RelVideo video) {
-	getPk().setVideo(video);
-    }
-
-    @JsonIgnore
-    @Transient
-    public User getUser() {
-        return getPk().getUser();
-    }
-
-    public void setUser(User user) {
-	getPk().setUser(user);
-    }
-
-    @JsonProperty
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created", nullable = false)
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    
     @Embeddable
     @ToString
     public static class VideoGenrePk implements Serializable {
         private static final long serialVersionUID = 490200883975165432L;
         
-        private RelVideo video;
         private User user;
+        private RelVideo video;
 
         public VideoGenrePk() {}
         
@@ -182,12 +77,11 @@ public class VideoGenre {
     	return false;
         }
 
-        public int hashCode() {
-            return 31 * (
-            		((this.user != null) ? this.user.hashCode() : 0)  +
-            		((this.video != null) ? this.video.hashCode() : 0)
-            	);
-        }
+        @ManyToOne
+        @JoinColumn(name="user_id")
+	public User getUser() {
+	    return user;
+	}
 
 	//Transient
         @ManyToOne
@@ -196,20 +90,126 @@ public class VideoGenre {
 	    return video;
 	}
 
+	public int hashCode() {
+            return 31 * (
+            		((this.user != null) ? this.user.hashCode() : 0)  +
+            		((this.video != null) ? this.video.hashCode() : 0)
+            	);
+        }
+
+        public void setUser(User user) {
+	    this.user = user;
+	}
+
 	public void setVideo(RelVideo video) {
 	    this.video = video;
 	}
 
-        @ManyToOne
-        @JoinColumn(name="user_id")
-	public User getUser() {
-	    return user;
-	}
+    }
 
-	public void setUser(User user) {
-	    this.user = user;
-	}
+    private Long genre2Id;
 
+    private Long genreId;
+    
+    private Date lastModified = new Date();
+
+    VideoGenrePk pk;
+    
+    public VideoGenre() {
+	this.pk =  new VideoGenrePk();
+    }
+    
+    public VideoGenre(RelVideo video, User user) {
+	this.pk =  new VideoGenrePk(video, user);
+    }
+    
+    public VideoGenre(RelVideo video, User user,
+	    ImmutablePair<Long, Long> genreIds) {
+	this(video, user);
+	this.setGenrePairs(genreIds);
+    }
+
+    public VideoGenre(RelVideo video, User user, Long genreId, Long genre2Id) {
+	this.pk =  new VideoGenrePk(video, user);
+	this.genreId = genreId;
+	this.genre2Id = genre2Id;
+    }
+    
+    @JsonProperty
+    @Column(name = "genre2_id", nullable = true)
+    public Long getGenre2Id() {
+        return genre2Id;
+    }
+    
+    @JsonProperty
+    @Column(name = "genre_id", nullable = true)
+    public Long getGenreId() {
+        return genreId;
+    }
+
+    @JsonProperty
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created", nullable = false)
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    @JsonIgnore
+    @EmbeddedId
+    public VideoGenrePk getPk() {
+        return pk;
+    }
+
+    @JsonIgnore
+    @Transient
+    public User getUser() {
+        return getPk().getUser();
+    }
+    
+    @JsonIgnore
+    @Transient
+    public RelVideo getVideo() {
+        return getPk().getVideo();
+    }
+
+    public void setGenre2Id(Long genre2Id) {
+        this.genre2Id = genre2Id;
+    }
+
+    public void setGenreId(Long genreId) {
+        this.genreId = genreId;
+    }
+
+    @JsonIgnore
+    @Transient
+    public VideoGenre setGenreIds(Long[] genres) {
+	this.genreId = genres[0];
+	this.genre2Id = genres[1];
+	return this;
+    }
+
+    @JsonIgnore
+    @Transient
+    public void setGenrePairs(ImmutablePair<Long, Long> genres) {
+	this.genreId = genres.left;
+	this.genre2Id = genres.right;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public void setPk(VideoGenrePk pk) {
+        this.pk = pk;
+    }
+
+    public void setUser(User user) {
+	getPk().setUser(user);
+    }
+
+    
+    public void setVideo(RelVideo video) {
+	getPk().setVideo(video);
     }
     
 

@@ -34,22 +34,16 @@ public class MongoVideo extends BasicVideo {
 
     private Long id; // Gen ID
 
-    private static final Long[] defaultGIDs = new Long[] {1L, 1L};
+//    private static final Long[] defaultGIDs = new Long[] {1L, 1L};
 
     // TODO Add empty genres to the MongoDocument. This will allow us to use Mongo as primary source down the line
     protected List<VideoGenre> videoGenres;
     
-    @JsonProperty
     protected String publishedAt; // snippetType.publishedAt
 
-//    private Map<String, String> callback = new HashMap<String, String>();
-//    
     public MongoVideo() {
 	super();
-	this.videoGenres = Arrays.asList(new VideoGenre[] { new VideoGenre().setGenreIds(defaultGIDs) });
-	
-//	callback.put("open" , "");
-//	callback.put("addTo","");
+	this.videoGenres = Arrays.asList(new VideoGenre[] { new VideoGenre().setGenreIds(new Long[] {1L, 1L}) });
     }
     
     public MongoVideo(String etag) {
@@ -67,10 +61,6 @@ public class MongoVideo extends BasicVideo {
     @JsonProperty
     public List<VideoGenre> getVideoGenres() {
 	return videoGenres;
-    }
-
-    public void setVideoGenres(List<VideoGenre> videoGenres) {
-	this.videoGenres = videoGenres;
     }
 
     @JsonProperty 
@@ -102,6 +92,11 @@ public class MongoVideo extends BasicVideo {
     public String getDefaultThumbnail() {
 	return this.defaultThumbnail;
     }
+
+    public void setVideoGenres(List<VideoGenre> videoGenres) {
+	this.videoGenres = videoGenres;
+    }
+
     @JsonProperty(value ="id", access=JsonProperty.Access.WRITE_ONLY)
     public void setVidId(Map<String, Object> foo) {
 	this.videoId  = (String) foo.get("videoId");
@@ -131,6 +126,7 @@ public class MongoVideo extends BasicVideo {
     
     @JsonIgnore
     @Transient
+    @ManyToMany(mappedBy = "videos", targetEntity = cab.bean.srvcs.tube4kids.core.Playlist.class)
     public Set<Playlist> getPlaylists() {
 	return playlists;
     }
@@ -143,35 +139,27 @@ public class MongoVideo extends BasicVideo {
     }
 
     public void setDefaultThumbnail(String thumb) {
-	this.defaultThumbnail = thumb;    }
+	this.defaultThumbnail = thumb;
+    }
 
     public void setEtag(String etag) {
-        this.etag = etag;    }
+        this.etag = etag;
+    }
 
     public void setVideoId(String videoId) {
-        this.videoId = videoId;    }
+        this.videoId = videoId;
+    }
 
     public void setPublishedAt(String publishedAt) {
-        this.publishedAt = publishedAt;    }
+        this.publishedAt = publishedAt;
+    }
 
     public void setTitle(String title) {
-        this.title = title;    }
+        this.title = title;
+    }
 
     public void setDescription(String description) {
-        this.description = description;    }
+        this.description = description;
+    }
 
-//    public Map<String, String> getCallback() {
-//        return callback;
-//    }
-//    
-//    public MongoVideo setACallback(String key, String value) {
-//	callback.put(key, value);
-//	return this;
-//    }
-    
-//    @Transient
-//    public  String getACallback(String key) {
-//	return callback.get(key);
-//    }
-    
 }

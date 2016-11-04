@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ChildDAO extends AbstractDAO<Child> {
+
     public ChildDAO(SessionFactory factory) {
 	super(factory);
     }
