@@ -51,9 +51,9 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 		<constructor-arg name="dbName" value="test" />
 	</bean>
 
-	<camelContext id="gazelle" xmlns="http://camel.apache.org/schema/spring">
-		<routeBuilder id="first" ref="restRouteBuilder"/>
-	</camelContext>
+	<camel:camelContext id="gazelle">
+		<camel:routeBuilder id="first" ref="restRouteBuilder"/>
+	</camel:camelContext>
 
 </beans>
 

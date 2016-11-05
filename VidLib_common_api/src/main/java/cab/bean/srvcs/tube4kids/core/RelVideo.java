@@ -36,7 +36,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class RelVideo extends BasicVideo {
 
     protected DateTime publishedAt; 	// snippetType.publishedAt
-    protected Long userId; 			// used in MySQL 
+    protected Long userId; 			// used in MySQL
+    
+    protected User user; 			// used for joining videoGenre PK
+    
     private Set<Playlist> playlists;
     private List<VideoGenre> videoGenres = new ArrayList<VideoGenre>();
 
@@ -157,11 +160,20 @@ public class RelVideo extends BasicVideo {
 	}
 
 	public void setVideoGenres(List<VideoGenre> videoGenres) {
+//	    videoGenres.forEach( g -> {
+//		g.getPk().
+//	    });
 	    this.videoGenres = videoGenres;
 	}
 
 	public void setPlaylists(Set<Playlist> playlists) {
 	    this.playlists = playlists;
+	}
+
+    	@JsonIgnore
+	public void setUser(User user) {
+	    this.user = user;
+	    this.userId = user.getId();
 	}
 
 //	public void setGenres(Set<Genre> genres) {

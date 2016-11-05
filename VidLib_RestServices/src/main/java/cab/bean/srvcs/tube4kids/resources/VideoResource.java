@@ -171,12 +171,20 @@ public class VideoResource {
     @POST
     @UnitOfWork
     public Response addYTVideos(List<RelVideo> videos) {
-	List<String>ids = new ArrayList();
-	for (int i = 0; i < videos.size(); i++) {
-	    videos.get(i).setUserId(1L);
-	    ids.add(videoDAO.addVideoYTVideo(videos.get(i)));
-	}
-	URI location = UriBuilder.fromUri("/video/" +  ids.get(0) ).build();
+	User user = userDAO.findById(1L).get();
+
+	List<String>ids = new ArrayList<String>();
+	videos.forEach( video -> {
+	    video.setUserId(1L);
+	    video.setUser(user);
+	    video.getVideoGenres().forEach( g -> {
+		g.getPk().setUser(user);
+		g.getPk().setVideo(video);
+	    });
+	    ids.add(videoDAO.addVideoYTVideo(video));
+	});
+	
+	URI location = UriBuilder.fromUri("/video").build();
 	return Response
 		.status(Response.Status.CREATED)
 		.header("Location", location)
@@ -184,8 +192,7 @@ public class VideoResource {
 			.put("id", ids)
 			.put("uri", location)
 			.build()
-			)
-			.build();
+		).build();
     }
     
 

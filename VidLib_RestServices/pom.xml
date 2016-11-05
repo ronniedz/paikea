@@ -28,8 +28,6 @@
         <project.youtube.version>v3-rev107-1.18.0-rc</project.youtube.version>
         <project.youtube.analytics.version>v1-rev24-1.17.0-rc</project.youtube.analytics.version>
         <project.http.version>1.18.0-rc</project.http.version>
-        <project.oauth.version>1.18.0-rc</project.oauth.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     		<!--  / YouTube properties -->
     <dropwizard.version>1.0.0-rc3</dropwizard.version>
         
