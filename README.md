@@ -60,12 +60,11 @@ ______
 
 	git clone git@bitbucket.org:dietary_builders/youtube-rider.git [destination]
 
-## Build
+## Build and run
 Execute:
 
- 1. Install libraries (to ~/.m2/)
- 	- `./install_deps.sh`
- 2. Start message queue with:
- 	- `mvn clean package install &`
- 3. Start the rest service:
-	- `cd VidLib_RestServices && mvn clean package && java -jar target/VidLib_RestServices-1.0.0.jar server config.yml &`
+ 1. This will install libraries and compile the source:
+ 	- `./build_run.sh`
+ 2. Stop the services with:
+	- `./stop_servers.sh`
+	
