@@ -37,7 +37,7 @@ public class RelVideo extends BasicVideo {
 
     protected DateTime publishedAt; 	// snippetType.publishedAt
     protected Long userId; 			// used in MySQL
-    
+
     protected User user; 			// used for joining videoGenre PK
     
     private Set<Playlist> playlists;

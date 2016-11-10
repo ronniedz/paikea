@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+MSG_b=0
+MSG_created=""
+
+wrkdirs="run logs"
+for wrkd in $wrkdirs
+do
+    if [ ! -d "$wrkd" ]
+    then
+        mkdir "$wrkd"
+        MSG_b=1
+        MSG_created="${MSG_created} ${wrkd},"
+    fi
+done
+
+
 ## Install basic dependencies
 
 cd utility-deps/
@@ -9,7 +24,7 @@ mvn clean install
 cd ..
 
 ## Build and install queue
-mvn clean package install  2>&1 >>./log/paikea_queue.log  &
+mvn clean package install 2>&1 >> logs/paikea_queue.log &
 QUEUE_PID=$!
 echo "Starting 'Message Queue' (pid: ${QUEUE_PID}) ..."
 
@@ -39,7 +54,7 @@ if [ "$CODE" -eq "0" ]; then
 	echo "Build Complete!"
 	
 	## Start server
-	java -jar target/VidLib_RestServices-1.0.0.jar server config.yml  2>&1 >>../log/paikea_restserver.log &
+	java -jar target/VidLib_RestServices-1.0.0.jar server config.yml  2>&1 >>../logs/paikea_restserver.log &
 	
 	RSERVER_PID=$!
 	echo "Starting Rest Server (pid: ${RSERVER_PID}) - Running!"
@@ -48,4 +63,10 @@ if [ "$CODE" -eq "0" ]; then
 	echo -n ${RSERVER_PID} > ../run/paikea_restsrvr.pid
 
 	cd ..
+
+    if [ MSG_b == 1 ]
+    then
+        echo "$MSG_created"
+    fi
+
 fi
