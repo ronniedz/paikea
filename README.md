@@ -21,16 +21,22 @@ _____
  	- The relevant collections are name `cache_control_dat` or are prefixed with `vcache_`
  	- Reset DB:
 
-		- `db.cache_control_dat.drop()`
-		- ```
-			var collectionNames = db.getCollectionNames();
-			for(var i = 0, len = collectionNames.length; i < len ; i++){
-				var collectionName = collectionNames[i];
-				if (collectionName.indexOf('vcache_') == 0) {
-					db[collectionName].drop()
-				}
-			}
-		```
+```
+#!javascript
+db.cache_control_dat.drop()
+```
+
+```
+#!javascript
+
+var collectionNames = db.getCollectionNames();
+for(var i = 0, len = collectionNames.length; i < len ; i++){
+	var collectionName = collectionNames[i];
+	if (collectionName.indexOf('vcache_') == 0) {
+		db[collectionName].drop()
+	}
+}
+```
  + Apache Maven 3
 	- build tool
  + MySQL or MariaDb
@@ -43,7 +49,7 @@ _____
 
 - Jetty
 	- Port `8080`
-- Apache Camel
+- Apache Camel. A backend service queue. [See README](VidLib_Youtube_pipes/README.md)
 	- Port `7070` - internal Rest server
 - ActiveMQ
 	- Port `61616`
@@ -52,12 +58,12 @@ ______
 
 ## Pull
 
-	`git clone git@bitbucket.org:dietary_builders/youtube-rider.git [destination]`
+	git clone git@bitbucket.org:dietary_builders/youtube-rider.git [destination]
 
 ## Build
 Execute:
 
- 1. Install libraries (to .m2/)
+ 1. Install libraries (to ~/.m2/)
  	- `./install_deps.sh`
  2. Start message queue with:
  	- `mvn clean package install &`
