@@ -18,12 +18,12 @@ _____
  		- user=
  		- pass=
  		- database-name = test
- 	- The relevant collections are name `cache_control_dat` or are prefixed with `vcache_`
+ 	- The relevant collections are: `cache_control_dat` and the ones prefixed with `vcache_`
  	- Reset DB:
  + Apache Maven 3
 	- build tool
  + MySQL or MariaDb
- 	- For user and the applicaion bound video library
+ 	- For user and the application bound video library
  + Neo4J
  	- For recommendations, user interaction feedback, as an alternative to RDBMS join traversals. This will support the rating/voting type queries.
 
@@ -32,7 +32,7 @@ _____
 
 - Jetty
 	- Port `8080`
-- Apache Camel. A backend service queue. [See README](VidLib_Youtube_pipes/README.md)
+- Apache Camel. An internal service queue. More [details here](VidLib_Youtube_pipes/README.md)
 	- Port `7070` - internal Rest server
 - ActiveMQ
 	- Port `61616`
