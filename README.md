@@ -20,23 +20,6 @@ _____
  		- database-name = test
  	- The relevant collections are name `cache_control_dat` or are prefixed with `vcache_`
  	- Reset DB:
-
-```
-#!javascript
-db.cache_control_dat.drop()
-```
-
-```
-#!javascript
-
-var collectionNames = db.getCollectionNames();
-for(var i = 0, len = collectionNames.length; i < len ; i++){
-	var collectionName = collectionNames[i];
-	if (collectionName.indexOf('vcache_') == 0) {
-		db[collectionName].drop()
-	}
-}
-```
  + Apache Maven 3
 	- build tool
  + MySQL or MariaDb
@@ -57,8 +40,10 @@ ______
 
 
 ## Pull
-
-	git clone git@bitbucket.org:dietary_builders/youtube-rider.git [destination]
+```
+#!bash
+git clone git@bitbucket.org:dietary_builders/youtube-rider.git [destination]
+```
 
 ## Build and run
 Execute:
@@ -67,4 +52,3 @@ Execute:
  	- `./build_run.sh`
  2. Stop the services with:
 	- `./stop_servers.sh`
-	
