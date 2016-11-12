@@ -1,76 +1,77 @@
 # VidLib_Youtube_pipes
 
-_A queue for managing YouTube and backend requests_
+_A queue for coordinating requests and responses to & fro: YouTube, MongoDB and Neo4J_
 
-# Setup
+## Setup Environment
 
 ### Install mongo
+```
+#!bash
 
-1. Add and enable Mongo repository for YuM :
+# Add and enable Mongo repository
+echo "[MongoDB]
+name=MongoDB Repository
+baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64
+gpgcheck=0
+enabled=1" | sudo tee -a /etc/yum.repos.d/mongodb.repo
 
-		echo "[MongoDB]
-		name=MongoDB Repository
-		baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64
-		gpgcheck=0
-		enabled=1" | sudo tee -a /etc/yum.repos.d/mongodb.repo
+# Install required packages
 
+sudo yum install -y mongodb-org-server mongodb-org-shell mongodb-org-tools
+```
 
-2. Install the packages:
-
-		sudo yum install -y mongodb-org-server mongodb-org-shell mongodb-org-tools
-
-----
-### Route Configuration
-
-   - YouTube API properties: `yt-gateway.properties`
-     
-   - Routes are configuration: `META-INF/spring/camel.xml`
-
-----
 ### Start back-backend services:
+```
+#!bash
+mvn clean compile camel:run &
+```
 
-		mvn clean compile camel:run &
+## MongoDB admin
 
-----
-###  Application DB admin - MongoDB
+### Drop collections
 
-### Drop collections:
+```
+#!javascript
 
-1. To reset collections:
+// drop query result cache
+var collectionNames = db.getCollectionNames();
+for(var i = 0, len = collectionNames.length; i < len ; i++){
+	var collectionName = collectionNames[i];
+	if (collectionName.indexOf('vcache_') == 0) {
+		db[collectionName].drop()
+	}
+}
 
-		var collectionNames = db.getCollectionNames();
-		for (var i = 0, len = collectionNames.length; i < len ; i++ ) {
-			var collectionName = collectionNames[i];
-			if (collectionName.indexOf('vcache_') == 0) {
-				db[collectionName].drop()
-			}
-		}
+// drop cache's metadata
+db.cache_control_dat.drop()
 
-2. Clear video collection search-metadata.
+```
 
-		db.cache_control_dat.drop()
+## _More (WIP)_
 
-# _More (WIP)_
+  _Applying graphed and statistical or inferred data; **Backchat**_
 
-  _Application of graphed or statistical data; Backchat - interactions sent to backend._
+### Mongo
 
-## Mongo
+- Inject videos' [selected] Genres
+- ?? 
 
-1. Inject videos' [selected] Genres
-2. ?? 
+### GraphDB
 
-## GraphDB
-
-1. `User -[assigns] -> Genres (1 & ?2) -[TO]-> video` count as "Votes"
-2. Capture `child -[watches]-> video`
-3. Recommend videos to User2 [a parent]
-  - user^1 --parent-> (c1:Child)
-  - user^2 --parent-> (c2:Child)
-  - MATCH (Child: c) where{c1.ageRange == c2.ageRange} 
-  - MATCH (Playlist: p) where{ p.id IN COLLECT(c1.playlists) }
-  - RETURN COLLECT(p.videos)
-4.  ??
-5.  ??
+  -  `User -[assigns] -> Genres (1 & ?2) -[TO]-> video` count as "Votes"
+  -  Capture `child -[watches]-> video`
+  -  Recommend videos to User2 [a parent]
+	- pseudocode..
+```
+#!cypher
+user^1 --parent-> (c1:Child)
+user^2 --parent-> (c2:Child)
+MATCH (Child: c) where{c1.ageRange == c2.ageRange} 
+MATCH (Playlist: p) where{ p.id IN COLLECT(c1.playlists) }
+RETURN COLLECT(p.videos)
+```
+  -   ??
+  -   ??
 
 
 
