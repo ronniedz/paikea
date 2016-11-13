@@ -29,8 +29,6 @@ public class YouTubeAPICallProcessor implements Processor {
     }
     
     public void process(Exchange exchange) throws Exception {
-	LOGGER.debug("IN  - GET Headers(): " + exchange.getIn().getHeaders().keySet());
-	LOGGER.debug("OUT - GET Headers(): " + exchange.getOut().getHeaders().keySet());
 
 	YouTubeResponse ytResp= null;
 	Map<String,String> params = exchange.getIn().getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, Map.class);

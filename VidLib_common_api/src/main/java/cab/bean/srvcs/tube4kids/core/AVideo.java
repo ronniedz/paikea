@@ -1,31 +1,27 @@
-/**
- * 
- */
 package cab.bean.srvcs.tube4kids.core;
 
 import java.util.List;
 
 /**
+ * 
  * @author ronalddennison
- *
  */
 public interface AVideo {
  
     public String getEtag();
-    public String getVideoId();
-//    public String getPublishedAt();
+    
     public String getTitle();
-    public String getDescription();
-    public String getDefaultThumbnail();
 
-    // TODO Add empty genres to the MongoDocument. This will allow us to use Mongo as primary source down the line
+    /**
+     *  A video's primary key in MySqlDB and Neo4J - a reuse of YouTube's video id.
+     *  Mongo generates it's own IDs.
+     */
+    public String getVideoId();
+    
+    public String getDescription();
+    
+    public String getDefaultThumbnail();
+    
     public List<VideoGenre> getVideoGenres();
 
-    
-    // public abstract BasicVideo setDefaultThumbnail(String thumb);
-    // public abstract BasicVideo setEtag(String etag);
-    // public abstract BasicVideo setVideoId(String videoId);
-    // public abstract BasicVideo setPublishedAt(String publishedAt);
-    // public abstract BasicVideo setTitle(String title);
-    // public abstract BasicVideo setDescription(String description);
 }

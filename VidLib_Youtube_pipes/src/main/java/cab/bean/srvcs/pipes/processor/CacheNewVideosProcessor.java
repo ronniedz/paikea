@@ -34,8 +34,6 @@ public class CacheNewVideosProcessor implements Processor {
     }
     
     public void process(Exchange exchange) throws Exception {
-	LOGGER.debug("IN  - GET Headers(): " + exchange.getIn().getHeaders().keySet());
-	LOGGER.debug("OUT - GET Headers(): " + exchange.getOut().getHeaders().keySet());
 
 	YouTubeResponse ytResp = exchange.getIn().getBody(YouTubeResponse.class);
 	String collectionName = exchange.getIn().getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, String.class);
@@ -58,12 +56,11 @@ public class CacheNewVideosProcessor implements Processor {
 	
 	queryDetail.setCollectionName(collectionName);
 	org.bson.types.ObjectId lid = res.getSavedId();
-	System.out.println("LID: " + lid);
 	queryDetail.setLastId(lid.toString());
 	
 	WriteResult<VideoSearchRequest, String> result = qryAllocColl.insert(queryDetail);
 	
-	LOGGER.debug("Saved videos: " + result.getSavedIds().size());
+	LOGGER.debug("Saved " + result.getSavedIds().size() " videos");
 
     }
 }

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import cab.bean.srvcs.tube4kids.core.BasicVideo;
 import cab.bean.srvcs.tube4kids.core.MongoVideo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -66,14 +65,17 @@ public class YouTubeResponse {
     @JsonProperty(value="error")
     private ErrorBox error;
     
-/*
-...
-    pageInfo: {
-	totalResults: 356474,
-	resultsPerPage: 10
-    }
-*/
-
+    /**
+     * @param pageInfo
+     * 
+     * In the form of:
+     * 
+     *       pageInfo: {
+     *       	totalResults: 356474,
+     *       	resultsPerPage: 10
+     *       }
+     * 
+     */
     @JsonProperty(value="pageInfo", access=JsonProperty.Access.WRITE_ONLY)
     public void setPageInfo(Map<String, Object> pageInfo) {
 	this.totalResults  = new Long((Integer) pageInfo.get("totalResults"));

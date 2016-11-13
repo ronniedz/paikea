@@ -8,7 +8,6 @@
 		<version>1.0-dev</version>
 	</parent>
 
-	<groupId>cab.bean.srvcs.tube4kids</groupId>
 	<artifactId>VidLib_Youtube_agent</artifactId>
 	<version>0.8</version>
 

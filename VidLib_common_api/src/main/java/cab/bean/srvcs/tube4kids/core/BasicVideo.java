@@ -78,43 +78,5 @@ public abstract class BasicVideo implements AVideo {
         this.defaultThumbnail = defaultThumbnail;
     }
     
-
-//    public abstract String getEtag();
-//    public abstract String getVideoId();
-//    public abstract String getPublishedAt();
-//    public abstract String getTitle();
-//    public abstract String getDescription();
-//    public abstract String getDefaultThumbnail();
-
-
-//    public String getEtag() {
-//	return etag;
-//    }
-//
-//    public String getVideoId() {
-//	return videoId;
-//    }
-//
-//    public String getPublishedAt() {
-//	return publishedAt;
-//    }
-//
-//    public String getTitle() {
-//	return title;
-//    }
-//
-//    public String getDescription() {
-//	return description;
-//    }
-//
-//    public String getDefaultThumbnail() {
-//	return defaultThumbnail;
-//    }
-
-    // public abstract BasicVideo setDefaultThumbnail(String thumb);
-    // public abstract BasicVideo setEtag(String etag);
-    // public abstract BasicVideo setVideoId(String videoId);
-    // public abstract BasicVideo setPublishedAt(String publishedAt);
-    // public abstract BasicVideo setTitle(String title);
-    // public abstract BasicVideo setDescription(String description);
 }
+

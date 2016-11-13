@@ -1,27 +1,30 @@
 package cab.bean.srvcs.tube4kids.core;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-import java.util.Optional;
-import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
+
+/**
+ * Composite key for video genres.
+ * 
+ * One user may associate, one pair of genre per video.
+ * 
+ * @author Ronald Dennison
+ *
+ */
 @Embeddable
 @ToString
-//EqualsAndHashCode(exclude = { "genreId", "genre2Id" })
 @Getter
 @Setter
 public class VidUserPk implements Serializable {
+    
     private static final long serialVersionUID = 490200883975165432L;
 
     @ManyToOne
@@ -47,5 +50,5 @@ public class VidUserPk implements Serializable {
         		((this.video != null) ? this.video.hashCode() : 0)
         	);
     }
-
 }
+

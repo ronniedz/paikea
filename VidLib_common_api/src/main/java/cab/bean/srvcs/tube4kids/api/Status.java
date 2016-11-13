@@ -1,7 +1,5 @@
 package cab.bean.srvcs.tube4kids.api;
 
-import java.util.HashMap;
-
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 

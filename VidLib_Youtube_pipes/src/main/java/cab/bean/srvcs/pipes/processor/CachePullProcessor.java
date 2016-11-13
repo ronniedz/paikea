@@ -18,8 +18,6 @@ import org.mongojack.JacksonDBCollection;
 import cab.bean.srvcs.pipes.PersistenceHelper;
 import cab.bean.srvcs.pipes.model.VideoSearchRequest;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
-import cab.bean.srvcs.tube4kids.core.AVideo;
-import cab.bean.srvcs.tube4kids.core.BasicVideo;
 import cab.bean.srvcs.tube4kids.core.MongoVideo;
 
 import com.mongodb.BasicDBObject;

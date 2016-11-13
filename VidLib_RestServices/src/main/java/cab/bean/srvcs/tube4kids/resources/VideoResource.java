@@ -85,7 +85,7 @@ public class VideoResource {
 	List<Map<String, Object>> list = getSession().run(query).list(r -> unwrap(r, "v"));
 	getSession().close();
 
-	list.forEach(d -> System.out.println(d));
+//	list.forEach(d -> System.out.println(d));
 
 
 	// while (result.hasNext()) {

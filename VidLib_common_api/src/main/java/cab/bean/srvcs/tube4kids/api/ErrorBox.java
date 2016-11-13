@@ -12,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-// JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
-// JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
@@ -22,7 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @EqualsAndHashCode
 @Accessors(fluent = true)
 public class ErrorBox {
-    //
+
     @JsonProperty
     List<Error> errors;
 

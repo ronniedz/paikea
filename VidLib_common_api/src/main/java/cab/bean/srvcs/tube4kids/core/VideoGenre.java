@@ -35,6 +35,13 @@ import java.util.Set;
 
 import lombok.*;
 
+/**
+ * Joins video to genre with extra properties.
+ * 
+ * @author Ronald Dennison
+ *
+ */
+
 @Entity
 @Table(name = "video_genre")
 @NamedQueries({
@@ -51,6 +58,14 @@ import lombok.*;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_DEFAULT)
 public class VideoGenre {
     
+    /**
+     * Composite key for video genres.
+     * 
+     * One user may associate, one pair of genre per video.
+     * 
+     * @author Ronald Dennison
+     *
+     */
     @Embeddable
     @ToString
     public static class VideoGenrePk implements Serializable {

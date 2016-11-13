@@ -11,6 +11,7 @@ import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 public class VideoDAO extends AbstractDAO<RelVideo> {
+
     public VideoDAO(SessionFactory factory) {
         super(factory);
     }
@@ -38,11 +39,8 @@ public class VideoDAO extends AbstractDAO<RelVideo> {
     }
 
     public String addVideoYTVideo(RelVideo video) {
-	System.out.println("RelVideo: " + video);
 	return (String) super.currentSession().save(video);
     }
-//    public RelVideo addVideoYTVideo(RelVideo video) {
-//	System.out.println("RelVideo: " + video);
-//	return (RelVideo) get(super.currentSession().save(video));
-//    }
+
 }
+
