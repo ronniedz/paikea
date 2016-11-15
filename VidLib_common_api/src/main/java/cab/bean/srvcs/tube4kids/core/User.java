@@ -83,7 +83,7 @@ public class User implements Principal {
     private String activationCode;
 
     public User() {
-	this.roles = new HashSet();
+	this.roles = new HashSet<String>();
     }
 
     public User(String name) {
