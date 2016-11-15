@@ -9,7 +9,12 @@ import lombok.Data;
 
 @Entity
 @Table(name = "child")
-@NamedQueries({ @NamedQuery(name = "cab.bean.srvcs.tube4kids.core.Child.findAll", query = "SELECT p FROM Child p") })
+@NamedQueries({
+    @NamedQuery(
+	    name = "cab.bean.srvcs.tube4kids.core.Child.findAll",
+	    query = "SELECT p FROM Child p"
+    )
+})
 @Data
 public class Child {
 

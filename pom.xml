@@ -1,6 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>cab.bean.srvcs.tube4kids</groupId>
 	<artifactId>paikea</artifactId>
 	<packaging>pom</packaging>
@@ -8,16 +9,18 @@
 	<name>Paikea - A YouTube Helper</name>
 
 	<properties>
+		<project.version>1.0-dev</project.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<project.version>1.0-dev</project.version>
 		<java.version>1.8</java.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 
-		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+    <maven-resources-plugin.version>3.0.1</maven-resources-plugin.version>
+    <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
 
 		<!-- <spring.version>2.5.5</spring.version> -->
 		<spring.version>4.2.6.RELEASE</spring.version>
@@ -29,25 +32,25 @@
 		<jms.version>1.1</jms.version>
 
 		<!-- Used by Camel/ActiveMQ and googleAPI -->
-		<jackson.version>1.9.13</jackson.version>		
+		<jackson.version>1.9.13</jackson.version>
 		<derby.version>10.12.1.1</derby.version>
 		<lombok.version>1.16.8</lombok.version>
 	</properties>
 
 	<dependencyManagement>
 
-	<dependencies>
-
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-		</dependency>
+		<dependencies>
 
 			<dependency>
-			  <groupId>cab.bean.srvcs.tube4kids</groupId>
-			  <artifactId>utility-deps</artifactId>
-			  <version>1.0</version>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>cab.bean.srvcs.tube4kids</groupId>
+				<artifactId>utility-deps</artifactId>
+				<version>1.0</version>
 				<type>pom</type>
 			</dependency>
 
@@ -69,27 +72,25 @@
 				<version>2.8.0.rc1</version>
 			</dependency>
 
-		<!-- JPA annotations -->
-		<dependency>
-			<groupId>org.hibernate.javax.persistence</groupId>
-			<artifactId>hibernate-jpa-2.1-api</artifactId>
-			<version>1.0.0.Final</version>
-		</dependency>
+			<!-- JPA annotations -->
+			<dependency>
+				<groupId>org.hibernate.javax.persistence</groupId>
+				<artifactId>hibernate-jpa-2.1-api</artifactId>
+				<version>1.0.0.Final</version>
+			</dependency>
 
-		<!-- Validations -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>5.2.3.Final</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-annotations -->
-<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
-<dependency>
-    <groupId>org.hibernate</groupId>
-    <artifactId>hibernate-core</artifactId>
-    <version>5.2.3.Final</version>
-</dependency>
+			<!-- Validations -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>5.2.3.Final</version>
+			</dependency>
 
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>5.2.3.Final</version>
+			</dependency>
 
 		</dependencies>
 
@@ -100,73 +101,99 @@
 		<module>VidLib_Youtube_pipes</module>
 		<module>VidLib_Youtube_agent</module>
 	</modules>
-	<build>
 
+	<build>
 		<pluginManagement>
 			<plugins>
-	      <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-compiler-plugin</artifactId>
-			    <version>3.5.1</version>
-	        <configuration>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+					<configuration>
 						<source>${java.version}</source>
 						<target>${java.version}</target>
-	        </configuration>
-	      </plugin>
-	      
-	      <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-resources-plugin</artifactId>
-	        <version>2.6</version>
-	        <configuration>
-	          <encoding>UTF-8</encoding>
-	        </configuration>
-	      </plugin>
+					</configuration>
+				</plugin>
 
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${maven-resources-plugin.version}</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${maven-jar-plugin.version}</version>
+				</plugin>
 
 				<!-- allows the route to be ran via 'mvn camel:run' -->
 				<plugin>
 					<groupId>org.apache.camel</groupId>
 					<artifactId>camel-maven-plugin</artifactId>
 					<version>${camel.version}</version>
+				</plugin>
+
+				<!-- run "mvn hibernate3:hbm2ddl" to generate a schema -->
+<!-- 					
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>hibernate3-maven-plugin</artifactId>
+					<version>2.2</version>
+					<configuration>
+						<components>
+							<component>
+								<name>hbm2ddl</name>
+								<implementation>jpaconfiguration</implementation>
+							</component>
+						</components>
+						<componentProperties>
+							<persistenceunit>persistenceUnit</persistenceunit>
+							<outputfilename>schema.ddl</outputfilename>
+							<drop>true</drop>
+							<create>true</create>
+							<export>false</export>
+							<format>true</format>
+						</componentProperties>
+					</configuration>
+				</plugin>
+
+ -->
+ 				<plugin>
+					<groupId>com.jolira</groupId>
+					<artifactId>onejar-maven-plugin</artifactId>
+					<version>1.4.4</version>
 					<executions>
 						<execution>
-						  <phase>verify</phase>                                                                                               
+							<phase>verify</phase>
 							<goals>
-								<goal>run</goal>
+								<goal>one-jar</goal>
 							</goals>
-							<configuration>
-									<fileApplicationContextUri>/${project.build.outputDirectory}/META-INF/spring/activemq.xml</fileApplicationContextUri>
-						</configuration>
 						</execution>
 					</executions>
 				</plugin>
-
-
-
-			<plugin>
-				<!-- run "mvn hibernate3:hbm2ddl" to generate a schema -->
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>hibernate3-maven-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<components>
-						<component>
-							<name>hbm2ddl</name>
-							<implementation>jpaconfiguration</implementation>
-						</component>
-					</components>
-					<componentProperties>
-						<persistenceunit>persistenceUnit</persistenceunit>
-						<outputfilename>schema.ddl</outputfilename>
-						<drop>true</drop>
-						<create>true</create>
-						<export>false</export>
-						<format>true</format>
-					</componentProperties>
-				</configuration>
-			</plugin>
-
+<!-- 
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.1.1</version>
+					<executions>
+						<execution>
+							<id>some-execution</id>
+							<phase>compile</phase>
+							<goals>
+								<goal>exec</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<executable>hostname</executable>
+					</configuration>
+				</plugin>
+ -->
 <!--
  			<plugin>
 				<groupId>org.apache.activemq.tooling</groupId>
@@ -187,42 +214,7 @@
 				</configuration>
 			</plugin> 
 -->
-
-
-
 				
-				<plugin>
-					<groupId>com.jolira</groupId>
-					<artifactId>onejar-maven-plugin</artifactId>
-					<version>1.4.4</version>
-					<executions>
-						<execution>
-								  <phase>verify</phase>                                                                                               
-							<goals>
-								<goal>one-jar</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.1.1</version>
-				<executions>
-					<execution>
-						<id>some-execution</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<executable>hostname</executable>
-				</configuration>
-			</plugin>
-
 			</plugins>
 		</pluginManagement>
 	</build>

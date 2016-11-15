@@ -11,26 +11,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * @author ronalddennison
- *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public abstract class BasicVideo implements AVideo {
 
     protected String etag;
-
     protected String videoId;
+    protected String title;				// snippetType.title
+    protected String description;		// snippetType.description
+    protected String defaultThumbnail;
 
     //@-JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-
     //@-JsonProperty
     //protected String publishedAt; // snippetType.publishedAt
-
-    protected String title; // snippetType.title
-
-    protected String description; // snippetType.description
-
-    protected String defaultThumbnail;
 
     @NonNull
     @JsonProperty

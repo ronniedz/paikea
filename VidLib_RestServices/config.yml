@@ -23,8 +23,8 @@ database:
   password: 
 
   # the JDBC URL
-  url: jdbc:mysql://localhost:3306/mydb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    
+  url: jdbc:mysql://localhost:3306/mydb?autoReconnect=true&useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+
 # use the simple server factory if you only want to run on a single port
 #server:
 #  type: simple
@@ -102,6 +102,10 @@ metrics:
   type: graphite
   frequency: 10s
 
+
+# Get this value from:
+#    VidLib_Youtube_pipes/src/main/resources/app-queue.properties
+#
 # YouTube Rest API proxy URL
 proxyUrl: http://localhost:7070/ix/a/b
 

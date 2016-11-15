@@ -13,7 +13,11 @@
 			<version>0.8</version>
 		</dependency>
 
-### Create an agent.
+## Usage:
+
+/src/main/resources/cab/bean/srvcs/tube4kids/resources/youtube_agent_config.properties
+
+## Create an agent.
 
 	- eg Camel:
 

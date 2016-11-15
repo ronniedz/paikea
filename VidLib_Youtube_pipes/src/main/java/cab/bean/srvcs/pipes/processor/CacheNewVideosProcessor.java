@@ -60,7 +60,7 @@ public class CacheNewVideosProcessor implements Processor {
 	
 	WriteResult<VideoSearchRequest, String> result = qryAllocColl.insert(queryDetail);
 	
-	LOGGER.debug("Saved " + result.getSavedIds().size() " videos");
+	LOGGER.debug("Saved " + result.getSavedIds().size() + " videos");
 
     }
 }

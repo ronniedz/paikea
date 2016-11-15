@@ -45,6 +45,7 @@ public class YouTubeAPICallProcessor implements Processor {
 	
 	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME,collectionName);
 	ytResp.setCollectionName(collectionName);
+	
 	// Copy into out message for wireTap
 	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, exchange.getIn().getBody(VideoSearchRequest.class));
 	exchange.getOut().setBody(ytResp);

@@ -1,7 +1,5 @@
 package cab.bean.srvcs.tube4kids.core;
 
-import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,7 +10,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import lombok.Data;
-import lombok.NonNull;
 
 @Entity
 @Table(name = "age_group")
@@ -28,10 +25,10 @@ public class AgeGroup {
     private Long id;
 
     @Column(name = "start", nullable = false)
-    private Boolean start;
+    private Integer start;
 
     @Column(name = "end", nullable = false)
-    private Boolean end;
+    private Integer end;
 
     @Column(name = "label", nullable = false)
     private String label;

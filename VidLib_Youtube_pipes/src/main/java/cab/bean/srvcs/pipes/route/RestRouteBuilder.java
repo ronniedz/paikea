@@ -11,7 +11,6 @@ import cab.bean.srvcs.pipes.processor.CachePullProcessor;
 import cab.bean.srvcs.pipes.processor.QueryStringProcessor;
 
 import com.mongodb.DB;
-import com.mongodb.Mongo;
 
 
 /**
@@ -19,14 +18,17 @@ import com.mongodb.Mongo;
  */
 public class RestRouteBuilder extends RouteBuilder {
 
-    private Mongo mongoBean = null;
-    private DB db = null;
+//    private Mongo mongoBean = null;
 
     private Predicate cacheCheckPredicate = null;
     private Processor cachePullProcessor = null;
     private Processor queryStringProcessor;
-
     private Processor stashNovelDataProcessor;
+    
+    private String	resourcePath ;
+    private String	serviceUri;
+    private int		restServerPort;
+    private String	restServerHost;
 
     public RestRouteBuilder() {
 	super();
@@ -36,10 +38,8 @@ public class RestRouteBuilder extends RouteBuilder {
 	getContext().getProperties().put("CamelJacksonTypeConverterToPojo", "true");
     }
 
-    public RestRouteBuilder(Mongo mongoBean, String dbName) {
+    public RestRouteBuilder(DB db) {
 	this();
-	this.mongoBean = mongoBean;
-	this.db = mongoBean.getDB(dbName);
 	this.cachePullProcessor = new CachePullProcessor(db);
 	this.stashNovelDataProcessor = new CacheNewVideosProcessor(db);
 	this.queryStringProcessor = new QueryStringProcessor(db);
@@ -50,23 +50,25 @@ public class RestRouteBuilder extends RouteBuilder {
      */
     public void configure() {
 
-	restConfiguration().component("restlet").host("localhost").port(7070)
+	restConfiguration().component("restlet")
+	.host(this.restServerHost)
+	.port(this.restServerPort)
 		.bindingMode(RestBindingMode.auto)
 		.componentProperty("chunked", "true");
 
-	rest().path("ix").get("/a/b")
-//	   .outTypeList(MQVideo.class)
-	    .produces("application/json")
-	    .bindingMode(RestBindingMode.json)
-	    .route()
-	   	.process(queryStringProcessor)
-	   	.choice()
-	   	   .when(header(PersistenceHelper.HDR_FOUNDQUERY_NAME).isNotNull())
-	   	   	.to("direct:inbound_cached")
-	   	   .otherwise()
+	rest(this.resourcePath)
+	.get(this.serviceUri)
+	.produces("application/json")
+	.bindingMode(RestBindingMode.json)
+	.route()
+		.process(queryStringProcessor)
+		.choice()
+	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY_NAME).isNotNull())
+	   	    	.to("direct:inbound_cached")
+	   	    .otherwise()
 	   	   	.to("direct:inbound_novel")
-	   	.endChoice()
-	    .end();
+	   	   .endChoice()
+	.end();
 		
 	from("direct:inbound_cached")
 	    .process(cachePullProcessor)  ;
@@ -78,6 +80,38 @@ public class RestRouteBuilder extends RouteBuilder {
 	from("direct:store_novel_data")
 	    .process(stashNovelDataProcessor)
 	    .end();
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
+    }
+
+    public String getServiceUri() {
+        return serviceUri;
+    }
+
+    public void setServiceUri(String serviceUri) {
+        this.serviceUri = serviceUri;
+    }
+
+    public int getRestServerPort() {
+        return restServerPort;
+    }
+
+    public void setRestServerPort(int restServerPort) {
+        this.restServerPort = restServerPort;
+    }
+
+    public String getRestServerHost() {
+        return restServerHost;
+    }
+
+    public void setRestServerHost(String restServerHost) {
+        this.restServerHost = restServerHost;
     }
 
     public Predicate getCacheCheckPredicate() {
@@ -95,13 +129,13 @@ public class RestRouteBuilder extends RouteBuilder {
     public void setCachePullProcessor(Processor cachePullProcessor) {
 	this.cachePullProcessor = cachePullProcessor;
     }
-
-    public Mongo getMongoBean() {
-	return mongoBean;
-    }
-
-    public void setMongoBean(Mongo mongoBean) {
-	this.mongoBean = mongoBean;
-    }
+//
+//    public Mongo getMongoBean() {
+//	return mongoBean;
+//    }
+//
+//    public void setMongoBean(Mongo mongoBean) {
+//	this.mongoBean = mongoBean;
+//    }
 
 }

@@ -47,19 +47,27 @@
 	</dependencies>
 
 	<build>
-		<defaultGoal>install</defaultGoal>
+	
+    		<defaultGoal>install</defaultGoal>
 		<plugins>
 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 					<compilerArgument></compilerArgument>
 				</configuration>
 			</plugin>
-
+		<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+                <excludes>
+                    <exclude>config.properties</exclude>
+                </excludes>
+            </configuration>
+        </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -72,7 +80,6 @@
 			<plugin>
 				<groupId>com.jolira</groupId>
 				<artifactId>onejar-maven-plugin</artifactId>
-				<version>1.4.4</version>
 				<executions>
 					<execution>
 						<goals>
