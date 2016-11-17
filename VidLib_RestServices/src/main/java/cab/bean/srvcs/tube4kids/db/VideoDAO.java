@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 public class VideoDAO extends AbstractDAO<RelVideo> {
 
     public VideoDAO(SessionFactory factory) {
+	
         super(factory);
     }
 

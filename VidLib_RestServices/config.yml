@@ -121,7 +121,10 @@ proxyUrl: http://localhost:7070/ix/a/b
 
 ## NEO4J configuration ###
 neo4jConf:
-  url: bolt://localhost
+  protocol: bolt
+  port: 7687
+  host: localhost
+  path: /
   username: neo4j
   password: reggae
 

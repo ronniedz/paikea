@@ -5,6 +5,7 @@ import cab.bean.srvcs.tube4kids.core.RelVideo;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.VideoGenre;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
+import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -44,19 +45,16 @@ public class VideoResource {
     private final VideoDAO videoDAO;
     private final GenreDAO genreDAO;
     private final UserDAO userDAO;
-    private final Driver driver;
+    private final Neo4JGraphDAO neo4jGraphDAO;
 
-    public VideoResource(VideoDAO videoDAO, GenreDAO genreDAO, UserDAO userDAO, Driver ndriver) {
+    public VideoResource(VideoDAO videoDAO, GenreDAO genreDAO, UserDAO userDAO, Neo4JGraphDAO neo4jGraphDAO) {
 	super();
 	this.videoDAO = videoDAO;
 	this.genreDAO = genreDAO;
 	this.userDAO = userDAO;
-	this.driver = ndriver;
+	this.neo4jGraphDAO = neo4jGraphDAO;
     }
 
-    private Session getSession() {
-	return this.driver.session();
-    }
 //    
 //    @POST
 //    @UnitOfWork
@@ -78,12 +76,13 @@ public class VideoResource {
     @Path("shiz")
     @UnitOfWork
     public List<Map<String, Object>> listneo() {
-	String query = "MATCH (v:Video)-[:WITH]-(genre:Genre) return v;";
-
-	// StatementResult result = session.run(query);
-
-	List<Map<String, Object>> list = getSession().run(query).list(r -> unwrap(r, "v"));
-	getSession().close();
+//	Session session = getSession();
+//	String query = "MATCH (v:Video)-[:WITH]-(genre:Genre) return v;";
+//
+//	// StatementResult result = session.run(query);
+//	
+//	List<Map<String, Object>> list = session.run(query).list(r -> unwrap(r, "v"));
+//	session.close();
 
 //	list.forEach(d -> System.out.println(d));
 
@@ -94,7 +93,7 @@ public class VideoResource {
 	// RelVideo vid = (RelVideo) nv.asObject();
 	// System.out.println(vid.toString());
 	// }
-	return list;
+	return neo4jGraphDAO.listAllVideo();
     }
 
     @Path("/{vid}")
@@ -182,8 +181,8 @@ public class VideoResource {
 		g.getPk().setVideo(video);
 	    });
 	    ids.add(videoDAO.addVideoYTVideo(video));
+	    neo4jGraphDAO.insert(video);
 	});
-	
 	URI location = UriBuilder.fromUri("/video").build();
 	return Response
 		.status(Response.Status.CREATED)

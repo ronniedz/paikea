@@ -18,6 +18,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
+
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Session;
@@ -29,38 +30,8 @@ public class Tube4kidsConfiguration extends Configuration {
     @Valid
     @NotNull
     @JsonProperty
-    private NeoConfig neo4jConf = new NeoConfig();
+    private Neo4JRestServerConfiguration neo4jConf = new Neo4JRestServerConfiguration();
     
-    class NeoConfig {
-
-	public NeoConfig() {
-	    
-	}
-	@NotEmpty
-	@JsonProperty
-	private String url = "bolt://localhost";
-
-	@NotEmpty
-	@JsonProperty
-	private String username = "neo4j";
-
-	@NotEmpty
-	@JsonProperty
-	private String password = "reggae";
-	
-	public String getUrl() {
-	    return url;
-	}
-	public String getUsername() {
-	    return username;
-	}
-	public String getPassword() {
-	    return password;
-	}
-    }
-    
-    private Driver neo4jDriver = GraphDatabase.driver( neo4jConf.getUrl(), AuthTokens.basic( neo4jConf.getUsername(), neo4jConf.getPassword() ) );;
-
     @NotEmpty
     private String template;
     
@@ -154,9 +125,11 @@ public class Tube4kidsConfiguration extends Configuration {
 	return "sdfghjhgfd".getBytes(Charset.forName("UTF-8"));
     }
 
-    
-    public Driver getNeo4jSession() {
-	return this.neo4jDriver;
+    public Driver getNeo4jDriver() {
+	return  GraphDatabase.driver(
+	    neo4jConf.getURI(),
+	    AuthTokens.basic( neo4jConf.getUsername(), neo4jConf.getPassword())
+	);
     }
 
 }

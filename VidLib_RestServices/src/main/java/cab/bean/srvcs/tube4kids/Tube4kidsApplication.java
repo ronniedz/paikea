@@ -35,6 +35,7 @@ import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.keys.HmacKey;
+import org.neo4j.driver.v1.Driver;
 
 import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 
@@ -49,6 +50,7 @@ import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.AgeGroupDAO;
 import cab.bean.srvcs.tube4kids.db.ChildDAO;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
+import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
@@ -67,6 +69,8 @@ import cab.bean.srvcs.tube4kids.resources.FilteredResource;
 //import cab.bean.srvcs.tube4kids.resources.PersonResource;
 
 
+
+
 import org.glassfish.jersey.server.ServerProperties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,8 +86,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     }
 
     private final HibernateBundle<Tube4kidsConfiguration> hibernateBundle = 
-	new ScanningHibernateBundle<Tube4kidsConfiguration>(
-		"cab.bean.srvcs.tube4kids.core") {
+	new ScanningHibernateBundle<Tube4kidsConfiguration>("cab.bean.srvcs.tube4kids.core") {
         @Override
         public DataSourceFactory getDataSourceFactory(Tube4kidsConfiguration configuration) {
             return configuration.getDataSourceFactory();
@@ -126,6 +129,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
     private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
 
+	
         jerseyConf.register(new YouTubeVideoResource(new YouTubeAPIProxy(configuration.getProxyUrl())));
 
         final VideoDAO videoDAO = new VideoDAO(hibernateBundle.getSessionFactory());
@@ -134,6 +138,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         final PlaylistDAO playlistDAO = new PlaylistDAO(hibernateBundle.getSessionFactory());
         final AgeGroupDAO ageGroupDAO = new AgeGroupDAO(hibernateBundle.getSessionFactory());
         final ChildDAO childDAO = new ChildDAO(hibernateBundle.getSessionFactory());
+        final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
 
         
         jerseyConf.register(new GenreResource(genreDAO));
@@ -144,7 +149,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         
-        jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, configuration.getNeo4jSession()));
+        jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO));
         
         jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());

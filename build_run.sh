@@ -91,7 +91,7 @@ if [ "$CODE" -eq "0" ]; then
 	echo "Starting Rest Server (pid: ${RSERVER_PID}) - Running!"
 
 	## Store PID
-	echo -n ${RSERVER_PID} > ../run/paikea_restsrvr.pid
+	echo -n ${RSERVER_PID} > ../run/paikea_restserver.pid
 
 	cd ..
 
