@@ -1,3 +1,11 @@
+# Install dependencies
+
+`sudo yum install neo4j`
+
+`sudo service neo4j start`
+
+
+
 # Introduction
 
 

@@ -117,8 +117,8 @@ proxyUrl: http://localhost:7070/ix/a/b
 ## {"web":{"client_id":"16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com","project_id":"bc-yt-sso","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://accounts.google.com/o/oauth2/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"5aLltV9mfyeteSV9ihPo77Yt","redirect_uris":["http://localhost:8080/gapi/oauth2Callback"],"javascript_origins":["http://localhost:8080","http://54.153.116.166:8080"]}}
 ## 
 
-
-
+## TODO. This section (or just the password) will be appended during build.
+## This might be one way to use environment variables to influence the build
 ## NEO4J configuration ###
 neo4jConf:
   protocol: bolt
@@ -126,5 +126,5 @@ neo4jConf:
   host: localhost
   path: /
   username: neo4j
-  password: reggae
+  password: mango
 
