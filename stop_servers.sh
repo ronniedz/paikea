@@ -8,21 +8,20 @@ then
 		if  [ -f  "$pidfile" ];
 		then
 			echo "Killing $pidfile"
-			kill -KILL "`cat ${pidfile}`" && rm ${pidfile} && echo "Stopped"
+			kill -KILL "`cat ${pidfile}`" && echo "Stopped"
 			sleep 1
+			rm ${pidfile}
 		fi
 	done
 else
-
 	RUNPID=$(ls ./run/*.pid 2>/dev/null || false)
 	if [ "$RUNPID" ]; then
 		for pidfile in ${RUNPID[@]};
 		do
 			echo "Killing $pidfile"
-			kill -KILL "`cat ${pidfile}`" && rm ${pidfile} && echo "Stopped"
+			kill -KILL "`cat ${pidfile}`" && echo "Stopped"
 			sleep 1
+			rm ${pidfile}
 		done
-	fi
-
-	
+	fi	
 fi
