@@ -2,19 +2,26 @@ package cab.bean.srvcs.tube4kids.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
+import io.dropwizard.jersey.params.IntParam;
 import io.dropwizard.jersey.params.LongParam;
+import io.dropwizard.jersey.params.BooleanParam;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -43,32 +50,38 @@ public class ChildResource {
 
     @POST
     @UnitOfWork
-    public Response createChild(List<Child> children) {
+    public Response createChild(List<Child> children,  @QueryParam("detail") Boolean detail ) {
+	// TODO add real user
 	
-	List<Long>ids = new ArrayList<Long>();
-	for (int i = 0; i < children.size(); i++) {
-	    children.get(i).setUserId(fakeUserId);
-	    ids.add(childDAO.quickCreate(children.get(i)));
-//	    ids.add(childDAO.create(children.get(i)));
+
+	List<?> outp =  null;
+	Object exibo = null;
+	
+	boolean fullDetail = detail != null && detail; 
+	
+	if (fullDetail) {
+	    outp = children.stream().map(
+		    (Child uChild)-> { uChild.setUserId(fakeUserId); return childDAO.create(uChild);}
+	    ).collect(Collectors.toList());
+	    exibo = ((Child)outp.get(0)).getId();
+	} else {
+	    outp = children.stream().map(
+		    (Child uChild)-> { uChild.setUserId(fakeUserId); return childDAO.quickCreate(uChild);}
+	     ).collect(Collectors.toList());
+	    exibo = outp.get(0);
 	}
-	URI location = UriBuilder.fromUri("/child/" +  ids.get(0) ).build();
+	
+	URI location = UriBuilder.fromUri((children.size() > 1) ? "/child#" +  exibo :  "/child/" +  exibo).build();
 	
 	return Response.status(Response.Status.CREATED)
 		.header("Location", location)
-		.entity(
+		.entity( fullDetail ? outp : 
 			ImmutableMap.<String, Object>builder()
 			.put("uri", location)
-			.put("ids", ids)
+			.put("ids", outp)
 			.build()
 		)
 	.build();
-    }
-
-
-    private URI getView(long id) {
-	return UriBuilder.fromUri("/child/" + id).build();
-//	return UriBuilder.fromResource(this.getClass()).path(id +"").build();
-//	return null;
     }
 
 
