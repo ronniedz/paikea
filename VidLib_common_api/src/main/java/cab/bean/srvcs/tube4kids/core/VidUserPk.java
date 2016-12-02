@@ -28,7 +28,7 @@ public class VidUserPk implements Serializable {
     private static final long serialVersionUID = 490200883975165432L;
 
     @ManyToOne
-    private RelVideo video;
+    private Video video;
 
     @ManyToOne
     private User user;

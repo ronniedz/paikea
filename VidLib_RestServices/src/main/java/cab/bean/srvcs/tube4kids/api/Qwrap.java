@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import cab.bean.srvcs.tube4kids.core.RelVideo;
+import cab.bean.srvcs.tube4kids.core.Video;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,7 +41,7 @@ public class Qwrap {
     private Long totalResults;
     
     @JsonProperty
-    private List<RelVideo> items;
+    private List<Video> items;
 
     @JsonProperty(value="error")
     private ErrorBox error;

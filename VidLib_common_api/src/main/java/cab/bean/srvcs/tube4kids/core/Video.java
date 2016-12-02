@@ -28,12 +28,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Entity
 @Table(name = "video")
 @NamedQueries({ @NamedQuery(
-	name = "cab.bean.srvcs.tube4kids.core.RelVideo.findAll",
-	query = "SELECT vid FROM RelVideo vid")
+	name = "cab.bean.srvcs.tube4kids.core.Video.findAll",
+	query = "SELECT vid FROM Video vid")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
-public class RelVideo extends BasicVideo {
+public class Video extends BasicVideo {
 
     protected DateTime publishedAt; 	// snippetType.publishedAt
     protected Long userId; 			// used in MySQL

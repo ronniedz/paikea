@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
-public abstract class BasicVideo implements AVideo {
+public abstract class BasicVideo implements VideoType {
 
     protected String etag;
     protected String videoId;

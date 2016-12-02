@@ -72,11 +72,11 @@ public class VideoGenre {
         private static final long serialVersionUID = 490200883975165432L;
         
         private User user;
-        private RelVideo video;
+        private Video video;
 
         public VideoGenrePk() {}
         
-        public VideoGenrePk(RelVideo video, User user) {
+        public VideoGenrePk(Video video, User user) {
             this.user = user;
             this.video = video;
         }
@@ -101,7 +101,7 @@ public class VideoGenre {
 	//Transient
         @ManyToOne
         @JoinColumn(name="video_id")
-	public RelVideo getVideo() {
+	public Video getVideo() {
 	    return video;
 	}
 
@@ -116,7 +116,7 @@ public class VideoGenre {
 	    this.user = user;
 	}
 
-	public void setVideo(RelVideo video) {
+	public void setVideo(Video video) {
 	    this.video = video;
 	}
 
@@ -134,17 +134,17 @@ public class VideoGenre {
 	this.pk =  new VideoGenrePk();
     }
     
-    public VideoGenre(RelVideo video, User user) {
+    public VideoGenre(Video video, User user) {
 	this.pk =  new VideoGenrePk(video, user);
     }
     
-    public VideoGenre(RelVideo video, User user,
+    public VideoGenre(Video video, User user,
 	    ImmutablePair<Long, Long> genreIds) {
 	this(video, user);
 	this.setGenrePairs(genreIds);
     }
 
-    public VideoGenre(RelVideo video, User user, Long genreId, Long genre2Id) {
+    public VideoGenre(Video video, User user, Long genreId, Long genre2Id) {
 	this.pk =  new VideoGenrePk(video, user);
 	this.genreId = genreId;
 	this.genre2Id = genre2Id;
@@ -183,7 +183,7 @@ public class VideoGenre {
     
     @JsonIgnore
     @Transient
-    public RelVideo getVideo() {
+    public Video getVideo() {
         return getPk().getVideo();
     }
 
@@ -223,7 +223,7 @@ public class VideoGenre {
     }
 
     
-    public void setVideo(RelVideo video) {
+    public void setVideo(Video video) {
 	getPk().setVideo(video);
     }
     

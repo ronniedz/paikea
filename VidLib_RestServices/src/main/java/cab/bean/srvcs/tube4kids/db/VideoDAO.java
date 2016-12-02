@@ -1,6 +1,6 @@
 package cab.bean.srvcs.tube4kids.db;
 
-import cab.bean.srvcs.tube4kids.core.RelVideo;
+import cab.bean.srvcs.tube4kids.core.Video;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import org.hibernate.SessionFactory;
@@ -10,23 +10,23 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
-public class VideoDAO extends AbstractDAO<RelVideo> {
+public class VideoDAO extends AbstractDAO<Video> {
 
     public VideoDAO(SessionFactory factory) {
         super(factory);
     }
 
-    public Optional<RelVideo> findById(String id) {
+    public Optional<Video> findById(String id) {
         return Optional.ofNullable(get(id));
     }
 
-    public RelVideo create(RelVideo video) {
+    public Video create(Video video) {
         return persist(video);
     }
     
     public Boolean delete(String id) {
 	Boolean rep = Boolean.FALSE;
-	RelVideo o = get(id);
+	Video o = get(id);
 	if ( o != null ) {
 	    currentSession().delete(o);
 	    rep = Boolean.TRUE;
@@ -34,11 +34,11 @@ public class VideoDAO extends AbstractDAO<RelVideo> {
 	return rep;
     }
 
-    public List<RelVideo> findAll() {
-        return list(namedQuery("cab.bean.srvcs.tube4kids.core.RelVideo.findAll"));
+    public List<Video> findAll() {
+        return list(namedQuery("cab.bean.srvcs.tube4kids.core.Video.findAll"));
     }
 
-    public String addVideoYTVideo(RelVideo video) {
+    public String addVideoYTVideo(Video video) {
 	return (String) super.currentSession().save(video);
     }
 

@@ -69,11 +69,11 @@ public class Playlist {
     private Timestamp created;
 
     // ------------------ JOINS ----------------------- //
-    @ManyToMany(targetEntity = cab.bean.srvcs.tube4kids.core.RelVideo.class)
+    @ManyToMany(targetEntity = cab.bean.srvcs.tube4kids.core.Video.class)
     @JoinTable(name = "playlist_video",
     	joinColumns = @JoinColumn(name = "playlist_id", referencedColumnName = "id"),
     	inverseJoinColumns = @JoinColumn(name = "video_id", referencedColumnName = "video_id"))
-    private Set<RelVideo> videos;
+    private Set<Video> videos;
     
     @JsonIgnore
     @Transient

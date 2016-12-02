@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import cab.bean.srvcs.pipes.PersistenceHelper;
 import cab.bean.srvcs.pipes.model.VideoSearchRequest;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
-import cab.bean.srvcs.tube4kids.core.AVideo;
+import cab.bean.srvcs.tube4kids.core.VideoType;
 import cab.bean.srvcs.tube4kids.core.MongoVideo;
 import cab.bean.srvcs.tube4kids.core.MongoVideo;
 
@@ -47,7 +47,7 @@ public class CacheNewVideosProcessor implements Processor {
 	
 	List<MongoVideo> insertsVids = new ArrayList<MongoVideo>();
 	
-	for ( AVideo tvid : ytResp.getItems()) {
+	for ( VideoType tvid : ytResp.getItems()) {
 	    MongoVideo mg = new MongoVideo();
 	    BeanUtils.copyProperties(mg, tvid);
 	    insertsVids.add(mg);

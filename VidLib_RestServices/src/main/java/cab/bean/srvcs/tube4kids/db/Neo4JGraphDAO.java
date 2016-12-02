@@ -10,7 +10,7 @@ import org.neo4j.driver.v1.StatementResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cab.bean.srvcs.tube4kids.core.RelVideo;
+import cab.bean.srvcs.tube4kids.core.Video;
 
 public class Neo4JGraphDAO {
 
@@ -22,7 +22,7 @@ public class Neo4JGraphDAO {
     }
 
 
-    public Map<String, ?> insert(RelVideo video) {
+    public Map<String, ?> insert(Video video) {
 	ObjectMapper objectMapper = new ObjectMapper();
 	@SuppressWarnings("unchecked")
 	Map<String, Object> videoAsMap = objectMapper.convertValue(video, Map.class);	
@@ -115,7 +115,7 @@ public class Neo4JGraphDAO {
 	// while (result.hasNext()) {
 	// Record record = result.next();
 	// org.neo4j.driver.v1.Value nv = record.get("v");
-	// RelVideo vid = (RelVideo) nv.asObject();
+	// Video vid = (Video) nv.asObject();
 	// System.out.println(vid.toString());
 	// }
 	return list;

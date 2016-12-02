@@ -1,7 +1,7 @@
 package cab.bean.srvcs.tube4kids.resources;
 
 import cab.bean.srvcs.tube4kids.core.Playlist;
-import cab.bean.srvcs.tube4kids.core.RelVideo;
+import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.VideoGenre;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
@@ -58,13 +58,13 @@ public class VideoResource {
 //    
 //    @POST
 //    @UnitOfWork
-//    public RelVideo createVideo(RelVideo video) {
+//    public Video createVideo(Video video) {
 //	return videoDAO.create(video);
 //    }
 
     @GET
     @UnitOfWork
-    public List<RelVideo> listVideos() {
+    public List<Video> listVideos() {
 	return videoDAO.findAll();
     }
 
@@ -90,7 +90,7 @@ public class VideoResource {
 	// while (result.hasNext()) {
 	// Record record = result.next();
 	// org.neo4j.driver.v1.Value nv = record.get("v");
-	// RelVideo vid = (RelVideo) nv.asObject();
+	// Video vid = (Video) nv.asObject();
 	// System.out.println(vid.toString());
 	// }
 	return neo4jGraphDAO.listAllVideo();
@@ -99,21 +99,21 @@ public class VideoResource {
     @Path("/{vid}")
     @GET
     @UnitOfWork
-    public Optional<RelVideo> viewVideo(@PathParam("vid") String vid) {
+    public Optional<Video> viewVideo(@PathParam("vid") String vid) {
 	return videoDAO.findById(vid);
     }
 //    
 //    @Path("/{vid}")
 //    @PATCH
 //    @UnitOfWork
-//    public Optional<RelVideo> viewVideo(@PathParam("vid") String vid) {
+//    public Optional<Video> viewVideo(@PathParam("vid") String vid) {
 //	return videoDAO.findById(vid);
 //    }
 
 //    @Path("/add/{cn}/{vids}")
 //    @GET
 //    @UnitOfWork
-//    public List<RelVideo> addVideos(@PathParam("cn") String collectionName, @PathParam("vids") String... vids) {
+//    public List<Video> addVideos(@PathParam("cn") String collectionName, @PathParam("vids") String... vids) {
 //	
 //	return videoDAO.findByIds(vids);
 //    }
@@ -121,7 +121,7 @@ public class VideoResource {
 //    @Path("/add")
 //    @POST
 //    @UnitOfWork
-//    public Response addYTVideo(RelVideo video) {
+//    public Response addYTVideo(Video video) {
 //	video.setUserId(1L);
 //	
 //	String vid = videoDAO.addVideoYTVideo(video);
@@ -142,7 +142,7 @@ public class VideoResource {
     @UnitOfWork
     public Response genreize(@PathParam("vid") String vid, Long[] genreIds) {
 	User user = userDAO.findById(1L).get();
-	RelVideo video = videoDAO.findById(vid).get();
+	Video video = videoDAO.findById(vid).get();
 	VideoGenre vg = new VideoGenre(video, user, genreIds[0], genreIds[1]);
 	video.getVideoGenres().add(vg);
 	
@@ -162,14 +162,14 @@ public class VideoResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    public Response deleteRelVideo(@PathParam("id") String id) {
+    public Response deleteVideo(@PathParam("id") String id) {
     	videoDAO.delete(id);
 	return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @POST
     @UnitOfWork
-    public Response addYTVideos(List<RelVideo> videos) {
+    public Response addYTVideos(List<Video> videos) {
 	User user = userDAO.findById(1L).get();
 
 	List<String>ids = new ArrayList<String>();

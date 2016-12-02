@@ -2,7 +2,7 @@ package cab.bean.srvcs.tube4kids.resources;
 
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
-import cab.bean.srvcs.tube4kids.core.RelVideo;
+import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -75,7 +75,7 @@ public class PlaylistResource {
 	
 	Playlist p = playlistDAO.findById(pidVal).get();
 	
-	Set<RelVideo> videos = p.getVideos(); 
+	Set<Video> videos = p.getVideos(); 
 	
 	for (String vid : videoIds ) {
 	    videos.add(videoDAO.findById(vid).get());

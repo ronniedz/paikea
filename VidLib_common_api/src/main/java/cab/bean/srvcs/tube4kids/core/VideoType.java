@@ -6,7 +6,7 @@ import java.util.List;
  * 
  * @author ronalddennison
  */
-public interface AVideo {
+public interface VideoType {
  
     public String getEtag();
     
