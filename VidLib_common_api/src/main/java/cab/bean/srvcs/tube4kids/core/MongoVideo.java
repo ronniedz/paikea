@@ -1,12 +1,10 @@
 package cab.bean.srvcs.tube4kids.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,13 +12,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 import javax.ws.rs.core.UriBuilder;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import cab.bean.srvcs.tube4kids.api.ErrorBox;
-import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

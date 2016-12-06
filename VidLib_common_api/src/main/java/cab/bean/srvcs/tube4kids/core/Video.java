@@ -9,10 +9,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -43,6 +47,18 @@ public class Video extends BasicVideo {
     private Set<Playlist> playlists;
     private List<VideoGenre> videoGenres = new ArrayList<VideoGenre>();
 
+    private VideoDetail detail;
+
+    
+    @OneToOne
+    @PrimaryKeyJoinColumn(name="video_id")
+    public VideoDetail getDetail() {
+        return detail;
+    }
+
+    public void setDetail(VideoDetail detail) {
+        this.detail = detail;
+    }
 
     @NonNull
     @Id
@@ -146,16 +162,10 @@ public class Video extends BasicVideo {
 
         
     	@JsonProperty
-	@OneToMany(
-		fetch = FetchType.LAZY,
-		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-		mappedBy = "pk.video"
-	)
-	@org.hibernate.annotations.Cascade({
-	    org.hibernate.annotations.CascadeType.SAVE_UPDATE, 
-	    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-	})
-	public List<VideoGenre> getVideoGenres() {
+        @OneToMany(
+        		cascade = CascadeType.ALL, fetch = FetchType.LAZY,
+        		mappedBy = "video_id", targetEntity = cab.bean.srvcs.tube4kids.core.VideoGenre.class)
+    	public List<VideoGenre> getVideoGenres() {
 	    return videoGenres;
 	}
 

@@ -3,6 +3,10 @@
  */
 package cab.bean.srvcs.tube4kids.core;
 
+import java.util.List;
+
+import javax.persistence.Embedded;
+
 import lombok.NonNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,6 +30,8 @@ public abstract class BasicVideo implements VideoType {
     //@-JsonProperty
     //protected String publishedAt; // snippetType.publishedAt
 
+    public String publishedAt; //   snippet.publishedAt
+    
     @NonNull
     @JsonProperty
     public String getEtag() {

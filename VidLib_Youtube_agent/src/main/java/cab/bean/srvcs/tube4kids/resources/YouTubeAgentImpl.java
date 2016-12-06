@@ -29,7 +29,7 @@ public class YouTubeAgentImpl implements YouTubeAgent {
     public YouTubeAgentImpl() {
 	this.jClient = ClientBuilder.newClient().register(new JacksonJaxbJsonProvider()); //.register(mapper); 
 	this.baseTarget = jClient
-		.target( Config.PropKey.DATASRC_DOMAIN.getValue() + Config.PropKey.DATASRC_CTX_URL.getValue() )
+		.target( Config.PropKey.DATASRC_DOMAIN.getValue() + Config.PropKey.DATASRC_CTX_URI.getValue() )
 		.queryParam("key", nullStr)
 		.queryParam("key", Config.PropKey.APIKEY.getValue());
     } 
@@ -44,11 +44,30 @@ public class YouTubeAgentImpl implements YouTubeAgent {
     }
     
     public Response runSearchQuery(Map<String, String> params)  {
-	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_SRV_URL.getValue());
+	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_SEARCH_SRV_URI.getValue());
 	webResource = Config.setRequestQueryParams(webResource, params);
+
+	LOGGER.debug("YTRequest:\n{}\n", webResource.getUri().toString());
+	
 	Response remoteReply = webResource.request(MediaType.APPLICATION_JSON).get();
 	YouTubeResponse body = remoteReply.readEntity(YouTubeResponse.class);
-	LOGGER.debug("Response\n\tetag: {}\n\tsize: {}\n", body.getEtag(), body.getTotalResults());
+
+	LOGGER.debug("YTResponse:\n{}\n", body.toString());
+
+	return Response.status(remoteReply.getStatusInfo()).entity(body).build();
+    }
+    
+    public Response runVideoDetailsQuery(Map<String, String> params)  {
+	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_SEARCH_SRV_URI.getValue());
+	webResource = Config.setRequestQueryParams(webResource, params);
+	
+	LOGGER.debug("YTRequest:\n{}\n", webResource.getUri().toString());
+	
+	Response remoteReply = webResource.request(MediaType.APPLICATION_JSON).get();
+	YouTubeResponse body = remoteReply.readEntity(YouTubeResponse.class);
+	
+	LOGGER.debug("YTResponse:\n{}\n", body.toString());
+	
 	return Response.status(remoteReply.getStatusInfo()).entity(body).build();
     }
 

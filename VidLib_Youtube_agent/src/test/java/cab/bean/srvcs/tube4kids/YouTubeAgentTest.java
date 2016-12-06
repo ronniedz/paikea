@@ -41,9 +41,21 @@ public class YouTubeAgentTest extends TestCase {
         return new TestSuite(YouTubeAgentTest.class);
     }
 
-    public void testQuery() {
+    public void testSearchQuery() {
 	LOGGER.info("runSearchQuery test Query");
-	Response reply = (new YouTubeAgentImpl(Config.PropKey.APIKEY.getValue())).runSearchQuery(cnf.testParams);
+	Response reply = (new YouTubeAgentImpl(Config.PropKey.APIKEY.getValue())).runSearchQuery(cnf.testSearchParams);
+	try {
+	    assertEquals(Response.Status.OK.getStatusCode(), reply.getStatus());
+	    YouTubeResponse tq = (YouTubeResponse) reply.getEntity();
+	    assertNull(tq.getError());
+	} catch (java.lang.ClassCastException jlce) {
+	    LOGGER.error(jlce.getMessage());
+	}
+    }
+    
+    public void testVideoDetailsQuery() {
+	LOGGER.info("runSearchQuery test Query");
+	Response reply = (new YouTubeAgentImpl(Config.PropKey.APIKEY.getValue())).runVideoDetailsQuery(cnf.testDetailLookupParams);
 	try {
 	    assertEquals(Response.Status.OK.getStatusCode(), reply.getStatus());
 	    YouTubeResponse tq = (YouTubeResponse) reply.getEntity();
@@ -56,7 +68,7 @@ public class YouTubeAgentTest extends TestCase {
     public void testMultiQuery() {
 	YouTubeAgent agn = new YouTubeAgentImpl(Config.PropKey.APIKEY.getValue());
 	LOGGER.info("runSearchQuery test Multi Query-1");
-	Response reply = agn.runSearchQuery(cnf.testParams);
+	Response reply = agn.runSearchQuery(cnf.testSearchParams);
 	try {
 	    assertEquals(Response.Status.OK.getStatusCode(), reply.getStatus());
 	    YouTubeResponse tq = (YouTubeResponse) reply.getEntity();
@@ -64,7 +76,7 @@ public class YouTubeAgentTest extends TestCase {
 	    assertNotNull(tq.getEtag());
 	    assertNull(tq.getError());
 	    LOGGER.info("runSearchQuery test Multi Query-2");
-	    agn.runSearchQuery(cnf.testParams.xput("pageToken", tq.getNextPageToken()));
+	    agn.runSearchQuery(cnf.testSearchParams.xput("pageToken", tq.getNextPageToken()));
 	    assertEquals(Response.Status.OK.getStatusCode(), reply.getStatus());
 	    tq = (YouTubeResponse) reply.getEntity();
 	    assertNotNull(tq.getItems());
@@ -88,7 +100,7 @@ public class YouTubeAgentTest extends TestCase {
 	LOGGER.info("runSearchQuery test Invalid Key");
 	YouTubeAgent agn = new YouTubeAgentImpl();
 	agn.setApiKey((String) null);
-	Response reply = agn.runSearchQuery( cnf.testParams.xput("key", Config.PropKey.APIKEY.getValue() +1) );
+	Response reply = agn.runSearchQuery( cnf.testSearchParams.xput("key", Config.PropKey.APIKEY.getValue() +1) );
 	try {
 	    // Confirm  http-response-code is as expected
 	    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), reply.getStatus());
@@ -121,7 +133,7 @@ public class YouTubeAgentTest extends TestCase {
 	LOGGER.info("runSearchQuery test No Key");
 	YouTubeAgent agn = new YouTubeAgentImpl();
 	agn.setApiKey((String) null);
-	Response reply = agn.runSearchQuery( cnf.testParams );
+	Response reply = agn.runSearchQuery( cnf.testSearchParams );
 	try {
 	    // Check HTTP status code
 	    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), reply.getStatus());

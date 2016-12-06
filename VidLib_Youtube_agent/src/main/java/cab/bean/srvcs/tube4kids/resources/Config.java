@@ -20,11 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 public class Config {
 
     public enum PropKey {
-
 	DATASRC_DOMAIN("dataSrcDomain",	"https://www.googleapis.com"),
-	DATASRC_CTX_URL("dataSrcCtxUri", 	"/youtube/v3"),
-	DATASRC_SRV_URL("dataSrcUri",		"/search"),
-	APIKEY			("apiKey", 		null);
+	DATASRC_CTX_URI("dataSrcCtxUri", 	"/youtube/v3"),
+	DATASRC_SEARCH_SRV_URI("dataSrcSearchUri", "/search"),
+	DATASRC_DETAILS_SRV_URI("dataSrcDetailsUri",	 "/videos"),
+	APIKEY("apiKey", 		null);
 
 	private final String keyName;
 	private String defaultValue;
@@ -80,7 +80,7 @@ public class Config {
      *             key=AIzaSyAmOXO8tcUauYkj1POSnEzle_Rm61LAOe
      * </pre>
      */
-    public final QVal testParams = new QVal()
+    public final QVal testSearchParams = new QVal()
 	    .xput("q", "filmes completo dublado -legendado")
 	    .xput("part", "snippet")
 	    .xput("maxResults", "2")
@@ -95,6 +95,19 @@ public class Config {
 	    .xput("videoType", "any")
 	    .xput("fields", "etag,items,kind,nextPageToken,prevPageToken,pageInfo");
 
+    
+    
+// https://www.googleapis.com/youtube/v3/videos?
+//    id=QH4DhHpYEIc,4o1TFIIciAg
+//    &type=video
+//    &key=AIzaSyAmOXO8tcUauYkj1POSnEzle_Rm61LAOes
+//    &part=contentDetails,snippet
+    
+    public final QVal testDetailLookupParams = new QVal()
+    .xput("id", "QH4DhHpYEIc,4o1TFIIciAg")
+    .xput("part", "contentDetails,snippet")
+    ;
+    
     /**
      * 
      */
@@ -123,9 +136,9 @@ public class Config {
 //		    if ((tempString = prop.getProperty(dataSrcDomain_KEY)) != null)
 //			this.DATASRC_DOMAIN = tempString;
 //		    if ((tempString = prop.getProperty(dataSrcCtxUri_KEY)) != null)
-//			this.DATASRC_CTX_URL = tempString;
+//			this.DATASRC_CTX_URI = tempString;
 //		    if ((tempString = prop.getProperty(dataSrcUri_KEY)) != null)
-//			this.DATASRC_SRV_URL = tempString;
+//			this.DATASRC_SEARCH_SRV_URI = tempString;
 		} else {
 			throw new RuntimeException(" '" + PropKey.APIKEY +"' required.");
 		}
