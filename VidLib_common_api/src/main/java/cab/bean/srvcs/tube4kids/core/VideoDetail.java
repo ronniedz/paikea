@@ -2,6 +2,7 @@ package cab.bean.srvcs.tube4kids.core;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import javax.persistence.Column;
@@ -101,17 +102,15 @@ public class VideoDetail {
     
     @JsonProperty(value="contentDetails", access=JsonProperty.Access.WRITE_ONLY)
     public void setContentDetails(Map<String, Object> contentDetails) {
-	//   contentDetails.duration
+	//   contentDetails.duration : string
 	this.duration  = (String) contentDetails.get("duration");
 	
-	//   contentDetails.licensedContent
-	this.licensedContent  = contentDetails.containsKey("licensedContent") ? Boolean.valueOf((String)contentDetails.get("licensedContent")) : false;
+	//   contentDetails.licensedContent : boolean
+	this.licensedContent  =  Optional.of((Boolean) contentDetails.get("licensedContent")).orElse(Boolean.FALSE);
 	
-	//   contentDetails.caption
-	this.caption  = contentDetails.containsKey("caption") ? Boolean.valueOf((String)contentDetails.get("caption")) : false;
-	
-	//   contentDetails.licensedContent
-	this.licensedContent  = (Boolean) contentDetails.get("licensedContent");
+	//   contentDetails.caption : string
+	this.caption  = contentDetails.containsKey("caption") ? Boolean.valueOf((String)contentDetails.get("caption")) : Boolean.FALSE;
+
     }
     
     public void setEtag(String etag) {

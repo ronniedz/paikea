@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
+import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 import cab.bean.srvcs.tube4kids.resources.Config;
 import cab.bean.srvcs.tube4kids.resources.YouTubeAgent;
 import cab.bean.srvcs.tube4kids.resources.YouTubeAgentImpl;
@@ -54,11 +55,11 @@ public class YouTubeAgentTest extends TestCase {
     }
     
     public void testVideoDetailsQuery() {
-	LOGGER.info("runSearchQuery test Query");
+	LOGGER.info("test Video Details Query");
 	Response reply = (new YouTubeAgentImpl(Config.PropKey.APIKEY.getValue())).runVideoDetailsQuery(cnf.testDetailLookupParams);
 	try {
 	    assertEquals(Response.Status.OK.getStatusCode(), reply.getStatus());
-	    YouTubeResponse tq = (YouTubeResponse) reply.getEntity();
+	    YouTubeVideoDetailResponse tq = (YouTubeVideoDetailResponse) reply.getEntity();
 	    assertNull(tq.getError());
 	} catch (java.lang.ClassCastException jlce) {
 	    LOGGER.error(jlce.getMessage());

@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
 //import cab.bean.srvcs.tube4kids.resources.Config;
 
+import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
+
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 /**
@@ -58,15 +60,15 @@ public class YouTubeAgentImpl implements YouTubeAgent {
     }
     
     public Response runVideoDetailsQuery(Map<String, String> params)  {
-	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_SEARCH_SRV_URI.getValue());
+	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_DETAILS_SRV_URI.getValue());
 	webResource = Config.setRequestQueryParams(webResource, params);
 	
-	LOGGER.debug("YTRequest:\n{}\n", webResource.getUri().toString());
+	LOGGER.debug("YT Details Request:\n{}\n", webResource.getUri().toString());
 	
 	Response remoteReply = webResource.request(MediaType.APPLICATION_JSON).get();
-	YouTubeResponse body = remoteReply.readEntity(YouTubeResponse.class);
+	YouTubeVideoDetailResponse body = remoteReply.readEntity(YouTubeVideoDetailResponse.class);
 	
-	LOGGER.debug("YTResponse:\n{}\n", body.toString());
+	LOGGER.debug("YT Details Response:\n{}\n", body.toString());
 	
 	return Response.status(remoteReply.getStatusInfo()).entity(body).build();
     }
