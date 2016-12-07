@@ -181,7 +181,7 @@ public class VideoResource {
 		g.getPk().setVideo(video);
 	    });
 	    ids.add(videoDAO.addVideoYTVideo(video));
-	    neo4jGraphDAO.insert(video);
+//	    neo4jGraphDAO.insert(video);
 	});
 	URI location = UriBuilder.fromUri("/video").build();
 	return Response

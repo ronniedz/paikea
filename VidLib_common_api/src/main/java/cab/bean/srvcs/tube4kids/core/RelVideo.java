@@ -9,14 +9,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -32,12 +28,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Entity
 @Table(name = "video")
 @NamedQueries({ @NamedQuery(
-	name = "cab.bean.srvcs.tube4kids.core.Video.findAll",
-	query = "SELECT vid FROM Video vid")
+	name = "cab.bean.srvcs.tube4kids.core.RelVideo.findAll",
+	query = "SELECT vid FROM RelVideo vid")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
-public class Video extends BasicVideo {
+public class RelVideo extends BasicVideo {
 
     protected DateTime publishedAt; 	// snippetType.publishedAt
     protected Long userId; 			// used in MySQL
@@ -47,18 +43,6 @@ public class Video extends BasicVideo {
     private Set<Playlist> playlists;
     private List<VideoGenre> videoGenres = new ArrayList<VideoGenre>();
 
-    private VideoDetail detail;
-
-    
-    @OneToOne
-    @PrimaryKeyJoinColumn
-    public VideoDetail getDetail() {
-        return detail;
-    }
-
-    public void setDetail(VideoDetail detail) {
-        this.detail = detail;
-    }
 
     @NonNull
     @Id

@@ -1,5 +1,6 @@
 package cab.bean.srvcs.tube4kids.core;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,21 +9,18 @@ import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.NonNull;
 import lombok.Setter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -69,7 +67,7 @@ public class VideoDetail {
     
     @MapsId
     @OneToOne
-    @JoinColumn(name="id")
+    @JoinColumn(name="video_id")
     public Video getVideo() {
         return video;
     }
@@ -133,11 +131,15 @@ public class VideoDetail {
         return defaultAudioLanguage;
     }
 
-    @JsonProperty
+    @Column(name="youtube_tags")
     public String getYoutubeTags() {
 	final StringJoiner joiner = new StringJoiner(",");
 	tags.forEach(x -> { joiner.add(x); });
 	return joiner.toString();
+    }
+
+    public void setYoutubeTags(String utags) {
+	tags = Arrays.asList(utags.split("\\s*,\\s*"));
     }
 
     @JsonProperty
@@ -153,6 +155,11 @@ public class VideoDetail {
     @JsonProperty
     public RegionRestriction getRegionRestriction() {
         return regionRestriction;
+    }
+
+    @Transient @JsonProperty
+    public List<String> getTags() {
+        return tags;
     }
 
 }
