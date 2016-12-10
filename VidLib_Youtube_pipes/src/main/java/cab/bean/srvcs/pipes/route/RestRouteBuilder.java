@@ -4,6 +4,7 @@ import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
+import org.apache.camel.model.rest.RestDefinition;
 
 import cab.bean.srvcs.pipes.PersistenceHelper;
 import cab.bean.srvcs.pipes.processor.CacheNewVideosProcessor;
@@ -48,38 +49,54 @@ public class RestRouteBuilder extends RouteBuilder {
     /**
      * Camel routing rules in Java...
      */
+    @SuppressWarnings("deprecation")
     public void configure() {
 
 	restConfiguration().component("restlet")
-	.host(this.restServerHost)
-	.port(this.restServerPort)
+		.host(this.restServerHost)
+		.port(this.restServerPort)
 		.bindingMode(RestBindingMode.auto)
 		.componentProperty("chunked", "true");
 
-	rest(this.resourcePath)
-	.get(this.serviceUri)
-	.produces("application/json")
-	.bindingMode(RestBindingMode.json)
-	.route()
-		.process(queryStringProcessor)
-		.choice()
-	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY_NAME).isNotNull())
-	   	    	.to("direct:inbound_cached")
-	   	    .otherwise()
-	   	   	.to("direct:inbound_novel")
-	   	   .endChoice()
-	.end();
+	RestDefinition  def = rest(this.resourcePath);
+
+	def.get("/search")
+		.produces("application/json")
+		.bindingMode(RestBindingMode.json)
+            	.route()
+            		.routeId("search")
+            		.process(queryStringProcessor)
+            		.choice()
+            	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY_NAME).isNotNull())
+            	   	    	.to("direct:inbound_cached")
+            	   	    .otherwise()
+            	   	   	.to("direct:inbound_novel")
+            	   	   .endChoice()
+            	.end();
 		
 	from("direct:inbound_cached")
 	    .process(cachePullProcessor)  ;
 	
 	from("direct:inbound_novel")
+		.setHeader("servicePath", simple("inbound_novella"))
+
 	    .process("ytAPICallProcessor")
 	    .wireTap("direct:store_novel_data", true);
 
 	from("direct:store_novel_data")
 	    .process(stashNovelDataProcessor)
 	    .end();
+
+	def.get("/detail")
+	.produces("application/json")
+	.bindingMode(RestBindingMode.json)
+	.route()
+	.routeId("detail")
+//	.setHeader("servicePath", simple("/detail"))
+	.process("ytAPICallProcessor")
+	.end();
+
+
     }
 
     public String getResourcePath() {

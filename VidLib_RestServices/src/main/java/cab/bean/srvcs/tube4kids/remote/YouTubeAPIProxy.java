@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
+import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 
 import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
@@ -78,6 +79,23 @@ public class YouTubeAPIProxy {
 	LOGGER.info("clientResponsegetStatus: {}", clientResponse.getStatus());
 	
 	String body = clientResponse.readEntity(String.class);
+	
+	return body;
+    }
+    
+    public YouTubeVideoDetailResponse runVideoDetail (Map<String, String> params)  {
+	WebTarget webResource = baseTarget.path("/pipes/detail");
+	
+	// Add params to query
+	webResource = putParamsInRequest(webResource, params);
+	
+	Response clientResponse = webResource
+		.request(MediaType.APPLICATION_JSON)
+		.get(Response.class);
+	
+	LOGGER.info("clientResponsegetStatus: {}", clientResponse.getStatus());
+	
+	YouTubeVideoDetailResponse body = clientResponse.readEntity(YouTubeVideoDetailResponse.class);
 	
 	return body;
     }

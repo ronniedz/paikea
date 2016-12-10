@@ -49,7 +49,7 @@ public class Genre {
     @Column(name = "name", nullable = false)
     private String name;
     
-    @Column(name = "created", nullable = false)
+    @Column(name = "created", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp created;
     
     @Column(name = "genre_id", nullable = true)

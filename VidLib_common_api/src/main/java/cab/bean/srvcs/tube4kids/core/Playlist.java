@@ -65,7 +65,7 @@ public class Playlist {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "created", nullable = false)
+    @Column(name = "created", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp created;
 
     // ------------------ JOINS ----------------------- //

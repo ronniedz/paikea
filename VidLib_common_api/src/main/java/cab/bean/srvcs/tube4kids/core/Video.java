@@ -11,7 +11,9 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -49,21 +51,19 @@ public class Video extends BasicVideo {
 
     private VideoDetail detail;
 
-    
-    @OneToOne
-    @PrimaryKeyJoinColumn
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "video")
     public VideoDetail getDetail() {
         return detail;
     }
 
     public void setDetail(VideoDetail detail) {
         this.detail = detail;
+        detail.setVideo(this);
     }
 
-    @NonNull
-    @Id
-    @Column(name = "video_id", unique = true, nullable = false)
-    public String getVideoId() {
+   
+    @Column(name = "video_id", nullable = false)
+    @Id public String getVideoId() {
         return videoId;
     }
 
@@ -110,6 +110,7 @@ public class Video extends BasicVideo {
         this.title = title;
     }
 
+    @Lob
     @JsonProperty
     @Column(name = "description")
     public String getDescription() {

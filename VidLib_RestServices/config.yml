@@ -11,7 +11,7 @@ database:
     hibernate.show_sql: true
     hibernate.format_sql: true
     hibernate.hbm2ddl.auto: create-drop
-    hibernate.hbm2ddl.import_files: import.sql
+    hibernate.hbm2ddl.import_files: no_import.sql
 
   # the name of your JDBC driver
   driverClass: com.mysql.cj.jdbc.Driver
@@ -107,7 +107,8 @@ metrics:
 #    VidLib_Youtube_pipes/src/main/resources/app-queue.properties
 #
 # YouTube Rest API proxy URL
-proxyUrl: http://localhost:7070/ix/a/b
+proxySearchUrl: http://localhost:7070/pipes/search
+proxyDetailUrl: http://localhost:7070/pipes/detail
 
 
 ## Ronniedz

@@ -1,5 +1,6 @@
 package cab.bean.srvcs.tube4kids.resources;
 
+import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.core.User;
@@ -8,6 +9,7 @@ import cab.bean.srvcs.tube4kids.db.GenreDAO;
 import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
+import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
@@ -46,13 +49,16 @@ public class VideoResource {
     private final GenreDAO genreDAO;
     private final UserDAO userDAO;
     private final Neo4JGraphDAO neo4jGraphDAO;
+    private final YouTubeAPIProxy ytProxyClient;
 
-    public VideoResource(VideoDAO videoDAO, GenreDAO genreDAO, UserDAO userDAO, Neo4JGraphDAO neo4jGraphDAO) {
+
+    public VideoResource(VideoDAO videoDAO, GenreDAO genreDAO, UserDAO userDAO, Neo4JGraphDAO neo4jGraphDAO, final YouTubeAPIProxy ytProxyClient) {
 	super();
 	this.videoDAO = videoDAO;
 	this.genreDAO = genreDAO;
 	this.userDAO = userDAO;
 	this.neo4jGraphDAO = neo4jGraphDAO;
+        this.ytProxyClient = ytProxyClient;
     }
 
 //    
@@ -172,17 +178,34 @@ public class VideoResource {
     public Response addYTVideos(List<Video> videos) {
 	User user = userDAO.findById(1L).get();
 
+	String vids =  "" + videos.stream().map( v -> v.getVideoId() ).collect(Collectors.joining(","));
+	
+	Map<String, String> paramMap = ImmutableMap.of("part", "contentDetails,snippet", "id" ,vids);
+	
+	System.out.println("VIDDSSS: "  + paramMap);
+	
+	YouTubeVideoDetailResponse detailResp = ytProxyClient.runVideoDetail(paramMap);
+
+	System.out.println("detailResp: "  + detailResp.getItems());
+
+	
 	List<String>ids = new ArrayList<String>();
-	videos.forEach( video -> {
-	    video.setUserId(1L);
-	    video.setUser(user);
-	    video.getVideoGenres().forEach( g -> {
+	
+	for (int syncedIndex = 0; syncedIndex <  videos.size(); syncedIndex++ ) {
+	    Video tempVideo = videos.get(syncedIndex);
+	    tempVideo.setUserId(1L);
+	    tempVideo.setUser(user);
+	    tempVideo.getVideoGenres().forEach( g -> {
 		g.getPk().setUser(user);
-		g.getPk().setVideo(video);
+		g.getPk().setVideo(tempVideo);
 	    });
-	    ids.add(videoDAO.addVideoYTVideo(video));
+	    
+	    tempVideo.setDetail(detailResp.getItems().get(syncedIndex));
+	    ids.add(videoDAO.create(tempVideo).getVideoId());
 //	    neo4jGraphDAO.insert(video);
-	});
+	}
+	
+	
 	URI location = UriBuilder.fromUri("/video").build();
 	return Response
 		.status(Response.Status.CREATED)

@@ -23,5 +23,11 @@ public interface YouTubeAgent {
      * 		a JSON response
      */
     public Response runSearchQuery(Map<String, String> params);
+    
+    public Response doRequest(Map<String, String> params, String rte);
+    
+    public Response runVideoDetailsQuery(Map<String, String> params);
   
+    
+
 }

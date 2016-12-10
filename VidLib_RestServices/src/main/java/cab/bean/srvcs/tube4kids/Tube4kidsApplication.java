@@ -131,7 +131,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
 
 	
-        jerseyConf.register(new YouTubeVideoResource(new YouTubeAPIProxy(configuration.getProxyUrl())));
+        final YouTubeAPIProxy ytProxyClient = new YouTubeAPIProxy(configuration.getProxySearchUrl());
 
         final VideoDAO videoDAO = new VideoDAO(hibernateBundle.getSessionFactory());
         final GenreDAO genreDAO = new GenreDAO(hibernateBundle.getSessionFactory());
@@ -141,7 +141,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         final ChildDAO childDAO = new ChildDAO(hibernateBundle.getSessionFactory());
         final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
 
-        
+        jerseyConf.register(new YouTubeVideoResource(ytProxyClient));
+
         jerseyConf.register(new GenreResource(genreDAO));
         jerseyConf.register(new UserResource(userDAO));
         jerseyConf.register(new AgeGroupResource(ageGroupDAO));
@@ -150,7 +151,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         
-        jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO));
+        jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
         
         jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());

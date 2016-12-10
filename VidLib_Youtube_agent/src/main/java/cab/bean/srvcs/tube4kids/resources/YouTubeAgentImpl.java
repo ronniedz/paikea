@@ -45,17 +45,31 @@ public class YouTubeAgentImpl implements YouTubeAgent {
 	this.baseTarget = baseTarget.queryParam("key", nullStr).queryParam("key", apiKey);
     }
     
+    public Response doRequest(Map<String, String> params, String route) {
+	Response resp = null;
+	switch (route) {
+	    case "detail" :
+		resp = runVideoDetailsQuery(params);
+		break;
+	    default :
+		resp = runSearchQuery(params);
+		break;
+	}
+	return resp;
+    }
+
+
     public Response runSearchQuery(Map<String, String> params)  {
 	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_SEARCH_SRV_URI.getValue());
 	webResource = Config.setRequestQueryParams(webResource, params);
-
+	
 	LOGGER.debug("YTRequest:\n{}\n", webResource.getUri().toString());
 	
 	Response remoteReply = webResource.request(MediaType.APPLICATION_JSON).get();
 	YouTubeResponse body = remoteReply.readEntity(YouTubeResponse.class);
-
+	
 	LOGGER.debug("YTResponse:\n{}\n", body.toString());
-
+	
 	return Response.status(remoteReply.getStatusInfo()).entity(body).build();
     }
     

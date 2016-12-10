@@ -44,7 +44,11 @@ public class Tube4kidsConfiguration extends Configuration {
     
     @Valid
     @NotNull
-    private URL proxyUrl;
+    private URL proxySearchUrl;
+    
+    @Valid
+    @NotNull
+    private URL proxyDetailUrl;
     
     @NotNull
     private Map<String, Map<String, String>> viewRendererConfiguration = Collections.emptyMap();
@@ -53,13 +57,23 @@ public class Tube4kidsConfiguration extends Configuration {
     private GraphiteReporterFactory graphiteReporterFactory = new GraphiteReporterFactory();
     
     @JsonProperty
-    public URL getProxyUrl() {
-	return proxyUrl;
+    public URL getProxySearchUrl() {
+	return proxySearchUrl;
     }
     
     @JsonProperty
-    public void setProxyUrl(URL proxyUrl) {
-	this.proxyUrl = proxyUrl;
+    public void setProxySearchUrl(URL proxyUrl) {
+	this.proxySearchUrl = proxyUrl;
+    }
+
+    @JsonProperty
+    public URL getProxyDetailUrl() {
+        return proxyDetailUrl;
+    }
+
+    @JsonProperty
+    public void setProxyDetailUrl(URL proxyDetailUrl) {
+        this.proxyDetailUrl = proxyDetailUrl;
     }
 
     @JsonProperty

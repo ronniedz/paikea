@@ -2,16 +2,20 @@ package cab.bean.srvcs.pipes.processor;
 
 import java.util.Map;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.component.restlet.RestletConstants;
+import org.restlet.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.pipes.PersistenceHelper;
 import cab.bean.srvcs.pipes.model.VideoSearchRequest;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
+import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 import cab.bean.srvcs.tube4kids.resources.YouTubeAgent;
 
 public class YouTubeAPICallProcessor implements Processor {
@@ -28,26 +32,52 @@ public class YouTubeAPICallProcessor implements Processor {
         this.youTubeAgent = yta;
     }
     
+    public <T> T readEntity(Class<T> entityType) {
+        return null;
+    }
+
     public void process(Exchange exchange) throws Exception {
 
-	YouTubeResponse ytResp= null;
-	Map<String,String> params = exchange.getIn().getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, Map.class);
+	String servicePath = exchange.getIn().getHeader("servicePath", String.class);
 	
-	// TODO the value should be set by sender.
-	params.put("fields", "etag,regionCode,items,kind,nextPageToken,prevPageToken,pageInfo");
-	String collectionName = exchange.getIn().getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, String.class);
+	String path = exchange.getFromRouteId();
+//	String path = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
+	System.out.println("path: " + path);
+	LOGGER.debug("path: {}" , path);
+	
+	if (path.equals("detail")) {
 
-	Response reply = youTubeAgent.runSearchQuery( params );
+	    Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
+	    
+	    Map<String, String> params = request.getResourceRef().getQueryAsForm().getValuesMap();
 
-	if (Response.Status.OK.getStatusCode() == reply.getStatusInfo().getStatusCode()) {
-	    ytResp =  reply.readEntity(YouTubeResponse.class);;
+	    YouTubeVideoDetailResponse details = null;
+	    Response reply = youTubeAgent.doRequest(params, path);
+	    if (Response.Status.OK.getStatusCode() == reply.getStatusInfo().getStatusCode()) {
+		details =  reply.readEntity(YouTubeVideoDetailResponse.class);
+	    }
+	    exchange.getOut().setBody(details);
 	}
-	
-	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME,collectionName);
-	ytResp.setCollectionName(collectionName);
-	
-	// Copy into out message for wireTap
-	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, exchange.getIn().getBody(VideoSearchRequest.class));
-	exchange.getOut().setBody(ytResp);
+	else {
+		Map<String,String> params = exchange.getIn().getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, Map.class);
+		YouTubeResponse ytResp= null;
+
+		// TODO the value should be set by sender.
+            	params.put("fields", "etag,regionCode,items,kind,nextPageToken,prevPageToken,pageInfo");
+            	String collectionName = exchange.getIn().getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, String.class);
+            
+            	Response reply = youTubeAgent.runSearchQuery( params );
+            
+            	if (Response.Status.OK.getStatusCode() == reply.getStatusInfo().getStatusCode()) {
+            	    ytResp =  reply.readEntity(YouTubeResponse.class);;
+            	}
+            	
+            	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME,collectionName);
+            	ytResp.setCollectionName(collectionName);
+            	
+            	// Copy into out message for wireTap
+            	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, exchange.getIn().getBody(VideoSearchRequest.class));
+            	exchange.getOut().setBody(ytResp);
+	}
     }
 }

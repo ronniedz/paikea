@@ -7,6 +7,7 @@ import io.dropwizard.jersey.params.LongParam;
 import io.dropwizard.jersey.params.BooleanParam;
 
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,27 +48,29 @@ public class ChildResource {
         this.playlistDAO = playlistDAO;
     }
 
-
+    private Child setupChild(Child uChild) { 
+	uChild.setUserId(fakeUserId);
+	uChild.setCreated(new Timestamp(java.lang.System.currentTimeMillis()));
+	return uChild;
+    }
+    
     @POST
     @UnitOfWork
     public Response createChild(List<Child> children,  @QueryParam("detail") Boolean detail ) {
 	// TODO add real user
 	
 
+	// Either a Child or Child ids
 	List<?> outp =  null;
 	Object exibo = null;
 	
 	boolean fullDetail = detail != null && detail; 
 	
 	if (fullDetail) {
-	    outp = children.stream().map(
-		    (Child uChild)-> { uChild.setUserId(fakeUserId); return childDAO.create(uChild);}
-	    ).collect(Collectors.toList());
+	    outp = children.stream().map( x -> childDAO.create(setupChild(x))).collect(Collectors.toList());
 	    exibo = ((Child)outp.get(0)).getId();
 	} else {
-	    outp = children.stream().map(
-		    (Child uChild)-> { uChild.setUserId(fakeUserId); return childDAO.quickCreate(uChild);}
-	     ).collect(Collectors.toList());
+	    outp = children.stream().map( x -> childDAO.quickCreate(setupChild(x)) ).collect(Collectors.toList());
 	    exibo = outp.get(0);
 	}
 	

@@ -43,6 +43,6 @@ public class Child {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "created", nullable = false)
+    @Column(name = "created", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp created;
 }

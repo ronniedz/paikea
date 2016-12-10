@@ -2,6 +2,7 @@ package cab.bean.srvcs.tube4kids.core;
 
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -61,18 +62,12 @@ public class RegionRestriction {
 
     @JsonSetter("blocked")
     public void setBlockedList(List<String> blockedList) {
-	final StringJoiner joiner = new StringJoiner(",");
-	blockedList.forEach(x -> { joiner.add(x); });
-	this.blocked =  joiner.toString();
-
+	this.blocked = blockedList == null ? null : blockedList.stream().collect(Collectors.joining(","));
     }
 
     @JsonSetter("allowed")
     public void setAllowedList(List<String> allowedList) {
-	final StringJoiner joiner = new StringJoiner(",");
-	allowedList.forEach(x -> { joiner.add(x); });
-	this.allowed =  joiner.toString();
-
+	this.allowed = allowedList == null ? null : allowedList.stream().collect(Collectors.joining(","));
     }
    
 }

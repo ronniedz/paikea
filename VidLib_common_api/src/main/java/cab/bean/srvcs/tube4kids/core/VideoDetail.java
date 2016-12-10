@@ -6,11 +6,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -18,10 +22,15 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -33,56 +42,58 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 	name = "cab.bean.srvcs.tube4kids.core.VideoDetail.findAll",
 	query = "SELECT vid FROM VideoDetail vid")
 })
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
+@RequiredArgsConstructor
+@ToString( exclude={"video" })
+@EqualsAndHashCode( exclude={"video" })
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS)
 public class VideoDetail {
 
     private String etag;
     private String id;
-
-    
+    private String videoId;
     private String defaultLanguage; //   snippet.defaultLanguage
     private String defaultAudioLanguage; //   snippet.defaultAudioLanguage
     private List<String> tags; //   snippet.tags
-    
-    
     private Boolean caption; //   contentDetails.caption
     private String duration; //   contentDetails.duration
     private Boolean licensedContent; //   contentDetails.licensedContent: false
     private Video video;
 
+    @Id     
+    @NonNull
+    @Column(name="video_id")
+    @JsonIgnore
+    public String getVideoId() {
+        return videoId;
+    }
     
+    @JsonIgnore
+    public String getId() {
+	return id;
+    }
+
     @Embedded
     public RegionRestriction regionRestriction = new RegionRestriction(); //   contentDetails.regionRestriction
  
 
-    @Id     
-    @NonNull
-    @Column(name = "id", unique = true, nullable = false)
-    @JsonProperty
-    public String getId() {
-        return id;
-    }
-
-    
+    @OneToOne(optional = false, fetch=FetchType.LAZY)
     @MapsId
-    @OneToOne
-    @JoinColumn(name="video_id")
+    @JsonIgnore
     public Video getVideo() {
         return video;
     }
-
-
+    
     @JsonProperty 
     public String getEtag() {
         return etag;
     }
 
-    @JsonProperty
+    @JsonSetter
     public void setId(String ytid) {
 	this.id  = ytid;
     }
-    
+
 
     @SuppressWarnings("unchecked")
     @JsonSetter(value="snippet")
@@ -115,10 +126,11 @@ public class VideoDetail {
         this.etag = etag;
     }
 
-    public void setVideoId(String videoId) {
-        this.id = videoId;
-    }
+//    public void setVideoId(String videoId) {
+//        this.videoId = videoId;
+//    }
 
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
     public Boolean getCaption() {
         return caption;
     }
@@ -131,6 +143,7 @@ public class VideoDetail {
         return defaultAudioLanguage;
     }
 
+    @Lob
     @Column(name="youtube_tags")
     public String getYoutubeTags() {
 	final StringJoiner joiner = new StringJoiner(",");
@@ -147,6 +160,7 @@ public class VideoDetail {
         return duration;
     }
 
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
     @JsonProperty
     public Boolean isLicensedContent() {
         return licensedContent;
