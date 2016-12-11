@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import cab.bean.srvcs.tube4kids.utils.StringTool;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -62,12 +64,12 @@ public class RegionRestriction {
 
     @JsonSetter("blocked")
     public void setBlockedList(List<String> blockedList) {
-	this.blocked = blockedList == null ? null : blockedList.stream().collect(Collectors.joining(","));
+	this.blocked = StringTool.join(blockedList, ",", false);
     }
 
     @JsonSetter("allowed")
     public void setAllowedList(List<String> allowedList) {
-	this.allowed = allowedList == null ? null : allowedList.stream().collect(Collectors.joining(","));
+	this.allowed = StringTool.join(allowedList, ",", false); 
     }
    
 }

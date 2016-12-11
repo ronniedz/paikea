@@ -9,20 +9,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
-import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import lombok.NonNull;
 
 import org.joda.time.DateTime;
 
@@ -44,7 +38,7 @@ public class Video extends BasicVideo {
     protected DateTime publishedAt; 	// snippetType.publishedAt
     protected Long userId; 			// used in MySQL
 
-    protected User user; 			// used for joining videoGenre PK
+    protected User user; 				// used for joining videoGenre PK
     
     private Set<Playlist> playlists;
     private List<VideoGenre> videoGenres = new ArrayList<VideoGenre>();
@@ -60,7 +54,6 @@ public class Video extends BasicVideo {
         this.detail = detail;
         detail.setVideo(this);
     }
-
    
     @Column(name = "video_id", nullable = false)
     @Id public String getVideoId() {

@@ -10,6 +10,7 @@ import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
+import cab.bean.srvcs.tube4kids.utils.StringTool;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
@@ -178,7 +179,7 @@ public class VideoResource {
     public Response addYTVideos(List<Video> videos) {
 	User user = userDAO.findById(1L).get();
 
-	String vids =  "" + videos.stream().map( v -> v.getVideoId() ).collect(Collectors.joining(","));
+	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());
 	
 	Map<String, String> paramMap = ImmutableMap.of("part", "contentDetails,snippet", "id" ,vids);
 	
