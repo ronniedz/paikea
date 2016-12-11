@@ -1,5 +1,6 @@
 package cab.bean.srvcs.tube4kids.core;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.json.JsonArray;
+
 
 @Setter
 @Entity
@@ -51,11 +59,12 @@ public class VideoDetail {
     private String id; // The ID returned by YT. Same as video's ID
     private String defaultLanguage; // snippet.defaultLanguage
     private String defaultAudioLanguage; // snippet.defaultAudioLanguage
-    private List<String> tags; // snippet.tags
+    private @JsonProperty List<String> tags; // snippet.tags
     private Boolean caption; // contentDetails.caption
     private String duration; // contentDetails.duration
     private Boolean licensedContent; // contentDetails.licensedContent: false
     private Video video;
+
 
     @Id
     @NonNull
@@ -92,8 +101,7 @@ public class VideoDetail {
 	this.defaultLanguage = (String) snippet.get("defaultLanguage");
 
 	// snippet.defaultAudioLanguage
-	this.defaultAudioLanguage = (String) snippet
-		.get("defaultAudioLanguage");
+	this.defaultAudioLanguage = (String) snippet.get("defaultAudioLanguage");
 
 	// snippet.tags
 	this.tags = (List<String>) snippet.get("tags");
@@ -105,13 +113,11 @@ public class VideoDetail {
 	this.duration = (String) contentDetails.get("duration");
 
 	// contentDetails.licensedContent : boolean
-	this.licensedContent = Optional.of(
-		(Boolean) contentDetails.get("licensedContent")).orElse(
-		Boolean.FALSE);
+	this.licensedContent = Optional.of((Boolean) contentDetails.get("licensedContent")).orElse(Boolean.FALSE);
 
 	// contentDetails.caption : string
-	this.caption = contentDetails.containsKey("caption") ? Boolean
-		.valueOf((String) contentDetails.get("caption"))
+	this.caption = contentDetails.containsKey("caption")
+		? Boolean.valueOf((String) contentDetails.get("caption"))
 		: Boolean.FALSE;
 
     }
@@ -132,15 +138,19 @@ public class VideoDetail {
     public String getDefaultAudioLanguage() {
 	return defaultAudioLanguage;
     }
-
+    
+    @JsonIgnore
     @Lob
     @Column(name="youtube_tags")
-    public String getYoutubeTags() {
-    	return StringTool.joinMap(tags, ",", s -> StringTool.doubleQuote(s));
+    public String getYoutubeTags() throws JsonProcessingException {
+	ObjectMapper mapper = new ObjectMapper();
+    	return this.tags == null ? null : mapper.writeValueAsString(tags);
     }
 
-    public void setYoutubeTags(String utags) {
-	tags = Arrays.asList(utags.split("\\s*,\\s*"));
+    @JsonIgnore
+    public void setYoutubeTags(String utags) throws JsonParseException, JsonMappingException, IOException {
+	ObjectMapper mapper = new ObjectMapper();
+	tags = utags == null ? null : Arrays.asList(mapper.readValue(utags, String[].class));
     }
 
     @JsonProperty
@@ -164,10 +174,9 @@ public class VideoDetail {
 	return tags;
     }
 
-//    @Transient
-//    @JsonSetter(value = "tags")
-//    public void setYTTags(List<String> utags) {
-//	tags = utags;
-//    }
+    @JsonSetter
+    public void setTags(List<String> utags) {
+	tags = utags;
+    }
 
 }

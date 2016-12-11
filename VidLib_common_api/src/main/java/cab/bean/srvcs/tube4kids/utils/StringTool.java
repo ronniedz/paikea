@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 public class StringTool {
     
@@ -18,11 +19,11 @@ public class StringTool {
     }
     
     public static String join(Collection<String> list, String glue) {
-	return join(list, glue,true);
+	return StringUtils.join(list, glue);
     }
     
     public static String join(Collection<String> list, String glue, boolean elseBlank) {
-	return list == null ? (elseBlank ? "" : null) : list.stream().collect(Collectors.joining(glue));
+	return list == null ? (elseBlank ? "" : null) : StringUtils.join(list, glue);
     }
     
     public static <T> String joinMap(Collection<T> list, String glue, Function<T, String> fn) {
