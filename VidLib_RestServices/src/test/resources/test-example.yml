@@ -1,11 +1,29 @@
 template: Hello, %s!
 defaultName: Stranger
 
+
+# Database settings.
 database:
-  driverClass: org.h2.Driver
-  user: sa
-  password: sa
-  url: jdbc:h2:./target/test-example
+
+  properties:
+    hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+    hibernate.generate_statistics: true
+    hibernate.show_sql: true
+    hibernate.format_sql: true
+    hibernate.hbm2ddl.auto: create-drop
+    hibernate.hbm2ddl.import_files: no_import.sql
+
+  # the name of your JDBC driver
+  driverClass: com.mysql.cj.jdbc.Driver
+
+  # the username
+  user: root
+
+  # the password
+  password: 
+
+  # the JDBC URL
+  url: jdbc:mysql://localhost:3306/paikea_test?autoReconnect=true&useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
 
 server:
   applicationConnectors:
@@ -14,3 +32,80 @@ server:
   adminConnectors:
     - type: http
       port: 0
+
+
+# use the simple server factory if you only want to run on a single port
+#server:
+#  type: simple
+#  connector:
+#    type: http
+#    port: 8080
+
+# Logging settings.
+logging:
+
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+
+  # Logger-specific levels.
+  loggers:
+
+    # Sets the level for 'cab.bean.srvcs.app' to DEBUG.
+    cab.bean.srvcs.tube4kids: DEBUG
+
+    # Redirects SQL logs to a separate file
+    org.hibernate.SQL:
+      level: DEBUG
+
+# Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
+# Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
+# Logback's Fixed Window Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%i.log.gz
+
+  appenders:
+    - type: console
+    - type: file
+      threshold: INFO
+      logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
+      currentLogFilename: /tmp/test_application.log
+      archivedLogFilenamePattern: /tmp/test_application-%d{yyyy-MM-dd}-%i.log.gz
+      archivedFileCount: 7
+      timeZone: UTC
+      maxFileSize: 10MB
+
+# the key needs to match the suffix of the renderer
+viewRendererConfiguration:
+    .ftl:
+        strict_syntax: yes
+        whitespace_stripping: yes
+
+metrics:
+  type: graphite
+  frequency: 10s
+
+
+# Get this value from:
+#    VidLib_Youtube_pipes/src/main/resources/app-queue.properties
+#
+# YouTube Rest API proxy URL
+proxySearchUrl: http://localhost:7070/pipes/search
+proxyDetailUrl: http://localhost:7070/pipes/detail
+
+
+## Ronniedz
+##  API key = 16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com
+##  Secret  = 5aLltV9mfyeteSV9ihPo77Yt
+## {"web":{"client_id":"16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com","project_id":"bc-yt-sso","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://accounts.google.com/o/oauth2/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"5aLltV9mfyeteSV9ihPo77Yt","javascript_origins":["http://localhost:8080","http://54.153.116.166:8080"]}}
+## {"web":{"client_id":"16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com","project_id":"bc-yt-sso","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://accounts.google.com/o/oauth2/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"5aLltV9mfyeteSV9ihPo77Yt","redirect_uris":["http://localhost:8080/gapi/oauth2Callback"],"javascript_origins":["http://localhost:8080","http://54.153.116.166:8080"]}}
+## 
+
+## TODO. This section (or just the password) will be appended during build.
+## This might be one way to use environment variables to influence the build
+## NEO4J configuration ###
+neo4jConf:
+  protocol: bolt
+  port: 7687
+  host: localhost
+  path: /
+  username: neo4j
+  password: mango
+

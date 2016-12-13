@@ -32,6 +32,9 @@ import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.helpers.collection.Iterators;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +48,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 @Path("/video")
 @Produces(MediaType.APPLICATION_JSON)
 public class VideoResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VideoResource.class);
 
     private final VideoDAO videoDAO;
     private final GenreDAO genreDAO;
@@ -61,13 +65,6 @@ public class VideoResource {
 	this.neo4jGraphDAO = neo4jGraphDAO;
         this.ytProxyClient = ytProxyClient;
     }
-
-//    
-//    @POST
-//    @UnitOfWork
-//    public Video createVideo(Video video) {
-//	return videoDAO.create(video);
-//    }
 
     @GET
     @UnitOfWork
@@ -174,9 +171,16 @@ public class VideoResource {
 	return Response.status(Response.Status.NO_CONTENT).build();
     }
 
+//  
+//  @POST
+//  @UnitOfWork
+//  public Video createVideo(Video video) {
+//	return videoDAO.create(video);
+//  }
+
     @POST
     @UnitOfWork
-    public Response addYTVideos(List<Video> videos) {
+    public Response createVideos(List<Video> videos) {
 	User user = userDAO.findById(1L).get();
 
 	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());

@@ -51,8 +51,10 @@ public class Video extends BasicVideo {
     }
 
     public void setDetail(VideoDetail detail) {
-        this.detail = detail;
-        detail.setVideo(this);
+	this.detail = detail;
+        if (detail != null) {
+            detail.setVideo(this);
+        }
     }
    
     @Column(name = "video_id", nullable = false)

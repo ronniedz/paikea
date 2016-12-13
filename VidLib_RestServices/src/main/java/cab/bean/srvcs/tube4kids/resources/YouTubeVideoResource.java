@@ -37,7 +37,7 @@ public class YouTubeVideoResource {
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
     public Response search(@Context UriInfo uriInfo) {
 	YouTubeResponse qwrap  = ytProxyClient.runSearchQuery(asMap(uriInfo.getQueryParameters()));
 //	List<MongoVideo> mvids = qwrap.getItems();
