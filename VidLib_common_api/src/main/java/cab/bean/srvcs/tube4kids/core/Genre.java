@@ -39,7 +39,7 @@ import org.hibernate.annotations.Cascade;
                 query = "SELECT p FROM Genre p"
         )
 })
-@EqualsAndHashCode(exclude = { "videoGenres", "videos", "created" })
+@EqualsAndHashCode(exclude = { "videoGenres", "created" })
 @Data
 public class Genre {
 

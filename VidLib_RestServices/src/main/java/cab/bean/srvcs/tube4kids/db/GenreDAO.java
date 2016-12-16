@@ -3,6 +3,7 @@ package cab.bean.srvcs.tube4kids.db;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import io.dropwizard.hibernate.AbstractDAO;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.util.List;
@@ -33,5 +34,14 @@ public class GenreDAO extends AbstractDAO<Genre> {
 
     public List<Genre> findAll() {
         return list(namedQuery("cab.bean.srvcs.tube4kids.core.Genre.findAll"));
+    }
+
+    public Genre update(Genre genre) {
+	Session session = currentSession();
+	Genre g = session.get(Genre.class, genre.getId());
+	if ( g != null ) {
+	    g = (Genre) session.merge(genre);
+	}
+	return g;
     }
 }
