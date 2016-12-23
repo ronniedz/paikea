@@ -3,6 +3,7 @@ package cab.bean.srvcs.tube4kids.resources;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 
+import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -21,16 +22,16 @@ import cab.bean.srvcs.tube4kids.db.GenreDAO;
 
 @Path("/genre")
 @Produces(MediaType.APPLICATION_JSON)
-public class GenreResource {
+public class GenreResource extends ResourceStandards {
 
 //    @Context
 //    private UriInfo uriInfo;
 
-    final UriBuilder uriBuilder = UriBuilder.fromResource(GenreResource.class);
 
     private final GenreDAO genreDAO;
 
     public GenreResource(GenreDAO genreDAO) {
+	super();
         this.genreDAO = genreDAO;
     }
 
@@ -39,20 +40,39 @@ public class GenreResource {
     @UnitOfWork
     public Response createGenre(Genre genre) {
 	
+	ResponseData dat = new ResourceStandards.ResponseData();
+	
 	Genre nuGenre = genreDAO.create(genre);
+
+	if (nuGenre != null ) { 
+	    dat.isSuccess = true;
+
+	    dat.setStatus(Response.Status.CREATED);
+	    if (isMinimalRequest()) {
+		dat.setEntity(nuGenre.getId());
+	    }
+	    else {
+		dat.setEntity(nuGenre);
+	    }
+	} else {
+	    dat.setErrorMessage("Genre " + Response.Status.NOT_FOUND.toString());
+	    dat.setStatus(Response.Status.NOT_FOUND);
+	}
 	
-	Response.Status status = (nuGenre == null)
-		? Response.Status.CREATED
-		:  Response.Status.NOT_ACCEPTABLE;
-	
-	return Response.seeOther(uriBuilder.build()).status(status).build(); // .entity(nuGenre)
+	return reply(dat);
     }
 
     /** Retrieve **/
     @GET
     @UnitOfWork
-    public List<Genre> listGenres() {
-        return genreDAO.findAll();
+    public Response listGenres() {
+	List<Genre> list = genreDAO.findAll();
+	ResponseData dat = new ResourceStandards.ResponseData();
+	if (list != null) {
+	    dat.isSuccess = true;
+	    dat.setEntity(list);
+	}
+	return reply(dat);
     }
 
     /** Update **/
@@ -60,26 +80,40 @@ public class GenreResource {
     @PATCH
     @UnitOfWork
     public Response updateGenre(@PathParam("id") Long id, Genre genreDat) {
-
 	genreDat.setId(id);
 	return updateGenre(genreDat);
-
     }
     
     /** Update **/
     @PATCH
     @UnitOfWork
     public Response updateGenre(Genre genreDat) {
-	Genre genre = null;
 	
-	ResponseBuilder rb = Response.seeOther(uriBuilder.path(genreDat.getId().toString()).build());
+	ResponseData dat = new ResourceStandards.ResponseData();
 	
-	if ( (genre = genreDAO.update(genreDat)) == null) {
-	    rb.status(Response.Status.NOT_FOUND);
+	Genre entity = genreDAO.update(genreDat);
+	
+	if ( (entity = genreDAO.update(genreDat)) == null) {
+	    
+	    dat.setEntity(genreDat);
+	    dat.setErrorMessage("Genre " + Response.Status.NOT_FOUND.toString());
+	    dat.setStatus(Response.Status.NOT_FOUND);
+	    
 	} else {
-	    rb.status(Response.Status.CREATED).entity(genre);
+	    dat.setLocation( uriBuilder.path(entity.getId().toString()).build() );
+	    dat.isSuccess = true;
+
+	    if ( isMinimalRequest()) {
+//		dat.setEntity(entity.getId());
+		dat.setStatus(Response.Status.NO_CONTENT);
+	    }
+	    else {
+		dat.setEntity(entity);
+		dat.setStatus(Response.Status.CREATED);
+	    }
 	}
-	return rb.build();
+
+	return super.reply(dat);
     }
     
     /** Delete **/
