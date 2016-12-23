@@ -67,59 +67,168 @@ public abstract class ResourceStandards {
 
     protected Map<String, Function<ResponseData, ResponseBuilder>> methodResponseFuncs = new HashMap<String, Function<ResponseData, ResponseBuilder>>();
 
-    protected Function<ResponseData, ResponseBuilder> verbGET = (respData) -> {
+    /**
+     * Default status response:<pre>
+     * 		Success:
+     * 			- 201 (CREATED) if an entity is set (via setEntity(object))
+     * 			- 204 (NO_CONTENT if response body is empty
+     * 		Error:
+     * 			- 404 (NOT_FOUND)
+     * </pre>
+     * @param
+     * 		respData
+     * @return
+     * 		a responseBuilder
+     */
+    protected ResponseBuilder doPOST(ResponseData respData) {
+	boolean isOk = respData.isSuccess;
+	ResponseBuilder rb = Response
+		.status(isOk
+			? respData.hasEntity() ? Response.Status.CREATED : Response.Status.NO_CONTENT
+			: Response.Status.NOT_FOUND);
+
+	if (isOk &&  ! respData.hasLocation()) {
+	    respData.location = uriBuilder.build().toString();
+	}
+	parseRespData( respData, rb);
+	return rb;
+    }
+
+    /**
+     * Default status response:<pre>
+     * 		Success:
+     * 			- 200 (OK)
+     * 		Error:
+     * 			- 404 (NOT_FOUND)
+     * </pre>
+     * @param
+     * 		respData
+     * @return
+     * 		a responseBuilder
+     */
+    protected ResponseBuilder doGET(ResponseData respData) {
 	ResponseBuilder rb = Response.status(
 		respData.isSuccess
             		?Response.Status.OK
-            		: Response.Status.BAD_REQUEST
+            		: Response.Status.NOT_FOUND
         );
 
 	parseRespData(respData, rb);
 	return rb;
-    };
+    }
 
-    protected Function<ResponseData, ResponseBuilder> verbPOST = (respData) -> {
-
-	boolean isOk = respData.isSuccess;
-	ResponseBuilder rb = Response
-		.status(isOk ? respData.hasEntity() ? Response.Status.CREATED
-			: Response.Status.NO_CONTENT
-			: Response.Status.BAD_REQUEST);
-
-	if (isOk &&  ! respData.hasLocation()) {
-	    respData.location = uriBuilder.build().toString();
-	}
-	parseRespData( respData, rb);
-	return rb;
-    };
-
-    protected Function<ResponseData, ResponseBuilder> verbPATCH = (respData) -> {
-	
-	boolean isOk = respData.isSuccess;
-	ResponseBuilder rb = Response
-		.status(isOk ? respData.hasEntity() ? Response.Status.CREATED
-			: Response.Status.NO_CONTENT
-			: Response.Status.BAD_REQUEST);
-	
-	if (isOk &&  ! respData.hasLocation()) {
-	    respData.location = uriBuilder.build().toString();
-	}
-	parseRespData( respData, rb);
-	return rb;
-    };
     
+    /**
+     * Default status response:<pre>
+     * 		Success:
+     * 			- 200 (OK) if an entity is set (via setEntity(object))
+     * 			- 204 (NO_CONTENT if response body is empty
+     * 		Error:
+     * 			- 404 (NOT_FOUND)
+     * </pre>
+     * @param
+     * 		respData
+     * @return
+     * 		a responseBuilder
+     */
+    protected ResponseBuilder doPUT(ResponseData respData) {
+	boolean isOk = respData.isSuccess;
+	ResponseBuilder rb = Response
+		.status(isOk
+			? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
+			: Response.Status.NOT_FOUND);
+
+	if (isOk &&  ! respData.hasLocation()) {
+	    respData.location = uriBuilder.build().toString();
+	}
+	parseRespData( respData, rb);
+	return rb;
+    }
+
+    /**
+     * Default status response:<pre>
+     * 		Success:
+     * 			- 200 (OK) if an entity is set (via setEntity(object))
+     * 			- 204 (NO_CONTENT if response body is empty
+     * 
+     * 		Error:
+     * 			- 400 (NOT_FOUND)
+     * </pre>
+     * @param
+     * 		respData
+     * @return
+     * 		a responseBuilder
+     */
+    protected ResponseBuilder doPATCH(ResponseData respData) {
+	
+	boolean isOk = respData.isSuccess;
+	ResponseBuilder rb = Response
+		.status(isOk
+			? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
+			: Response.Status.NOT_FOUND);
+	
+	if (isOk &&  ! respData.hasLocation()) {
+	    respData.location = uriBuilder.build().toString();
+	}
+	parseRespData( respData, rb);
+	return rb;
+    }
+
+    /**
+     * Default status response:<pre>
+     * 		Success:
+     * 			- 200 (OK)
+     * 		Error:
+     * 			- 404 (NOT_FOUND)
+     * </pre>
+     * @param
+     * 		respData
+     * @return
+     * 		a responseBuilder
+     */
+    protected ResponseBuilder doDELETE(ResponseData respData) {
+	ResponseBuilder rb = Response.status(
+		respData.isSuccess
+            		?Response.Status.OK
+            		: Response.Status.NOT_FOUND
+        );
+
+	parseRespData(respData, rb);
+	return rb;
+    }
+
     protected ResourceStandards() {
 	this.uriBuilder = UriBuilder.fromResource(this.getClass());
-	methodResponseFuncs.put("GET", verbGET);
-	methodResponseFuncs.put("POST", verbPOST);
-	methodResponseFuncs.put("PATCH", verbPATCH);
     }
 
     public Response reply(ResponseData dat) {
+	ResponseBuilder r =null;
+	//methodResponseFuncs.get(method).apply(dat);
 
-	String method = request.getMethod();
+	String method = request.getMethod().toUpperCase();
 
-	ResponseBuilder r = methodResponseFuncs.get(method).apply(dat);
+	switch(method) {
+        		case "POST" : {
+        		    r = doPOST(dat);
+        		}
+        		break;
+        		case "GET" : {
+        		    r = doGET(dat);
+        		}
+        		break;
+        		case "PUT" : {
+        		    r = doPUT(dat);
+        		}
+        		break;
+        		case "PATCH" : {
+        		    r = doPATCH(dat);
+        		}
+        		break;
+        		case "DELETE" : {
+        		    r = doDELETE(dat);
+        		}
+        		break;
+	}
 	return r.build();
     }
 
