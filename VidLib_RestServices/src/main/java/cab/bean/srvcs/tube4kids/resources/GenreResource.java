@@ -19,14 +19,11 @@ import javax.ws.rs.core.UriBuilder;
 
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
+import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 
 @Path("/genre")
 @Produces(MediaType.APPLICATION_JSON)
-public class GenreResource extends ResourceStandards {
-
-//    @Context
-//    private UriInfo uriInfo;
-
+public class GenreResource extends BaseResource {
 
     private final GenreDAO genreDAO;
 
@@ -39,26 +36,13 @@ public class GenreResource extends ResourceStandards {
     @POST
     @UnitOfWork
     public Response createGenre(Genre genre) {
-	
-	ResponseData dat = new ResourceStandards.ResponseData();
-	
-	Genre nuGenre = genreDAO.create(genre);
+	Object o = genreDAO.create(genre, isMinimalRequest());
 
-	if (nuGenre != null ) { 
-	    dat.isSuccess = true;
+	boolean respBody =  (o != null);
+	ResponseData dat = new ResponseData()
+		.setSuccess(respBody)
+		.setEntity(o);
 
-	    dat.setStatus(Response.Status.CREATED);
-	    if (isMinimalRequest()) {
-		dat.setEntity(nuGenre.getId());
-	    }
-	    else {
-		dat.setEntity(nuGenre);
-	    }
-	} else {
-	    dat.setErrorMessage("Genre " + Response.Status.NOT_FOUND.toString());
-	    dat.setStatus(Response.Status.NOT_FOUND);
-	}
-	
 	return reply(dat);
     }
 
@@ -67,14 +51,9 @@ public class GenreResource extends ResourceStandards {
     @UnitOfWork
     public Response listGenres() {
 	List<Genre> list = genreDAO.findAll();
-	ResponseData dat = new ResourceStandards.ResponseData();
-	if (list != null) {
-	    dat.isSuccess = true;
-	    dat.setEntity(list);
-	}
-	return reply(dat);
+	return reply(new ResponseData(list).setSuccess(list != null));
     }
-
+    
     /** Update **/
     @Path("/{id: [0-9]+}")
     @PATCH
@@ -87,33 +66,20 @@ public class GenreResource extends ResourceStandards {
     /** Update **/
     @PATCH
     @UnitOfWork
-    public Response updateGenre(Genre genreDat) {
-	
-	ResponseData dat = new ResourceStandards.ResponseData();
-	
-	Genre entity = genreDAO.update(genreDat);
-	
-	if ( (entity = genreDAO.update(genreDat)) == null) {
-	    
-	    dat.setEntity(genreDat);
-	    dat.setErrorMessage("Genre " + Response.Status.NOT_FOUND.toString());
-	    dat.setStatus(Response.Status.NOT_FOUND);
-	    
-	} else {
-	    dat.setLocation( uriBuilder.path(entity.getId().toString()).build() );
-	    dat.isSuccess = true;
+    public Response updateGenre(Genre objectData) {
 
-	    if ( isMinimalRequest()) {
-//		dat.setEntity(entity.getId());
-		dat.setStatus(Response.Status.NO_CONTENT);
-	    }
-	    else {
-		dat.setEntity(entity);
-		dat.setStatus(Response.Status.CREATED);
-	    }
+	Genre o = genreDAO.update(objectData);
+	
+	boolean respBody =  (o != null);
+	ResponseData dat = new ResponseData()
+		.setSuccess(respBody)
+		.setEntity( respBody ? isMinimalRequest() ? o.getId() : o : null);
+	
+	if ( o != null) {
+	    dat.setLocation( uriBuilder.path(o.getId().toString()).build() );
 	}
 
-	return super.reply(dat);
+	return reply(dat);
     }
     
     /** Delete **/
@@ -121,12 +87,31 @@ public class GenreResource extends ResourceStandards {
     @DELETE
     @UnitOfWork
     public Response deleteGenre(@PathParam("id") Long id) {
-
-	Response.Status stat = genreDAO.delete(id)
-		? Response.Status.NO_CONTENT
-		:  Response.Status.NOT_FOUND;
 	
-	return Response.seeOther(uriBuilder.build()).status(stat).build();
+	Genre g = genreDAO.delete(id);
+
+	ResponseData dat = new ResponseData().setSuccess(g != null);
+
+	if (! isMinimalRequest()) {
+		dat.setEntity(g);
+	}
+	return reply(dat);
+    }
+    
+    /** Delete **/
+    @Path("/{id: [0-9]+}")
+    @GET
+    @UnitOfWork
+    public Response viewGenre(@PathParam("id") Long id) {
+	
+	Genre g = genreDAO.retrieve(id);
+	
+	ResponseData dat = new ResponseData().setSuccess(g != null);
+	
+	if (! isMinimalRequest()) {
+	    dat.setEntity(g);
+	}
+	return reply(dat);
     }
 
 }

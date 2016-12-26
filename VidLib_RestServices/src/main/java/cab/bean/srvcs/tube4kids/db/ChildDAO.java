@@ -19,17 +19,15 @@ public class ChildDAO extends AbstractDAO<Child> {
     }
 
     public Long quickCreate(Child child) {
-	return (Long) super.currentSession().save(child);
+	return (Long) currentSession().save(child);
     }
     
-    public Boolean delete(Long id) {
-	Boolean rep = Boolean.FALSE;
+    public Child delete(Long id) {
 	Child o = get(id);
 	if ( o != null ) {
 	    currentSession().delete(o);
-	    rep = Boolean.TRUE;
 	}
-	return rep;
+	return o;
     }
 
     public List<Child> findAll() {
@@ -38,5 +36,9 @@ public class ChildDAO extends AbstractDAO<Child> {
 
     public Optional<Child> findById(Long id) {
 	return Optional.ofNullable(get(id));
+    }
+
+    public Object create(Child aChild,  boolean identOnly) {
+	return identOnly ? currentSession().save(aChild) : this.create(aChild);
     }
 }

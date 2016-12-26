@@ -1,23 +1,11 @@
 package cab.bean.srvcs.tube4kids.resources;
 
-import io.dropwizard.hibernate.UnitOfWork;
-import io.dropwizard.jersey.PATCH;
-
 import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Function;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
@@ -60,12 +48,16 @@ public abstract class ResourceStandards {
     @Context
     protected javax.ws.rs.core.Request request;
 
+
     @Context
     protected javax.ws.rs.core.HttpHeaders headers;
     
     protected UriBuilder uriBuilder;
 
-    protected Map<String, Function<ResponseData, ResponseBuilder>> methodResponseFuncs = new HashMap<String, Function<ResponseData, ResponseBuilder>>();
+    
+    protected ResourceStandards() {
+	this.uriBuilder = UriBuilder.fromResource(this.getClass());
+    }
 
     /**
      * Default status response:<pre>
@@ -73,7 +65,7 @@ public abstract class ResourceStandards {
      * 			- 201 (CREATED) if an entity is set (via setEntity(object))
      * 			- 204 (NO_CONTENT if response body is empty
      * 		Error:
-     * 			- 404 (NOT_FOUND)
+     * 			- 400 (BAD_REQUEST), This is a deviation from the "norm" which prescribes a 404 error. However, 404 is unlikely in a POST.
      * </pre>
      * @param
      * 		respData
@@ -81,15 +73,17 @@ public abstract class ResourceStandards {
      * 		a responseBuilder
      */
     protected ResponseBuilder doPOST(ResponseData respData) {
-	boolean isOk = respData.isSuccess;
+	boolean isOk = respData.success;
 	ResponseBuilder rb = Response
 		.status(isOk
 			? respData.hasEntity() ? Response.Status.CREATED : Response.Status.NO_CONTENT
-			: Response.Status.NOT_FOUND);
+			: Response.Status.BAD_REQUEST);
 
-	if (isOk &&  ! respData.hasLocation()) {
-	    respData.location = uriBuilder.build().toString();
+	if (respData.success &&  ! respData.hasLocation()) {
+	    rb.header("Location", uriBuilder.build().toString());
 	}
+
+
 	parseRespData( respData, rb);
 	return rb;
     }
@@ -108,16 +102,19 @@ public abstract class ResourceStandards {
      */
     protected ResponseBuilder doGET(ResponseData respData) {
 	ResponseBuilder rb = Response.status(
-		respData.isSuccess
+		respData.success
             		?Response.Status.OK
             		: Response.Status.NOT_FOUND
         );
+
+	if (! respData.success) {
+	    rb.header("Location", respData.location);
+	}
 
 	parseRespData(respData, rb);
 	return rb;
     }
 
-    
     /**
      * Default status response:<pre>
      * 		Success:
@@ -132,15 +129,15 @@ public abstract class ResourceStandards {
      * 		a responseBuilder
      */
     protected ResponseBuilder doPUT(ResponseData respData) {
-	boolean isOk = respData.isSuccess;
 	ResponseBuilder rb = Response
-		.status(isOk
+		.status(respData.success
 			? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
 			: Response.Status.NOT_FOUND);
-
-	if (isOk &&  ! respData.hasLocation()) {
-	    respData.location = uriBuilder.build().toString();
+	
+	if (! respData.success) {
+	    rb.header("Location", respData.location);
 	}
+
 	parseRespData( respData, rb);
 	return rb;
     }
@@ -161,23 +158,23 @@ public abstract class ResourceStandards {
      */
     protected ResponseBuilder doPATCH(ResponseData respData) {
 	
-	boolean isOk = respData.isSuccess;
 	ResponseBuilder rb = Response
-		.status(isOk
+		.status(respData.success
 			? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
 			: Response.Status.NOT_FOUND);
 	
-	if (isOk &&  ! respData.hasLocation()) {
-	    respData.location = uriBuilder.build().toString();
+	if (! respData.success) {
+	    rb.header("Location", uriBuilder.build().toString());
 	}
-	parseRespData( respData, rb);
+
+	parseRespData( respData,  rb);
 	return rb;
     }
 
     /**
      * Default status response:<pre>
      * 		Success:
-     * 			- 200 (OK)
+     * 			- 204 (NO_CONTENT)
      * 		Error:
      * 			- 404 (NOT_FOUND)
      * </pre>
@@ -188,26 +185,22 @@ public abstract class ResourceStandards {
      */
     protected ResponseBuilder doDELETE(ResponseData respData) {
 	ResponseBuilder rb = Response.status(
-		respData.isSuccess
-            		?Response.Status.OK
-            		: Response.Status.NOT_FOUND
+		respData.success
+            		? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
+            		:  Response.Status.NOT_FOUND
         );
-
-	parseRespData(respData, rb);
+	
+	rb.header("Location", uriBuilder.build());
+	parseRespData( respData, rb);
 	return rb;
     }
-
-    protected ResourceStandards() {
-	this.uriBuilder = UriBuilder.fromResource(this.getClass());
-    }
-
+    
     public Response reply(ResponseData dat) {
 	ResponseBuilder r =null;
 	//methodResponseFuncs.get(method).apply(dat);
+	    String instanceMethod = request.getMethod().toUpperCase();
 
-	String method = request.getMethod().toUpperCase();
-
-	switch(method) {
+	switch(instanceMethod) {
         		case "POST" : {
         		    r = doPOST(dat);
         		}
@@ -237,13 +230,15 @@ public abstract class ResourceStandards {
 	    ResponseBuilder rb) {
 
 	if (respData.hasStatus()) {
-	    rb.entity(respData.status);
+	    rb.status(respData.status);
 	}
+	
 	if (respData.hasEntity()) {
 	    rb.entity(respData.entity);
 	} else if (respData.hasErrorMessage()) {
 	    rb.entity(respData.errorMessage);
 	}
+	
 	if (respData.hasLocation()) {
 	    rb.header("Location", respData.location);
 	}
@@ -262,21 +257,32 @@ public abstract class ResourceStandards {
 
     class ResponseData {
 
-	boolean isSuccess = false;
+	boolean success = false;
 	String errorMessage = null;
 	String location = null;
 	Object entity = null;
 	Response.Status status = null;
 
-	ResponseData() {
-	}
-
-	ResponseData(Object entity, String location, Response.Status status, String errorMessage) {
+	public ResponseData() {}
+	
+	public ResponseData(Object entity) {
 	    this();
 	    this.entity = entity;
-	    this.errorMessage = errorMessage;
-	    this.status = status;
+	}
+
+	public ResponseData(Object entity, String location) {
+	    this(entity);
 	    this.location = location;
+	}
+	
+	public ResponseData(Object entity, String location, Response.Status status) {
+	    this(entity, location);
+	    this.entity = status;
+	}
+	
+	public ResponseData(Object entity, String location, Response.Status status, String errorMessage) {
+	    this(entity, location, status);
+	    this.errorMessage = errorMessage;
 	}
 
 	public ResponseData(Object entity, URI location, Response.Status status, String errorMessage) {
@@ -299,26 +305,35 @@ public abstract class ResourceStandards {
 	    return StringUtils.isNotEmpty(location);
 	}
 
-	public void setErrorMessage(String errorMessage) {
-	    this.errorMessage = errorMessage;
-	}
-
-	public void setLocation(String location) {
-	    this.location = location;
+	public ResponseData setSuccess(boolean flag) {
+	    this.success = flag;
+	    return this;
 	}
 	
-	public void setLocation(URI location) {
+	public ResponseData setErrorMessage(String errorMessage) {
+	    this.errorMessage = errorMessage;
+	    return this;
+	}
+
+	public ResponseData setLocation(String location) {
+	    this.location = location;
+	    return this;
+	}
+	
+	public ResponseData setLocation(URI location) {
 	    this.location = location.toString();
+	    return this;
 	}
 
-	public void setEntity(Object entity) {
+	public ResponseData setEntity(Object entity) {
 	    this.entity = entity;
+	    return this;
 	}
 
-	public void setStatus(Response.Status status) {
+	public ResponseData setStatus(Response.Status status) {
 	    this.status = status;
+	    return this;
 	}
-
-
     }
+
 }

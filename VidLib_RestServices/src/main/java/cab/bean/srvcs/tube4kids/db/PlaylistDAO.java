@@ -5,6 +5,7 @@ import io.dropwizard.hibernate.AbstractDAO;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import cab.bean.srvcs.tube4kids.core.Playlist;
@@ -23,14 +24,12 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
         return persist(playlist);
     }
     
-    public Boolean delete(Long id) {
-    	Boolean rep = Boolean.FALSE;
+    public Playlist delete(Long id) {
     	Playlist o = get(id);
     	if ( o != null ) {
     	    currentSession().delete(o);
-    	    rep = Boolean.TRUE;
     	}
-    	return rep;
+    	return o;
     }
 
     public List<Playlist> findAll() {
@@ -41,6 +40,20 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
         return list(
         		namedQuery("cab.bean.srvcs.tube4kids.core.Playlist.findUserLists").setParameter("userId", userId)
         	);
+    }
+
+    
+    public Playlist retrieve(Long id) {
+	return get(id);
+    }
+
+    public Playlist update(Playlist objectData) {
+	Session session = currentSession();
+	Playlist o = get(objectData.getId());
+	if ( o != null ) {
+	    o = (Playlist) session.merge(objectData);
+	}
+	return o;
     }
 
 }

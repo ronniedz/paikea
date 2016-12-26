@@ -10,6 +10,7 @@ import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
+import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 import cab.bean.srvcs.tube4kids.utils.StringTool;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
@@ -31,7 +32,6 @@ import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.helpers.collection.Iterators;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 @Path("/video")
 @Produces(MediaType.APPLICATION_JSON)
-public class VideoResource {
+public class VideoResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoResource.class);
 
     private final VideoDAO videoDAO;
@@ -68,8 +68,9 @@ public class VideoResource {
 
     @GET
     @UnitOfWork
-    public List<Video> listVideos() {
-	return videoDAO.findAll();
+    public Response listVideos() {
+	Object vList = videoDAO.findAll();
+	return reply(new ResponseData(vList).setSuccess(vList != null));
     }
 
     private Map<String, Object> unwrap(Record r, String unkey) {
@@ -103,9 +104,11 @@ public class VideoResource {
     @Path("/{vid}")
     @GET
     @UnitOfWork
-    public Optional<Video> viewVideo(@PathParam("vid") String vid) {
-	return videoDAO.findById(vid);
+    public Response viewVideo(@PathParam("vid") String vid) {
+	Video v = videoDAO.findById(vid).orElse(null);
+	return reply(new ResponseData(v).setSuccess(v != null));
     }
+
 //    
 //    @Path("/{vid}")
 //    @PATCH
@@ -144,31 +147,37 @@ public class VideoResource {
     @Path("/{vid}")
     @PATCH
     @UnitOfWork
-    public Response genreize(@PathParam("vid") String vid, Long[] genreIds) {
-	User user = userDAO.findById(1L).get();
-	Video video = videoDAO.findById(vid).get();
-	VideoGenre vg = new VideoGenre(video, user, genreIds[0], genreIds[1]);
-	video.getVideoGenres().add(vg);
+    public Response addGenre(@PathParam("vid") String vid, Long[] genreIds) {
 	
-	videoDAO.create(video);
+	User user = userDAO.findById(1L).get();
+	ResponseData dat = new ResponseData();
 
-	URI location = UriBuilder.fromUri("/video/" +  vid ).build();
-	return Response
-		.status(Response.Status.CREATED)
-		.header("Location", location)
-		.entity(ImmutableMap.<String, Object> builder()
-			.put("uri", location)
-			.build()
-		)
-	.build();
+	try {
+	    Video video = videoDAO.findById(vid).orElse(null);
+
+	    if (video == null) {
+		dat.setStatus(Response.Status.PRECONDITION_FAILED);
+	    } else {
+		dat.setSuccess(true);
+		VideoGenre vg = new VideoGenre(video, user, genreIds[0], genreIds[1]);
+		video.getVideoGenres().add(vg);
+		Object o = videoDAO.create(video, isMinimalRequest());
+		dat.setEntity(o); // This is a saveOrUpdate() call
+	    }
+	} catch (Exception nsee) {
+	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST)
+		    .setErrorMessage(nsee.getMessage()); // TODO make safe
+	}
+	return reply(dat);
     }
-    
+
     @Path("/{id}")
     @DELETE
     @UnitOfWork
     public Response deleteVideo(@PathParam("id") String id) {
-    	videoDAO.delete(id);
-	return Response.status(Response.Status.NO_CONTENT).build();
+	ResponseData dat = new ResponseData();
+	Video video = videoDAO.delete(id);
+	return reply(dat.setSuccess(video != null).setEntity(isMinimalRequest() ? null : video));
     }
 
 //  
@@ -210,16 +219,17 @@ public class VideoResource {
 //	    neo4jGraphDAO.insert(video);
 	}
 	
-	
-	URI location = UriBuilder.fromUri("/video").build();
-	return Response
-		.status(Response.Status.CREATED)
-		.header("Location", location)
-		.entity(ImmutableMap.<String, Object> builder()
-			.put("id", ids)
-			.put("uri", location)
-			.build()
-		).build();
+	ResponseData dat = new ResponseData(ids).setSuccess(true);
+	return reply(dat);
+//	URI location = UriBuilder.fromUri("/video").build();
+//	return Response
+//		.status(Response.Status.CREATED)
+//		.header("Location", location)
+//		.entity(ImmutableMap.<String, Object> builder()
+//			.put("id", ids)
+//			.put("uri", location)
+//			.build()
+//		).build();
     }
     
 

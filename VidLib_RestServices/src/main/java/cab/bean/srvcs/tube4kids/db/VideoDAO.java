@@ -24,14 +24,12 @@ public class VideoDAO extends AbstractDAO<Video> {
         return persist(video);
     }
     
-    public Boolean delete(String id) {
-	Boolean rep = Boolean.FALSE;
+    public Video delete(String id) {
 	Video o = get(id);
 	if ( o != null ) {
 	    currentSession().delete(o);
-	    rep = Boolean.TRUE;
 	}
-	return rep;
+	return o;
     }
 
     public List<Video> findAll() {
@@ -40,6 +38,11 @@ public class VideoDAO extends AbstractDAO<Video> {
 
     public String addVideoYTVideo(Video video) {
 	return (String) super.currentSession().save(video);
+    }
+
+    public Object create(Video video, boolean identOnly) {
+	// TODO Auto-generated method stub
+	return identOnly ? create(video) : currentSession().save(video);
     }
 
 }
