@@ -43,7 +43,7 @@ public class GenreResource extends BaseResource {
 		.setSuccess(respBody)
 		.setEntity(o);
 
-	return reply(dat);
+        return doPOST(dat).build();
     }
 
     /** Retrieve **/
@@ -51,7 +51,7 @@ public class GenreResource extends BaseResource {
     @UnitOfWork
     public Response listGenres() {
 	List<Genre> list = genreDAO.findAll();
-	return reply(new ResponseData(list).setSuccess(list != null));
+	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }
     
     /** Update **/
@@ -79,7 +79,7 @@ public class GenreResource extends BaseResource {
 	    dat.setLocation( uriBuilder.path(o.getId().toString()).build() );
 	}
 
-	return reply(dat);
+        return doPATCH(dat).build();
     }
     
     /** Delete **/
@@ -95,7 +95,7 @@ public class GenreResource extends BaseResource {
 	if (! isMinimalRequest()) {
 		dat.setEntity(g);
 	}
-	return reply(dat);
+        return doDELETE(dat).build();
     }
     
     /** Delete **/
@@ -111,7 +111,7 @@ public class GenreResource extends BaseResource {
 	if (! isMinimalRequest()) {
 	    dat.setEntity(g);
 	}
-	return reply(dat);
+        return doGET(dat).build();
     }
 
 }

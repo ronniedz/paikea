@@ -70,7 +70,7 @@ public class VideoResource extends BaseResource {
     @UnitOfWork
     public Response listVideos() {
 	Object vList = videoDAO.findAll();
-	return reply(new ResponseData(vList).setSuccess(vList != null));
+	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
     }
 
     private Map<String, Object> unwrap(Record r, String unkey) {
@@ -106,7 +106,7 @@ public class VideoResource extends BaseResource {
     @UnitOfWork
     public Response viewVideo(@PathParam("vid") String vid) {
 	Video v = videoDAO.findById(vid).orElse(null);
-	return reply(new ResponseData(v).setSuccess(v != null));
+	return doGET(new ResponseData(v).setSuccess(v != null)).build();
     }
 
 //    
@@ -158,17 +158,20 @@ public class VideoResource extends BaseResource {
 	    if (video == null) {
 		dat.setStatus(Response.Status.PRECONDITION_FAILED);
 	    } else {
-		dat.setSuccess(true);
 		VideoGenre vg = new VideoGenre(video, user, genreIds[0], genreIds[1]);
 		video.getVideoGenres().add(vg);
-		Object o = videoDAO.create(video, isMinimalRequest());
-		dat.setEntity(o); // This is a saveOrUpdate() call
+		boolean isMini = isMinimalRequest();
+		Object o = videoDAO.create(video, isMini); // This is a saveOrUpdate() call
+		
+		dat
+		 .setSuccess(true)
+		 .setEntity(o); 
 	    }
 	} catch (Exception nsee) {
 	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST)
 		    .setErrorMessage(nsee.getMessage()); // TODO make safe
 	}
-	return reply(dat);
+        return doPATCH(dat).build();
     }
 
     @Path("/{id}")
@@ -177,7 +180,7 @@ public class VideoResource extends BaseResource {
     public Response deleteVideo(@PathParam("id") String id) {
 	ResponseData dat = new ResponseData();
 	Video video = videoDAO.delete(id);
-	return reply(dat.setSuccess(video != null).setEntity(isMinimalRequest() ? null : video));
+	return doDELETE(dat.setSuccess(video != null).setEntity(isMinimalRequest() ? null : video)).build();
     }
 
 //  
@@ -190,19 +193,12 @@ public class VideoResource extends BaseResource {
     @POST
     @UnitOfWork
     public Response createVideos(List<Video> videos) {
+
 	User user = userDAO.findById(1L).get();
 
 	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());
-	
 	Map<String, String> paramMap = ImmutableMap.of("part", "contentDetails,snippet", "id" ,vids);
-	
-	System.out.println("VIDDSSS: "  + paramMap);
-	
 	YouTubeVideoDetailResponse detailResp = ytProxyClient.runVideoDetail(paramMap);
-
-	System.out.println("detailResp: "  + detailResp.getItems());
-
-	
 	List<String>ids = new ArrayList<String>();
 	
 	for (int syncedIndex = 0; syncedIndex <  videos.size(); syncedIndex++ ) {
@@ -220,7 +216,7 @@ public class VideoResource extends BaseResource {
 	}
 	
 	ResponseData dat = new ResponseData(ids).setSuccess(true);
-	return reply(dat);
+        return doPOST(dat).build();
 //	URI location = UriBuilder.fromUri("/video").build();
 //	return Response
 //		.status(Response.Status.CREATED)

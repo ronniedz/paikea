@@ -42,7 +42,7 @@ public class VideoDAO extends AbstractDAO<Video> {
 
     public Object create(Video video, boolean identOnly) {
 	// TODO Auto-generated method stub
-	return identOnly ? create(video) : currentSession().save(video);
+	return identOnly ? currentSession().save(video) : persist(video);
     }
 
 }

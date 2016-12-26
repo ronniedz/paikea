@@ -195,7 +195,7 @@ public abstract class ResourceStandards {
 	return rb;
     }
     
-    public Response reply(ResponseData dat) {
+    public ResponseBuilder reply(ResponseData dat) {
 	ResponseBuilder r =null;
 	//methodResponseFuncs.get(method).apply(dat);
 	    String instanceMethod = request.getMethod().toUpperCase();
@@ -222,7 +222,7 @@ public abstract class ResourceStandards {
         		}
         		break;
 	}
-	return r.build();
+	return r;
     }
 
 
@@ -326,7 +326,9 @@ public abstract class ResourceStandards {
 	}
 
 	public ResponseData setEntity(Object entity) {
-	    this.entity = entity;
+	    
+	    // Jersey-Jackson oversight of String in JSON fix.
+	    this.entity = (entity != null && String.class.equals(entity.getClass())) ? "\"" + entity + "\"" : entity;
 	    return this;
 	}
 

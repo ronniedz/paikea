@@ -65,7 +65,7 @@ public class ChildResource extends BaseResource {
         	.setSuccess(outp != null)
         	.setEntity(outp);
     
-        return reply(dat);
+        return doPOST(dat).build();
     }
     
     @Path("/{cid}")
@@ -79,7 +79,7 @@ public class ChildResource extends BaseResource {
 	.setSuccess(child != null)
 	.setEntity(child);
 
-        return reply(dat);
+        return doGET(dat).build();
     }
     
     
@@ -96,12 +96,12 @@ public class ChildResource extends BaseResource {
 		dat.setSuccess(false).setStatus(Response.Status.PRECONDITION_FAILED);
 	    } else {
 		child.getPlaylists().add(pl);
-		dat.setEntity(childDAO.create(child, isMinimalRequest())); // Update the Child
+		dat.setSuccess(true).setEntity(childDAO.create(child, isMinimalRequest())); // Update the Child
 	    }
 	} catch (Exception nsee) {
 	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST);
 	}
-	return reply(dat);
+        return doPATCH(dat).build();
     }
     
     @Path("/{id}")
@@ -113,7 +113,7 @@ public class ChildResource extends BaseResource {
 	if (! isMinimalRequest()) {
 		dat.setEntity(child);
 	}
-	return reply(dat);
+        return doDELETE(dat).build();
     }
     
 //    @POST
@@ -126,7 +126,7 @@ public class ChildResource extends BaseResource {
     @UnitOfWork
     public Response listChildren() {
         List<Child> list = childDAO.findAll();
-	return reply(new ResponseData(list).setSuccess(list != null));
+	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }
 
 }

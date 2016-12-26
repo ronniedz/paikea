@@ -55,14 +55,14 @@ public class PlaylistResource extends BaseResource {
 	ResponseData dat = new ResponseData()
 		.setSuccess(respBody)
 		.setEntity( respBody ? isMinimalRequest() ? p.getId() : p : null);
-	return reply(dat);
+        return doPOST(dat).build();
     }
 
     @GET
     @UnitOfWork
     public Response listPlaylists() {
 	 List<Playlist> list = playlistDAO.findAll();
-	return reply(new ResponseData(list).setSuccess(list != null));
+	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }
 
 
@@ -80,9 +80,9 @@ public class PlaylistResource extends BaseResource {
     @GET
     @UnitOfWork
     public Response listUserPlaylists(@PathParam("userId") LongParam userId) {
-	return reply(
+	return doGET(
 		new ResponseData( playlistDAO.findUserLists(userId.get())).setSuccess(true)
-	);
+	).build();
     }
 
 //    @Path("/pid: [0-9]+}")
@@ -107,7 +107,7 @@ public class PlaylistResource extends BaseResource {
 	    dat.setLocation( uriBuilder.path(o.getId().toString()).build() );
 	}
 
-	return reply(dat);
+        return doPATCH(dat).build();
     }
     
 
@@ -115,14 +115,13 @@ public class PlaylistResource extends BaseResource {
     @PATCH
     @UnitOfWork
     public Response addVideos(@PathParam("pidVal") Long pidVal, Set<String> videoIds) {
-	ResponseData dat = new ResponseData();
+	ResponseData dat = new ResponseData().setSuccess(false);
 
 	try {
             Playlist p = playlistDAO.findById(pidVal).orElse(null);
             
             if ( p == null ) {
-                dat.setSuccess(false)
-                .setStatus(Response.Status.PRECONDITION_FAILED);
+                dat .setStatus(Response.Status.PRECONDITION_FAILED);
             }
             else {
                 	Set<Video> videos = p.getVideos(); 
@@ -131,19 +130,18 @@ public class PlaylistResource extends BaseResource {
                     	for (String vid : videoIds ) {
                     	    videos.add(videoDAO.findById(vid).get());
                     	}
-                    	dat.setEntity(playlistDAO.create(p));
+                    	dat.setSuccess(true).setEntity(playlistDAO.create(p));
                 	}
                 	catch (java.util.NoSuchElementException nsee) {
-                	    dat.setSuccess(false).setStatus(Response.Status.PRECONDITION_FAILED)
+                	    dat
+                	    .setStatus(Response.Status.PRECONDITION_FAILED)
                 	    .setErrorMessage("Video not in library");
                 	}
             }
 	} catch (Exception nsee) {
-	    dat
-	    .setSuccess(false)
-	    .setStatus(Response.Status.BAD_REQUEST);
+	    dat.setStatus(Response.Status.BAD_REQUEST);
 	}
-	return reply(dat);
+        return doPATCH(dat).build();
     }
 
     @Path("/{id}")
@@ -158,7 +156,7 @@ public class PlaylistResource extends BaseResource {
 		.setSuccess(found)
 		.setEntity (found ? ( isMinimalRequest() ? o.getId() : o ) : null);
 
-	return reply(dat);
+        return doDELETE(dat).build();
     }
 
 }
