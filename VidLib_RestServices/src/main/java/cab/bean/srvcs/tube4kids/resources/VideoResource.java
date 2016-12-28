@@ -156,7 +156,7 @@ public class VideoResource extends BaseResource {
 	    Video video = videoDAO.findById(vid).orElse(null);
 
 	    if (video == null) {
-		dat.setStatus(Response.Status.PRECONDITION_FAILED);
+		dat.setStatus(Response.Status.NOT_FOUND);
 	    } else {
 		VideoGenre vg = new VideoGenre(video, user, genreIds[0], genreIds[1]);
 		video.getVideoGenres().add(vg);

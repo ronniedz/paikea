@@ -93,10 +93,11 @@ public class ChildResource extends BaseResource {
 	    Playlist pl = playlistDAO.findById(pid).orElse(null);
 	    
 	    if (pl == null || child == null) {
-		dat.setSuccess(false).setStatus(Response.Status.PRECONDITION_FAILED);
+		dat.setSuccess(false).setStatus(Response.Status.NOT_FOUND);
 	    } else {
 		child.getPlaylists().add(pl);
-		dat.setSuccess(true).setEntity(childDAO.create(child, isMinimalRequest())); // Update the Child
+		child = childDAO.create(child); // Update the Child
+		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? null : child.getPlaylists());
 	    }
 	} catch (Exception nsee) {
 	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST);
@@ -110,9 +111,7 @@ public class ChildResource extends BaseResource {
     public Response deleteChild(@PathParam("id") Long id) {
 	Child child = childDAO.delete(id);
 	ResponseData dat = new ResponseData().setSuccess(child != null);
-	if (! isMinimalRequest()) {
-		dat.setEntity(child);
-	}
+	dat.setEntity(isMinimalRequest() ? null : child);
         return doDELETE(dat).build();
     }
     

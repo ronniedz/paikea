@@ -98,13 +98,12 @@ public class PlaylistResource extends BaseResource {
 	
 	Playlist o = playlistDAO.update(objectData);
 	
-	boolean respBody =  (o != null);
 	ResponseData dat = new ResponseData()
-		.setSuccess(respBody)
-		.setEntity( respBody ? isMinimalRequest() ? o.getId() : o : null);
+		.setSuccess(o != null)
+		.setEntity(isMinimalRequest() ? null : o );
 	
 	if ( o != null) {
-	    dat.setLocation( uriBuilder.path(o.getId().toString()).build() );
+	    dat.setLocation( UriBuilder.fromResource(this.getClass()).path(o.getId().toString()).build() );
 	}
 
         return doPATCH(dat).build();
@@ -121,7 +120,7 @@ public class PlaylistResource extends BaseResource {
             Playlist p = playlistDAO.findById(pidVal).orElse(null);
             
             if ( p == null ) {
-                dat .setStatus(Response.Status.PRECONDITION_FAILED);
+                dat .setStatus(Response.Status.NOT_FOUND);
             }
             else {
                 	Set<Video> videos = p.getVideos(); 
@@ -130,11 +129,12 @@ public class PlaylistResource extends BaseResource {
                     	for (String vid : videoIds ) {
                     	    videos.add(videoDAO.findById(vid).get());
                     	}
-                    	dat.setSuccess(true).setEntity(playlistDAO.create(p));
+                    	p = playlistDAO.create(p);
+                    	dat.setSuccess(p != null).setEntity(isMinimalRequest() ? null : p);
                 	}
                 	catch (java.util.NoSuchElementException nsee) {
                 	    dat
-                	    .setStatus(Response.Status.PRECONDITION_FAILED)
+                	    .setStatus(Response.Status.NOT_FOUND)
                 	    .setErrorMessage("Video not in library");
                 	}
             }
@@ -150,11 +150,10 @@ public class PlaylistResource extends BaseResource {
     public Response deletePlaylist(@PathParam("id") Long id) {
 	
 	Playlist o = playlistDAO.delete(id);
-	boolean found = o != null;
 	
 	ResponseData dat = new ResponseData()
-		.setSuccess(found)
-		.setEntity (found ? ( isMinimalRequest() ? o.getId() : o ) : null);
+		.setSuccess(o != null)
+		.setEntity(isMinimalRequest() ? null : o );
 
         return doDELETE(dat).build();
     }

@@ -36,12 +36,18 @@ public class GenreResource extends BaseResource {
     @POST
     @UnitOfWork
     public Response createGenre(Genre genre) {
-	Object o = genreDAO.create(genre, isMinimalRequest());
+	Genre o = genreDAO.create(genre);
 
-	boolean respBody =  (o != null);
 	ResponseData dat = new ResponseData()
-		.setSuccess(respBody)
-		.setEntity(o);
+	   .setSuccess(o != null)
+	   .setEntity(isMinimalRequest() ? o.getId() : o );
+	if ( o != null) {
+	    dat.setLocation(
+	    	UriBuilder.fromResource(this.getClass())
+	    	   .path(o.getId().toString()
+	    	   ).build()
+	    	);
+	}
 
         return doPOST(dat).build();
     }
@@ -70,13 +76,12 @@ public class GenreResource extends BaseResource {
 
 	Genre o = genreDAO.update(objectData);
 	
-	boolean respBody =  (o != null);
 	ResponseData dat = new ResponseData()
-		.setSuccess(respBody)
-		.setEntity( respBody ? isMinimalRequest() ? o.getId() : o : null);
+		.setSuccess(o != null)
+		.setEntity(isMinimalRequest() ? null : o );
 	
 	if ( o != null) {
-	    dat.setLocation( uriBuilder.path(o.getId().toString()).build() );
+	    dat.setLocation( UriBuilder.fromResource(this.getClass()).path(o.getId().toString()).build() );
 	}
 
         return doPATCH(dat).build();
@@ -91,10 +96,7 @@ public class GenreResource extends BaseResource {
 	Genre g = genreDAO.delete(id);
 
 	ResponseData dat = new ResponseData().setSuccess(g != null);
-
-	if (! isMinimalRequest()) {
-		dat.setEntity(g);
-	}
+	dat.setEntity(isMinimalRequest() ? null : g );
         return doDELETE(dat).build();
     }
     
@@ -103,14 +105,9 @@ public class GenreResource extends BaseResource {
     @GET
     @UnitOfWork
     public Response viewGenre(@PathParam("id") Long id) {
-	
 	Genre g = genreDAO.retrieve(id);
-	
 	ResponseData dat = new ResponseData().setSuccess(g != null);
-	
-	if (! isMinimalRequest()) {
-	    dat.setEntity(g);
-	}
+	dat.setEntity(g);
         return doGET(dat).build();
     }
 

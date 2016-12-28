@@ -52,11 +52,11 @@ public abstract class ResourceStandards {
     @Context
     protected javax.ws.rs.core.HttpHeaders headers;
     
-    protected UriBuilder uriBuilder;
+//    protected UriBuilder uriBuilder;
 
     
     protected ResourceStandards() {
-	this.uriBuilder = UriBuilder.fromResource(this.getClass());
+//	this.uriBuilder = UriBuilder.fromResource(this.getClass());
     }
 
     /**
@@ -80,7 +80,7 @@ public abstract class ResourceStandards {
 			: Response.Status.BAD_REQUEST);
 
 	if (respData.success &&  ! respData.hasLocation()) {
-	    rb.header("Location", uriBuilder.build().toString());
+	    rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
 	}
 
 
@@ -164,7 +164,7 @@ public abstract class ResourceStandards {
 			: Response.Status.NOT_FOUND);
 	
 	if (! respData.success) {
-	    rb.header("Location", uriBuilder.build().toString());
+	    rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
 	}
 
 	parseRespData( respData,  rb);
@@ -190,7 +190,7 @@ public abstract class ResourceStandards {
             		:  Response.Status.NOT_FOUND
         );
 	
-	rb.header("Location", uriBuilder.build());
+	rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
 	parseRespData( respData, rb);
 	return rb;
     }
