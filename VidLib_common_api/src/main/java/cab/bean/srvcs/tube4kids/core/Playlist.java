@@ -77,7 +77,7 @@ public class Playlist {
     
     @JsonIgnore
     @Transient
-    @ManyToMany(mappedBy = "playlists", targetEntity = cab.bean.srvcs.tube4kids.core.Child.class)
+    @ManyToMany(mappedBy = "playlists", targetEntity = cab.bean.srvcs.tube4kids.core.Child.class, fetch = FetchType.LAZY)
     private Set<Child> reviewers;
 
  
