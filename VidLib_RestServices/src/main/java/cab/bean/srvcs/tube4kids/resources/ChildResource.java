@@ -86,15 +86,15 @@ public class ChildResource extends BaseResource {
     @Path("/{cid}/pl/{pid}")
     @PATCH
     @UnitOfWork
-    public Response childPlaylist(@PathParam("cid") Long cid, @PathParam("pid") Long pid) {
+    public Response playlist(@PathParam("cid") Long cid, @PathParam("pid") Long pid) {
 	ResponseData dat = new ResponseData();
 	try {
 	    Child child = childDAO.findById(cid).get();
-	    Playlist pl = playlistDAO.findById(pid).orElse(null);
-	    
+	    Playlist pl = rc.getResource(PlaylistResource.class).liberatePlaylist(pid);
 	    if (pl == null || child == null) {
 		dat.setSuccess(false).setStatus(Response.Status.NOT_FOUND);
 	    } else {
+		pl.setUserId(child.getUserId());
 		child.getPlaylists().add(pl);
 		child = childDAO.create(child); // Update the Child
 		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? null : child.getPlaylists());
@@ -103,6 +103,29 @@ public class ChildResource extends BaseResource {
 	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST);
 	}
         return doPATCH(dat).build();
+    }
+    
+    
+    @Path("/{cid}/pl/{pid}")
+    @DELETE
+    @UnitOfWork
+    public Response dePlaylist(@PathParam("cid") Long cid, @PathParam("pid") Long pid) {
+	ResponseData dat = new ResponseData();
+	try {
+	    Child child = childDAO.findById(cid).get();
+	    Playlist pl = playlistDAO.retrieve(pid);
+	    if (pl == null || child == null) {
+		dat.setSuccess(false).setStatus(Response.Status.NOT_FOUND);
+	    } else {
+		child.getPlaylists().remove(pl);
+		child = childDAO.create(child); // Update the Child
+		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? null : child.getPlaylists());
+	    }
+	} catch (Exception nsee) {
+	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST)
+	    .setErrorMessage(nsee.getMessage());
+	}
+	return doPATCH(dat).build();
     }
     
     @Path("/{id}")

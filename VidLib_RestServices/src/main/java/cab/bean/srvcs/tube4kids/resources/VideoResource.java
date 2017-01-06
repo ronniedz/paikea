@@ -156,10 +156,20 @@ public class VideoResource extends BaseResource {
 	    Video video = videoDAO.findById(vid).orElse(null);
 
 	    if (video == null) {
+
 		dat.setStatus(Response.Status.NOT_FOUND);
-	    } else {
+	    
+	    }
+	    else {
 		VideoGenre vg = new VideoGenre(video, user, genreIds[0], genreIds[1]);
-		video.getVideoGenres().add(vg);
+		int vglistIndex = video.getVideoGenres().indexOf(vg);
+
+		if (vglistIndex > -1) {
+		    video.getVideoGenres().get(vglistIndex).setGenreIds(genreIds);
+		} else {
+		    video.getVideoGenres().add(vg);
+		}
+		
 		boolean isMini = isMinimalRequest();
 		Object o = videoDAO.create(video, isMini); // This is a saveOrUpdate() call
 		
@@ -168,8 +178,9 @@ public class VideoResource extends BaseResource {
 		 .setEntity(o); 
 	    }
 	} catch (Exception nsee) {
-	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST)
-		    .setErrorMessage(nsee.getMessage()); // TODO make safe
+	    dat
+	    	.setSuccess(false).setStatus(Response.Status.BAD_REQUEST)
+		.setErrorMessage(nsee.getMessage()); // TODO make safe
 	}
         return doPATCH(dat).build();
     }

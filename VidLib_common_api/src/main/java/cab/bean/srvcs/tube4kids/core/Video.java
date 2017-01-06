@@ -160,7 +160,6 @@ public class Video extends BasicVideo {
     	@JsonProperty
 	@OneToMany(
 		fetch = FetchType.LAZY,
-		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
 		mappedBy = "pk.video"
 	)
 	@org.hibernate.annotations.Cascade({

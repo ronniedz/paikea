@@ -5,13 +5,17 @@ import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -36,7 +40,7 @@ public class PlaylistResource extends BaseResource {
     private final PlaylistDAO playlistDAO;
     private final VideoDAO videoDAO;
     
-
+    
     public PlaylistResource(PlaylistDAO playlistDAO, VideoDAO videoDAO) {
 	this.playlistDAO = playlistDAO;
 	this.videoDAO = videoDAO;
@@ -57,7 +61,53 @@ public class PlaylistResource extends BaseResource {
 		.setEntity( respBody ? isMinimalRequest() ? p.getId() : p : null);
         return doPOST(dat).build();
     }
+    
+    @Path("/pick/{pid: [0-9]+}")
+    @PUT
+    @UnitOfWork
+    public Response pickPlaylist(@PathParam("pid") Long pid) {
+	
+	// TODO In the future won't need to liberate() as only decoupled playlists will be findable 
+	Playlist org = liberatePlaylist(pid);
+	
+	Playlist o = new Playlist();
+	o.setTitle(org.getTitle() + " (picked)");
+	o.setUserId(2L);
+	o = playlistDAO.create(o);
+	
+	o.setVideos(org.getVideos().stream().map(orgVid -> { 
+	    return videoDAO.findById(orgVid.getVideoId()).get();
+	}).collect(Collectors.toSet()));
+	
+	playlistDAO.create(o);
+	boolean respBody =  (o != null);
+	ResponseData dat = new ResponseData(o).setSuccess(respBody);
+	return doPOST(dat).build();
+    }
 
+    
+    @Path("/liberate/{pid: [0-9]+}")
+    @PUT
+    @UnitOfWork
+    public Playlist liberatePlaylist(@PathParam("pid") Long pid) {
+	
+	Playlist org = playlistDAO.retrieve(pid);
+	if (org.getUserId() == null) {
+	    return org;
+	}
+	
+	Playlist o = new Playlist();
+
+	o.setTitle(org.getTitle() + " (copy)");
+	o = playlistDAO.create(o);
+	
+	o.setVideos(org.getVideos().stream().map(orgVid -> { 
+	    return videoDAO.findById(orgVid.getVideoId()).get();
+	}).collect(Collectors.toSet()));
+	
+	return playlistDAO.create(o);
+    }
+    
     @GET
     @UnitOfWork
     public Response listPlaylists() {

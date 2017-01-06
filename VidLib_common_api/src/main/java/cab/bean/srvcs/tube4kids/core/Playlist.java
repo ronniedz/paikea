@@ -3,6 +3,7 @@ package cab.bean.srvcs.tube4kids.core;
 import java.sql.Timestamp;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -42,23 +43,25 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 })
 @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ToString
+@ToString(exclude= {"reviewers"})
 @NoArgsConstructor
-@EqualsAndHashCode(exclude= {"reviewers", "creator"})
+//EqualsAndHashCode(exclude= {"reviewers", "creator"})
+@EqualsAndHashCode(of  = {"id"})
 @Data
-public class Playlist {
+public class Playlist implements Comparable<Playlist>{
+ 
     @Column(name = "id", nullable = false)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     //JsonProperty(value="creator_id", access=JsonProperty.Access.READ_ONLY)
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = true)
     private Long userId;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false, insertable = false)
+    @JoinColumn(name = "user_id", nullable = true, updatable = false, insertable = false)
     @Transient
     private User creator;
 
@@ -69,16 +72,33 @@ public class Playlist {
     private Timestamp created;
 
     // ------------------ JOINS ----------------------- //
-    @ManyToMany(targetEntity = cab.bean.srvcs.tube4kids.core.Video.class)
+    @ManyToMany( fetch = FetchType.LAZY, targetEntity = Video.class, cascade = CascadeType.ALL )
     @JoinTable(name = "playlist_video",
     	joinColumns = @JoinColumn(name = "playlist_id", referencedColumnName = "id"),
     	inverseJoinColumns = @JoinColumn(name = "video_id", referencedColumnName = "video_id"))
     private Set<Video> videos;
     
     @JsonIgnore
-    @Transient
-    @ManyToMany(mappedBy = "playlists", targetEntity = cab.bean.srvcs.tube4kids.core.Child.class, fetch = FetchType.LAZY)
+    //Transient
+    @ManyToMany(
+	    mappedBy = "playlists",
+	    targetEntity = Child.class,
+	    fetch = FetchType.LAZY, 
+	    cascade = CascadeType.ALL
+    )
     private Set<Child> reviewers;
+
+    @Override
+    public int compareTo(Playlist o) {
+	
+	if ( o == null ) return -1;
+	
+	Playlist other = (Playlist) o;
+	
+	return (this.id == null)
+		? ( other.getId() == null) ? 0 : -1
+		:  ( other.getId() == null) ? 1 : this.id.compareTo(other.getId());
+    }
 
  
 

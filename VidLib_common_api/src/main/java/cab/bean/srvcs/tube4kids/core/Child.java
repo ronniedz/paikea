@@ -22,7 +22,7 @@ public class Child {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToMany(targetEntity = cab.bean.srvcs.tube4kids.core.Playlist.class)
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Playlist.class, cascade= CascadeType.ALL)
     @JoinTable(
 	name = "child_playlist",
 	joinColumns = @JoinColumn(name = "child_id", referencedColumnName = "id"),
