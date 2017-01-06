@@ -97,7 +97,7 @@ public class ChildResource extends BaseResource {
 		pl.setUserId(child.getUserId());
 		child.getPlaylists().add(pl);
 		child = childDAO.create(child); // Update the Child
-		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? null : child.getPlaylists());
+		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? pl : child.getPlaylists());
 	    }
 	} catch (Exception nsee) {
 	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST);
@@ -119,7 +119,7 @@ public class ChildResource extends BaseResource {
 	    } else {
 		child.getPlaylists().remove(pl);
 		child = childDAO.create(child); // Update the Child
-		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? null : child.getPlaylists());
+		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? pl : child.getPlaylists());
 	    }
 	} catch (Exception nsee) {
 	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST)
