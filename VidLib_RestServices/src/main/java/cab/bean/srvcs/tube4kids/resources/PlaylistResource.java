@@ -193,6 +193,40 @@ public class PlaylistResource extends BaseResource {
 	}
         return doPATCH(dat).build();
     }
+    
+    @Path("{pidVal: [0-9]+}/v/{videoIds}")
+    @DELETE
+    @UnitOfWork
+    public Response dropVideos(@PathParam("pidVal") Long pidVal, @PathParam("videoIds") String videoIds) {
+	ResponseData dat = new ResponseData().setSuccess(false);
+	
+	try {
+	    Playlist p = playlistDAO.findById(pidVal).orElse(null);
+	    
+	    if ( p == null ) {
+		dat .setStatus(Response.Status.NOT_FOUND);
+	    }
+	    else {
+		Set<Video> videos = p.getVideos(); 
+		
+		try {
+		    Arrays.asList(videoIds.split(",\\s+")).stream().forEach(v -> {
+			videos.remove(videoDAO.findById(v).get());
+		    });
+		    p = playlistDAO.create(p);
+		    dat.setSuccess(p != null).setEntity(isMinimalRequest() ? null : p);
+		}
+		catch (java.util.NoSuchElementException nsee) {
+		    dat
+		    .setStatus(Response.Status.NOT_FOUND)
+		    .setErrorMessage("Video not in library");
+		}
+	    }
+	} catch (Exception nsee) {
+	    dat.setStatus(Response.Status.BAD_REQUEST);
+	}
+	return doPATCH(dat).build();
+    }
 
     @Path("/{id}")
     @DELETE

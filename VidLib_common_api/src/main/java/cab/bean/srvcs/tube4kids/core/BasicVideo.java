@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.Embedded;
 
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
+@EqualsAndHashCode(of  = {"videoId"})
 public abstract class BasicVideo implements VideoType {
 
     protected String etag;
