@@ -20,7 +20,6 @@
 		    <version>${commons-dbcp.version}</version>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 		<dependency>
 		    <groupId>mysql</groupId>
 		    <artifactId>mysql-connector-java</artifactId>
@@ -47,13 +46,6 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>5.2.4.Final</version>
 		</dependency>
-<!-- 
-		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>javax.el-api</artifactId>
-			<version>3.0.1-b04</version>
-		</dependency>
- -->
 
   </dependencies>
 

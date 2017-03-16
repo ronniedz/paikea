@@ -50,8 +50,8 @@ public class QueryStringProcessor implements Processor {
 	VideoSearchRequest found = null;
 	if ( (found = cacheContains(aQuery, collectionName)) != null ) {
 	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, found );
-	    exchange.getOut().setHeader(PersistenceHelper.HDR_FOUNDQUERY_NAME, Boolean.TRUE);
-//	    exchange.getIn().setHeader(PersistenceHelper.HDR_FOUNDQUERY_NAME, Boolean.TRUE);
+	    exchange.getOut().setHeader(PersistenceHelper.HDR_FOUNDQUERY, Boolean.TRUE);
+//	    exchange.getIn().setHeader(PersistenceHelper.HDR_FOUNDQUERY, Boolean.TRUE);
 	    // The Java DSL route needs me to set the 'found' flag in the IN-message 
 	}
 	else {

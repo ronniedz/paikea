@@ -65,24 +65,44 @@ public class PlaylistResource extends BaseResource {
     @Path("/pick/{pid: [0-9]+}")
     @PUT
     @UnitOfWork
-    public Response pickPlaylist(@PathParam("pid") Long pid) {
+    public Response pickPlaylist(@PathParam("pid") Long pid, Playlist destPlaylist ) {
 	
 	// TODO In the future won't need to liberate() as only decoupled playlists will be findable 
 	Playlist org = liberatePlaylist(pid);
 	
-	Playlist o = new Playlist();
-	o.setTitle(org.getTitle() + " (picked)");
-	o.setUserId(2L);
-	o = playlistDAO.create(o);
+//	Playlist o = new Playlist();
 	
-	o.setVideos(org.getVideos().stream().map(orgVid -> { 
+	if ( destPlaylist.getTitle().isEmpty()) {
+	    destPlaylist.setTitle(org.getTitle() + " (picked)");
+	}
+	//  TODO - get user from context 
+	destPlaylist.setUserId(2L);
+	
+	destPlaylist = playlistDAO.create(destPlaylist);
+	
+	destPlaylist.setVideos(org.getVideos().stream().map(orgVid -> { 
 	    return videoDAO.findById(orgVid.getVideoId()).get();
 	}).collect(Collectors.toSet()));
 	
-	playlistDAO.create(o);
-	boolean respBody =  (o != null);
-	ResponseData dat = new ResponseData(o).setSuccess(respBody);
+	playlistDAO.create(destPlaylist);
+	boolean respBody =  (destPlaylist != null);
+	
+	ResponseData dat = new ResponseData(destPlaylist).setSuccess(respBody);
+	
 	return doPOST(dat).build();
+	
+//	o.setTitle(org.getTitle() + " (picked)");
+//	o.setUserId(2L);
+//	o = playlistDAO.create(o);
+//	
+//	o.setVideos(org.getVideos().stream().map(orgVid -> { 
+//	    return videoDAO.findById(orgVid.getVideoId()).get();
+//	}).collect(Collectors.toSet()));
+//	
+//	playlistDAO.create(o);
+//	boolean respBody =  (o != null);
+//	ResponseData dat = new ResponseData(o).setSuccess(respBody);
+//	return doPOST(dat).build();
     }
 
     
@@ -193,7 +213,15 @@ public class PlaylistResource extends BaseResource {
 	}
         return doPATCH(dat).build();
     }
-    
+
+    /**
+     * Video ids can be sngle or a list of ids. Video ids may be separated by:
+     * commas, pipes, semicolons or spaces.
+     * 
+     * @param pidVal
+     * @param videoIds
+     * @return
+     */
     @Path("{pidVal: [0-9]+}/v/{videoIds}")
     @DELETE
     @UnitOfWork
@@ -205,12 +233,13 @@ public class PlaylistResource extends BaseResource {
 	    
 	    if ( p == null ) {
 		dat .setStatus(Response.Status.NOT_FOUND);
+		dat.setErrorMessage("Playlist not found");
 	    }
 	    else {
 		Set<Video> videos = p.getVideos(); 
 		
 		try {
-		    Arrays.asList(videoIds.split(",\\s+")).stream().forEach(v -> {
+		    Arrays.asList(videoIds.split(SPLIT_PARAM_REGEX)).stream().forEach(v -> {
 			videos.remove(videoDAO.findById(v).get());
 		    });
 		    p = playlistDAO.create(p);
@@ -219,7 +248,7 @@ public class PlaylistResource extends BaseResource {
 		catch (java.util.NoSuchElementException nsee) {
 		    dat
 		    .setStatus(Response.Status.NOT_FOUND)
-		    .setErrorMessage("Video not in library");
+		    .setErrorMessage(String.format("Video not in Playlist [%s]", p.getId()));
 		}
 	    }
 	} catch (Exception nsee) {

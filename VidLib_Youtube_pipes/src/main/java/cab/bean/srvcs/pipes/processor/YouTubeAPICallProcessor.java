@@ -62,7 +62,7 @@ public class YouTubeAPICallProcessor implements Processor {
 		Map<String,String> params = exchange.getIn().getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, Map.class);
 		YouTubeResponse ytResp= null;
 
-		// TODO the value should be set by sender.
+		// TODO the value should be set in request or intermediate client.
             	params.put("fields", "etag,regionCode,items,kind,nextPageToken,prevPageToken,pageInfo");
             	String collectionName = exchange.getIn().getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, String.class);
             

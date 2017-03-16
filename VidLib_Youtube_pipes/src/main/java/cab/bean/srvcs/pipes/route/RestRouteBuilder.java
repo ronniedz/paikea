@@ -15,13 +15,26 @@ import com.mongodb.DB;
 
 
 /**
- * A Camel Java DSL Router
+ * Route requests received at the Restlet endpoint. "Search" requests
+ * can be fulfilled from cache (in MongoDB) or by the
+ * GAPI_Agent (configured in spring context)
+ * 
+ * The current endpoints to the Restlet are:
+ * 
+ * 	'/search'	- to search for videos
+ * 	'/detail'	- to get details for a specified video
+ *  
  */
 public class RestRouteBuilder extends RouteBuilder {
 
-//    private Mongo mongoBean = null;
+    private static final String srv_endpt_search = "/search";
+    private static final String srv_endpt_detail = "/detail";
 
-    private Predicate cacheCheckPredicate = null;
+    private static final String GAPI_Agent = "ytAPICallProcessor";
+    /**
+     * The following values are set in Spring beans.
+     */
+    private Predicate	cacheCheckPredicate = null;
     private Processor cachePullProcessor = null;
     private Processor queryStringProcessor;
     private Processor stashNovelDataProcessor;
@@ -30,6 +43,8 @@ public class RestRouteBuilder extends RouteBuilder {
     private String	serviceUri;
     private int		restServerPort;
     private String	restServerHost;
+    
+    
 
     public RestRouteBuilder() {
 	super();
@@ -39,15 +54,18 @@ public class RestRouteBuilder extends RouteBuilder {
 	getContext().getProperties().put("CamelJacksonTypeConverterToPojo", "true");
     }
 
-    public RestRouteBuilder(DB db) {
+    /**
+     * @param mongoDb currently used only for caching queries and video refs/info.
+     */
+    public RestRouteBuilder(DB mongoDb) {
 	this();
-	this.cachePullProcessor = new CachePullProcessor(db);
-	this.stashNovelDataProcessor = new CacheNewVideosProcessor(db);
-	this.queryStringProcessor = new QueryStringProcessor(db);
+	this.cachePullProcessor = new CachePullProcessor(mongoDb);
+	this.stashNovelDataProcessor = new CacheNewVideosProcessor(mongoDb);
+	this.queryStringProcessor = new QueryStringProcessor(mongoDb);
     }
 
     /**
-     * Camel routing rules in Java...
+     * Routing rules ...
      */
     @SuppressWarnings("deprecation")
     public void configure() {
@@ -60,14 +78,14 @@ public class RestRouteBuilder extends RouteBuilder {
 
 	RestDefinition  def = rest(this.resourcePath);
 
-	def.get("/search")
+	def.get(srv_endpt_search)
 		.produces("application/json")
 		.bindingMode(RestBindingMode.json)
             	.route()
             		.routeId("search")
             		.process(queryStringProcessor)
             		.choice()
-            	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY_NAME).isNotNull())
+            	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY).isNotNull())
             	   	    	.to("direct:inbound_cached")
             	   	    .otherwise()
             	   	   	.to("direct:inbound_novel")
@@ -75,25 +93,26 @@ public class RestRouteBuilder extends RouteBuilder {
             	.end();
 		
 	from("direct:inbound_cached")
-	    .process(cachePullProcessor)  ;
+	    .process(cachePullProcessor)
+	;
 	
 	from("direct:inbound_novel")
-		.setHeader("servicePath", simple("inbound_novella"))
+	    .setHeader("servicePath", simple("inbound_novella"))
 
-	    .process("ytAPICallProcessor")
+	    .process(GAPI_Agent)
 	    .wireTap("direct:store_novel_data", true);
 
 	from("direct:store_novel_data")
 	    .process(stashNovelDataProcessor)
 	    .end();
 
-	def.get("/detail")
+	def.get(srv_endpt_detail)
 	.produces("application/json")
 	.bindingMode(RestBindingMode.json)
 	.route()
 	.routeId("detail")
 //	.setHeader("servicePath", simple("/detail"))
-	.process("ytAPICallProcessor")
+	.process(GAPI_Agent)
 	.end();
 
 
@@ -146,13 +165,4 @@ public class RestRouteBuilder extends RouteBuilder {
     public void setCachePullProcessor(Processor cachePullProcessor) {
 	this.cachePullProcessor = cachePullProcessor;
     }
-//
-//    public Mongo getMongoBean() {
-//	return mongoBean;
-//    }
-//
-//    public void setMongoBean(Mongo mongoBean) {
-//	this.mongoBean = mongoBean;
-//    }
-
 }

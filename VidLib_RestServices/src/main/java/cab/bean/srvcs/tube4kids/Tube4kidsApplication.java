@@ -1,12 +1,12 @@
 package cab.bean.srvcs.tube4kids;
 import io.dropwizard.Application;
-import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
@@ -58,6 +58,7 @@ import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
 import cab.bean.srvcs.tube4kids.resources.AgeGroupResource;
 import cab.bean.srvcs.tube4kids.resources.ChildResource;
 import cab.bean.srvcs.tube4kids.resources.GenreResource;
+import cab.bean.srvcs.tube4kids.resources.GoogleAuthNResource;
 import cab.bean.srvcs.tube4kids.resources.PlaylistResource;
 import cab.bean.srvcs.tube4kids.resources.UserResource;
 import cab.bean.srvcs.tube4kids.resources.VideoResource;
@@ -67,6 +68,8 @@ import cab.bean.srvcs.tube4kids.resources.ViewResource;
 import cab.bean.srvcs.tube4kids.resources.FilteredResource;
 //import cab.bean.srvcs.tube4kids.resources.PeopleResource;
 //import cab.bean.srvcs.tube4kids.resources.PersonResource;
+
+
 
 
 
@@ -112,7 +115,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         );
 
         bootstrap.addCommand(new RenderCommand());
-        bootstrap.addBundle(new AssetsBundle());
+        bootstrap.addBundle(new ConfiguredAssetsBundle("/assets", "/", "index.html"));
         bootstrap.addBundle(new MigrationsBundle<Tube4kidsConfiguration>() {
             @Override
             public DataSourceFactory getDataSourceFactory(Tube4kidsConfiguration configuration) {
@@ -152,6 +155,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
+
+        jerseyConf.register(new GoogleAuthNResource());
         
         jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
@@ -175,7 +180,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
 	this.jsonProvider.setMapper(new JodaMapper());
 	environment.jersey().register(this.jsonProvider);
-
+	environment.jersey().setUrlPattern("/api/*");
 //        final byte[] key = configuration.getJwtTokenSecret();
 //
 //        final JwtConsumer consumer = new JwtConsumerBuilder()

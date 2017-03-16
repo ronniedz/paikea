@@ -5,7 +5,7 @@
 #
 # 
 # This start-up script is created as a convenience for building and running the 2 servers that 
-# comprise this application. The components are: a Rest Server and Camel Queue
+# comprise this application. The components are: a Rest Server and Camel Router
 # These can run be on separate machines. The components communicate over a REST interface.
 #
 # - RBD [2016-10-10]
@@ -57,7 +57,7 @@ cd ..
 mvn clean install
 mvn -pl VidLib_Youtube_pipes camel:run 2>&1 >> logs/paikea_queue.log &
 QUEUE_PID=$!
-echo "Starting 'Message Queue' (pid: ${QUEUE_PID}) ..."
+echo "Starting 'Camel Router' (pid: ${QUEUE_PID}) ..."
 
 ## Check that port is update
 
@@ -75,7 +75,7 @@ echo -n ${QUEUE_PID} > ./run/paikea_msgqueue.pid
 
 if [ "$CODE" -eq "0" ]; then
 
-	echo "Message Queue (pid: ${QUEUE_PID}) - Running!"
+	echo "Camel Router (pid: ${QUEUE_PID}) - Running!"
 	echo "Building Rest-Server... "
 
 	cd VidLib_RestServices

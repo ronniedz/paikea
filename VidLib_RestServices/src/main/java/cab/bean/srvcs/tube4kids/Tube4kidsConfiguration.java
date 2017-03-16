@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 
 import io.dropwizard.Configuration;
+import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
+import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.metrics.graphite.GraphiteReporterFactory;
 
@@ -26,7 +28,7 @@ import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.Driver;
 
 
-public class Tube4kidsConfiguration extends Configuration {
+public class Tube4kidsConfiguration extends Configuration  implements AssetsBundleConfiguration {
     
     @Valid
     @NotNull
@@ -57,6 +59,16 @@ public class Tube4kidsConfiguration extends Configuration {
     @Valid
     private GraphiteReporterFactory graphiteReporterFactory = new GraphiteReporterFactory();
     
+    @Valid
+    @NotNull
+    @JsonProperty
+    private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
+
+    @Override
+    public AssetsConfiguration getAssetsConfiguration() {
+      return assets;
+    }
+
     @JsonProperty
     public URL getProxySearchUrl() {
 	return proxySearchUrl;

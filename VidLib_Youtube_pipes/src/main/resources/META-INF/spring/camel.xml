@@ -32,7 +32,6 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 	<bean id="mongoBean" class="com.mongodb.Mongo">
 		<constructor-arg name="host" value="${mongodb.host}" />
-		<!-- <constructor-arg name="port" value="${mongodb.port}" /> -->
 	</bean>
 	
 	<bean id="youTubeAgentImpl" class="cab.bean.srvcs.tube4kids.resources.YouTubeAgentImpl">
@@ -44,7 +43,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	</bean>
 
 	<bean id="restRouteBuilder" class="cab.bean.srvcs.pipes.route.RestRouteBuilder">
-		<constructor-arg name="db">
+		<constructor-arg><!--  name="mongoDb" -->
       <bean factory-bean="mongoBean" factory-method="getDB">
          <constructor-arg value="${mongodb.dbname}"/>
       </bean>

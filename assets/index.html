@@ -1,0 +1,96 @@
+<!--
+
+/*
+ *
+ * Copyright 2015 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+   </head>
+  <body>
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+    <script>
+      function onSignIn(googleUser) {
+        // Useful data for your client-side scripts:
+        var profile = googleUser.getBasicProfile();
+        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+        console.log('Full Name: ' + profile.getName());
+        console.log('Given Name: ' + profile.getGivenName());
+        console.log('Family Name: ' + profile.getFamilyName());
+        console.log("Image URL: " + profile.getImageUrl());
+        console.log("Email: " + profile.getEmail());
+
+        // The ID token you need to pass to your backend:
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log("ID Token: " + id_token);
+/* 
+		var id_token = authResult.currentUser.get().getAuthResponse().id_token;
+		alert(id_token);
+ */
+				$('#authResult').append('<br/>id_token : ');
+				$('#authResult').append(id_token);
+					
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', 'http://localhost:8080/api/oauth2/callback');
+				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				xhr.onload = function() {
+				  console.log('Signed in as: ' + xhr.responseText);
+		      $('#authResult').append('<br/>xhr.responseText : ' + xhr.responseText);
+				};
+				xhr.send('id_token=' + id_token);
+
+/* 
+        $.ajax({
+            headers : {
+                'Accept' : 'application/json',
+                'Content-Type' : 'application/json'
+            },
+            url : 'http://localhost:8080/wutup/venues/12',
+            type : 'PATCH',
+            data : JSON.stringify({description: "842490812321309213801923 gonzagazors"}),
+            success : function(response, textStatus, jqXhr) {
+                console.log("Venue Successfully Patched!");
+            },
+            error : function(jqXHR, textStatus, errorThrown) {
+                // log the error to the console
+                console.log("The following error occured: " + textStatus, errorThrown);
+            },
+            complete : function() {
+                console.log("Venue Patch Ran");
+            }
+        });
+        $(document).ready(function(){
+            
+        })
+        
+	    	
+ */        
+      };
+    </script>
+    <div id="authResult">
+    </div>
+    
+  </body>
+</html>

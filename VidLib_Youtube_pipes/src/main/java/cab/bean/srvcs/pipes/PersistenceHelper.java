@@ -18,7 +18,7 @@ public class PersistenceHelper {
 
     public static final String prefix = "vcache_";
     public static final String HDR_QUERYPARAMS_NAME = "params";
-    public static final String HDR_FOUNDQUERY_NAME = "found";
+    public static final String HDR_FOUNDQUERY = "found";
     public static final String META_DATA_DB_NAME = "cache_control_dat";
     public static final String DEFAULT_FETCH_SIZE = "10";
 

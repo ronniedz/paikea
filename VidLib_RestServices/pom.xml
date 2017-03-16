@@ -195,9 +195,9 @@
 	<dependency>
 	    <groupId>com.github.toastshaman</groupId>
 	    <artifactId>dropwizard-auth-jwt</artifactId>
-	    <version>1.0.0-0</version>
+	    <version>1.0.2-0</version>
 	</dependency>
-	
+
 <!-- 
 		<dependency>
 		    <groupId>io.jsonwebtoken</groupId>
@@ -239,10 +239,19 @@ compile("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.7.2")
             <version>${dropwizard.version}</version>
         </dependency>
  -->
+<!-- 
          <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-assets</artifactId>
-                    </dependency>
+         </dependency>
+			 -->
+			
+				<dependency>
+  <groupId>io.dropwizard-bundles</groupId>
+  <artifactId>dropwizard-configurable-assets-bundle</artifactId>
+  <version>1.0.5</version>
+</dependency>
+        
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-http2</artifactId>

@@ -146,10 +146,10 @@ public abstract class ResourceStandards {
      * Default status response:<pre>
      * 		Success:
      * 			- 200 (OK) if an entity is set (via setEntity(object))
-     * 			- 204 (NO_CONTENT if response body is empty
+     * 			- 204 (NO_CONTENT) if response body is empty
      * 
      * 		Error:
-     * 			- 400 (NOT_FOUND)
+     * 			- 404 (NOT_FOUND)
      * </pre>
      * @param
      * 		respData
