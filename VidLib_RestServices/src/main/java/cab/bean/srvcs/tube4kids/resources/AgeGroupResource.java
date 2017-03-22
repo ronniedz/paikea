@@ -5,6 +5,8 @@ import cab.bean.srvcs.tube4kids.db.AgeGroupDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.LongParam;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Path("/age")
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed({"MANAGER"})
 public class AgeGroupResource {
 
     private final AgeGroupDAO ageGroupDAO;
@@ -43,6 +46,7 @@ public class AgeGroupResource {
 
     @GET
     @UnitOfWork
+    @PermitAll
     public List<AgeGroup> listAges() {
         return ageGroupDAO.findAll();
     }

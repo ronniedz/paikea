@@ -12,12 +12,14 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.ScanningHibernateBundle;
+import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 
 import cab.bean.srvcs.tube4kids.auth.ExampleAuthenticator;
 import cab.bean.srvcs.tube4kids.auth.ExampleAuthorizer;
+import cab.bean.srvcs.tube4kids.auth.JWTAuthenticator;
 import cab.bean.srvcs.tube4kids.cli.RenderCommand;
 import cab.bean.srvcs.tube4kids.filter.DateRequiredFeature;
 import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
@@ -52,6 +55,7 @@ import cab.bean.srvcs.tube4kids.db.ChildDAO;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
 import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
+import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
@@ -68,8 +72,6 @@ import cab.bean.srvcs.tube4kids.resources.ViewResource;
 import cab.bean.srvcs.tube4kids.resources.FilteredResource;
 //import cab.bean.srvcs.tube4kids.resources.PeopleResource;
 //import cab.bean.srvcs.tube4kids.resources.PersonResource;
-
-
 
 
 
@@ -138,9 +140,13 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
         final VideoDAO videoDAO = new VideoDAO(hibernateBundle.getSessionFactory());
         final GenreDAO genreDAO = new GenreDAO(hibernateBundle.getSessionFactory());
+
         final UserDAO userDAO = new UserDAO(hibernateBundle.getSessionFactory());
+        final TokenDAO tokenDAO = new TokenDAO(hibernateBundle.getSessionFactory(), userDAO);
+        
         final PlaylistDAO playlistDAO = new PlaylistDAO(hibernateBundle.getSessionFactory());
         final AgeGroupDAO ageGroupDAO = new AgeGroupDAO(hibernateBundle.getSessionFactory());
+	    
         final ChildDAO childDAO = new ChildDAO(hibernateBundle.getSessionFactory());
         final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
 
@@ -156,12 +162,60 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
 
-        jerseyConf.register(new GoogleAuthNResource());
+        jerseyConf.register(new GoogleAuthNResource(configuration.getJwtTokenSecret(), configuration.getClientId()));
         
         jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
+        
+
+
+	    String jwtSecret = configuration.getJwtTokenSecret();
+
+        JWTAuthenticator authenticator = new UnitOfWorkAwareProxyFactory(hibernateBundle)
+        		.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class, UserDAO.class}, new Object[]{tokenDAO, userDAO });
+  
+//        JWTAuthenticator authenticator = new JWTAuthenticator(tokenDAO, userDAO );
+        
+        JwtAuthFilter<User> authFilter = buildJwtAuthFilter(jwtSecret, configuration.getClientId(), authenticator );
+        
+        
+        jerseyConf.register(new AuthDynamicFeature(authFilter));
+        jerseyConf.register(RolesAllowedDynamicFeature.class);
+        jerseyConf.register(new AuthValueFactoryProvider.Binder<>(Principal.class));
+   }
+
+    private JwtAuthFilter<User> buildJwtAuthFilter(String jwtSecret, String clientId, JWTAuthenticator authenticator) {
+        
+	HmacKey key = null;
+	
+	try {
+	    key = new HmacKey(jwtSecret.getBytes("UTF-8") );
+	} catch (UnsupportedEncodingException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+        
+	final JwtConsumer consumer = new JwtConsumerBuilder()
+//        .setSkipAllValidators()
+//        .setDisableRequireSignature()
+//        .setSkipSignatureVerification()
+	.setExpectedAudience(clientId)
+        .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
+        .setRequireExpirationTime() // the JWT must have an expiration time
+        .setRequireSubject() // the JWT must have a subject claim
+        .setVerificationKey(key) // verify the signature with the public key
+        .setRelaxVerificationKeyValidation() // relaxes key length requirement
+        .build(); // create the JwtConsumer instance 
+	return
+            new JwtAuthFilter.Builder<User>()
+            .setCookieName("beancab")
+            .setJwtConsumer(consumer)
+            .setRealm("Video Library")
+            .setPrefix("Bearer")
+            .setAuthenticator(authenticator)
+            .buildAuthFilter();
     }
-    
+
     @Override
     public void run(Tube4kidsConfiguration configuration, Environment environment) {
 
@@ -173,7 +227,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
         environment.healthChecks().register("template", new TemplateHealthCheck( configuration.buildTemplate() ));
         environment.jersey().register(DateRequiredFeature.class);
-        
+
+        	
 //        ObjectMapper mapper = new ObjectMapper();
 //        mapper.registerModule(new JodaModule());
 
@@ -181,40 +236,15 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	this.jsonProvider.setMapper(new JodaMapper());
 	environment.jersey().register(this.jsonProvider);
 	environment.jersey().setUrlPattern("/api/*");
-//        final byte[] key = configuration.getJwtTokenSecret();
-//
-//        final JwtConsumer consumer = new JwtConsumerBuilder()
-//            .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
-//            .setRequireExpirationTime() // the JWT must have an expiration time
-//            .setRequireSubject() // the JWT must have a subject claim
-//            .setVerificationKey(new HmacKey(key)) // verify the signature with the public key
-//            .setRelaxVerificationKeyValidation() // relaxes key length requirement
-//            .build(); // create the JwtConsumer instance
-//
-//        environment.jersey().register(new AuthDynamicFeature(
-//            new JwtAuthFilter.Builder<User>()
-//                .setJwtConsumer(consumer)
-//                .setRealm("BeanCab")
-//                .setPrefix("Bearer")
-//                .setAuthenticator(new AnotherAuthenticator())
-//                .buildAuthFilter()));
-//
-//        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Principal.class));
-////        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));
-//        environment.jersey().register(RolesAllowedDynamicFeature.class);
-//        environment.jersey().register(new SecuredResource(configuration.getJwtTokenSecret()));
-        
-        environment.jersey().register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<User>()
-                .setAuthenticator(new ExampleAuthenticator())
-                .setAuthorizer(new ExampleAuthorizer())
-                .setRealm("SUPER SECRET STUFF")
-                .buildAuthFilter()));
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));
-        environment.jersey().register(RolesAllowedDynamicFeature.class);
 
         buildResources(configuration, environment.jersey());
+
+
         environment.jersey().register(new FilteredResource());
         
+        setupCORS(environment);
+    }
+    private void setupCORS(Environment environment) {
         final FilterRegistration.Dynamic cors =  environment.servlets().addFilter("CORS", CrossOriginFilter.class);
 
         // Configure CORS parameters:
@@ -240,32 +270,16 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         cors.setInitParameter(CrossOriginFilter.PREFLIGHT_MAX_AGE_PARAM, "54000");
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
 
-    
-    }
 
-    private static class AnotherAuthenticator implements Authenticator<JwtContext, User> {
 	
-	@Override
-	public Optional<User> authenticate(JwtContext context) {
-	    // Provide your own implementation to lookup users based on the principal attribute in the
-	    // JWT Token. E.g.: lookup users from a database etc.
-	    // This method will be called once the token's signature has been verified
-	    
-	    // In case you want to verify different parts of the token you can do that here.
-	    // E.g.: Verifying that the provided token has not expired.
-	    
-	    // All JsonWebTokenExceptions will result in a 401 Unauthorized response.
-	    
-	    try {
-		final String subject = context.getJwtClaims().getSubject();
-		if ("good-guy".equals(subject)) {
-		    return Optional.of(new User("good-guy"));
-		}
-		return Optional.empty();
-	    }
-	    catch (MalformedClaimException e) { return Optional.empty(); }
-	}
-    }
+//	FilterRegistration.Dynamic filter = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
+//	    filter.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE,OPTIONS");
+//	    filter.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+//	    filter.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+//	    filter.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
+//	    filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+	  }
+
     
         
 }

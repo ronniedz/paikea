@@ -14,7 +14,7 @@ import javax.ws.rs.core.SecurityContext;
  * Method level annotations take precedence over the class level ones
  */
 
-@Path("/protected")
+@Path("/protectedClass")
 @RolesAllowed("BASIC_GUY")
 public final class ProtectedClassResource {
 
