@@ -6,13 +6,16 @@ import io.dropwizard.hibernate.UnitOfWork;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
@@ -27,6 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.keys.HmacKey;
@@ -40,7 +44,10 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.common.base.Throwables;
 
+import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
+import cab.bean.srvcs.tube4kids.db.TokenDAO;
+import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 
 
@@ -52,10 +59,16 @@ public class GoogleAuthNResource extends BaseResource {
     private final JsonFactory jsonFactory = new JacksonFactory();
     private String CLIENT_ID = "16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com";
     private String jwtTokenSecret = "";
-    
-    public GoogleAuthNResource(String jwtTokenSecret, String CLIENT_ID ) {
+
+    private TokenDAO tokenDAO;
+    private UserDAO userDAO;
+
+
+    public GoogleAuthNResource(TokenDAO tokenDAO, UserDAO userDAO, String jwtTokenSecret, String CLIENT_ID ) {
 	this.jwtTokenSecret = jwtTokenSecret;
 	this.CLIENT_ID = CLIENT_ID;
+	this.tokenDAO = tokenDAO;
+	this.userDAO = userDAO;
     }
 
     @POST
@@ -64,48 +77,82 @@ public class GoogleAuthNResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response callback(@FormParam("id_token") String idTokenString) {
-	// (Receive idTokenString by HTTPS POST)
-//	@FormParam("id_token") String idTokenString, @Context SecurityContext context
+
 	ResponseData dat = new ResponseData();
-	System.out.println("idTokenString: " + idTokenString);
-	
 	
 	GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder( new NetHttpTransport(), jsonFactory)
-		.setAudience(Collections.singletonList(CLIENT_ID)).build();
-		try {
+	  .setAudience(Collections.singletonList(CLIENT_ID)).build();
+
+	try {
 //		    GoogleIdToken idToken = GoogleIdToken.parse( jsonFactory, idTokenString );
-		    GoogleIdToken idToken = verifier.verify(idTokenString);
-//		    System.out.println("parsedToken: " + idToken);
-		    Map jwt = makeJwt(idToken);
-		    dat.setSuccess(jwt != null).setEntity(jwt);
-		} catch (GeneralSecurityException | IOException e) {
-//		    dat.setSuccess(false).setErrorMessage(e.getMessage()).setEntity(e.getCause());
-		    e.printStackTrace();
+	    GoogleIdToken idToken = verifier.verify(idTokenString);
+	    if (idToken != null) {
+		Map userValues = extractValues(idToken);
+		
+		Map jwt = makeJwt(idToken, userValues);
+		dat.setSuccess(jwt != null).setEntity(jwt);
+		
+		Optional<Token> t = tokenDAO.findUserWithToken(idToken.getPayload().getSubject());
+		if (! t.isPresent() ) {
+		    User user = createUser(userValues);
+		    Token beanToken = new Token(user, idToken.getPayload().getSubject(), idToken.getPayload().getIssuer());
+		    tokenDAO.create(beanToken);
 		}
+	    }
+	} catch (GeneralSecurityException | IOException e) {
+	    e.printStackTrace();
+	    dat.setSuccess(false).setErrorMessage(e.getMessage()).setEntity(e.getCause());
+	}
 	return doPOST(dat).build();
 
     }
+private User createUser(Map userValues) {
+    User u = new User();
 
-    private Map<String, String> makeJwt(GoogleIdToken idToken) {
-	final  Map<String, Object> m = new Hashtable<String, Object>();
-        
-        idToken.getPayload().entrySet().forEach(x -> { m.put(x.getKey(), x.getValue()); });
-        System.err.println(m); 
+    try {
+	BeanUtils.copyProperties(u, userValues);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+    }
+    u.setEmailVerified(Boolean.TRUE);
+    u.setActivated(Boolean.TRUE);
+    u.setPassword(Long.toHexString(Double.doubleToLongBits(Math.random())));
+
+   return userDAO.create(u);
+    }
+
+private Map<String, Object> extractValues(GoogleIdToken idToken) {
+    Map<String, Object> m = new HashMap();
+    m.put("email", idToken.getPayload().getEmail());
+    m.put("email_verified", idToken.getPayload().getEmailVerified());
+    m.put("firstname", idToken.getPayload().getUnknownKeys().get("given_name"));
+    m.put("firstname", idToken.getPayload().getUnknownKeys().get("given_name")); // additional claims/attributes about the subject can be added
+    m.put("lastname", idToken.getPayload().getUnknownKeys().get("family_name")); // additional claims/attributes about the subject can be added
+    m.put("picture",idToken.getPayload().getUnknownKeys().get("picture")); // additional claims/attributes about the subject can be added
+    m.put("locale",idToken.getPayload().getUnknownKeys().get("locale")); // additional claims/attributes about the subject can be added
+    return m;
+}
+    private Map<String, String> makeJwt(GoogleIdToken idToken, Map<String, Object> m) {
+//	final  Map<String, Object> m = new Hashtable<String, Object>();
+//        
+//        idToken.getPayload().entrySet().forEach(x -> { m.put(x.getKey(), x.getValue()); });
+//        System.err.println(m); 
         // Create the Claims, which will be the content of the JWT
         final JwtClaims claims = new JwtClaims();
-        claims.setIssuer("Issuer");  // who creates the token and signs it
+        claims.setIssuer(idToken.getPayload().getIssuer());  // who creates the token and signs it
+        claims.setSubject(idToken.getPayload().getSubject());
+        
         claims.setAudience(CLIENT_ID); // to whom the token is intended to be sent
         claims.setExpirationTimeMinutesInTheFuture(10); // time when the token will expire (10 minutes from now)
         claims.setGeneratedJwtId(); // a unique identifier for the token
         claims.setIssuedAtToNow();  // when the token was issued/created (now)
         claims.setNotBeforeMinutesInThePast(2); // time before which the token is not yet valid (2 minutes ago)
-        claims.setSubject(idToken.getPayload().getSubject());
-        claims.setClaim("email", idToken.getPayload().getEmail()); // additional claims/attributes about the subject can be added
-        claims.setClaim("email_verified",idToken.getPayload().getEmailVerified()); // additional claims/attributes about the subject can be added
-        claims.setClaim("firstname", idToken.getPayload().getUnknownKeys().get("given_name")); // additional claims/attributes about the subject can be added
-        claims.setClaim("lastname", idToken.getPayload().getUnknownKeys().get("family_name")); // additional claims/attributes about the subject can be added
-        claims.setClaim("picture",idToken.getPayload().getUnknownKeys().get("picture")); // additional claims/attributes about the subject can be added
-        claims.setClaim("locale",idToken.getPayload().getUnknownKeys().get("locale")); // additional claims/attributes about the subject can be added
+
+        m.entrySet().forEach(x -> { 
+            claims.setClaim(x.getKey(), x.getValue()); // additional claims/attributes about the subject can be added
+        });
+
         List<String> groups = Arrays.asList("ADMIN");
         claims.setStringListClaim("groups", groups); // multi-valued claims work too and will end up as a JSON array
 

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -45,6 +46,11 @@ public class User implements Principal {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "userId")
     private Set<Playlist> playlists;
+
+    @JsonIgnore
+    @Transient
+    @OneToOne(mappedBy="user")
+    private Token token;
 
     @Column(name = "email", nullable = false)
     private String email;

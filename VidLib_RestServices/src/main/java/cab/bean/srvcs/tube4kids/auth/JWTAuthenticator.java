@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
+import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
@@ -48,20 +49,13 @@ public class JWTAuthenticator implements Authenticator<JwtContext, User> {
         try {
             
             final String subject = context.getJwtClaims().getSubject();
-
-//            Optional<User> u = tokenDAO.findUserWithToken(subject);
-            Optional<User> u =  userDAO.findById(1L);
-
             LOGGER.debug("got subject: " + subject);
-//            LOGGER.debug("ignoring found user" + u);
-            if (true) {
-//            if (! u.isPresent()) {
-        	
-        		u = Optional.of(createSSOUser( context.getJwtClaims() ));
 
+            Optional<Token> t = tokenDAO.findUserWithToken(subject);
+            if (t.isPresent()) {
+        		return Optional.of(t.get().getUser());
             }
-    	LOGGER.debug("setting user " + u.toString());
-            return u;
+            return Optional.empty(); 
         }
         catch (MalformedClaimException e) { return Optional.empty(); }
     }

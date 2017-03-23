@@ -162,7 +162,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
 
-        jerseyConf.register(new GoogleAuthNResource(configuration.getJwtTokenSecret(), configuration.getClientId()));
+        jerseyConf.register(new GoogleAuthNResource(tokenDAO, userDAO , configuration.getJwtTokenSecret(), configuration.getClientId()));
         
         jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
