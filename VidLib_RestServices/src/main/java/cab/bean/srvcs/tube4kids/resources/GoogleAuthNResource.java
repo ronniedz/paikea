@@ -87,8 +87,7 @@ public class GoogleAuthNResource extends BaseResource {
     }
 
     private Map<String, String> makeJwt(GoogleIdToken idToken) {
-
-       final  Map<String, Object> m = new Hashtable<String, Object>();
+	final  Map<String, Object> m = new Hashtable<String, Object>();
         
         idToken.getPayload().entrySet().forEach(x -> { m.put(x.getKey(), x.getValue()); });
         System.err.println(m); 
@@ -101,7 +100,12 @@ public class GoogleAuthNResource extends BaseResource {
         claims.setIssuedAtToNow();  // when the token was issued/created (now)
         claims.setNotBeforeMinutesInThePast(2); // time before which the token is not yet valid (2 minutes ago)
         claims.setSubject(idToken.getPayload().getSubject());
-        claims.setClaim("email",idToken.getPayload().getEmail()); // additional claims/attributes about the subject can be added
+        claims.setClaim("email", idToken.getPayload().getEmail()); // additional claims/attributes about the subject can be added
+        claims.setClaim("email_verified",idToken.getPayload().getEmailVerified()); // additional claims/attributes about the subject can be added
+        claims.setClaim("firstname", idToken.getPayload().getUnknownKeys().get("given_name")); // additional claims/attributes about the subject can be added
+        claims.setClaim("lastname", idToken.getPayload().getUnknownKeys().get("family_name")); // additional claims/attributes about the subject can be added
+        claims.setClaim("picture",idToken.getPayload().getUnknownKeys().get("picture")); // additional claims/attributes about the subject can be added
+        claims.setClaim("locale",idToken.getPayload().getUnknownKeys().get("locale")); // additional claims/attributes about the subject can be added
         List<String> groups = Arrays.asList("ADMIN");
         claims.setStringListClaim("groups", groups); // multi-valued claims work too and will end up as a JSON array
 

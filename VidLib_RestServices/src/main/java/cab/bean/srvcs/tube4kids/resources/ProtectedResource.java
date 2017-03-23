@@ -26,8 +26,8 @@ public class ProtectedResource {
     @RolesAllowed("ADMIN")
     @GET
     @Path("admin")
-    public String showAdminSecret(@Context SecurityContext context) {
-	    User user = (User) context.getUserPrincipal();
+    public String showAdminSecret(@Auth User user) {
+//	    User user = (User) context.getUserPrincipal();
         return String.format("Hey there, %s. It looks like you are an admin. %d", user.getName(), user.getId());
     }
 

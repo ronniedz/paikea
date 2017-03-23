@@ -181,7 +181,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
         jerseyConf.register(new AuthDynamicFeature(authFilter));
         jerseyConf.register(RolesAllowedDynamicFeature.class);
-        jerseyConf.register(new AuthValueFactoryProvider.Binder<>(Principal.class));
+        jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
    }
 
     private JwtAuthFilter<User> buildJwtAuthFilter(String jwtSecret, String clientId, JWTAuthenticator authenticator) {

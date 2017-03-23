@@ -54,10 +54,13 @@ public class JWTAuthenticator implements Authenticator<JwtContext, User> {
 
             LOGGER.debug("got subject: " + subject);
 //            LOGGER.debug("ignoring found user" + u);
-            if (! u.isPresent()) {
+            if (true) {
+//            if (! u.isPresent()) {
+        	
         		u = Optional.of(createSSOUser( context.getJwtClaims() ));
+
             }
-    	LOGGER.debug("setting user " + u.get().toString());
+    	LOGGER.debug("setting user " + u.toString());
             return u;
         }
         catch (MalformedClaimException e) { return Optional.empty(); }
@@ -82,12 +85,22 @@ picture": "https://lh4.googleusercontent.com/-6zyoEuugOe0/AAAAAAAAAAI/AAAAAAAAAA
     
     private User createSSOUser(JwtClaims jwtClaims)  throws MalformedClaimException {
         User u = new User();
- 	u.setEmail(jwtClaims.getStringClaimValue("email"));
-        u.setFirstname(jwtClaims.getStringClaimValue("given_name"));
-        u.setLastname(jwtClaims.getStringClaimValue("family_name"));
-        u.setEmailVerified((Boolean)jwtClaims.getClaimsMap().get("email_verified"));
+	final  Map<String, Object> m = new Hashtable<String, Object>();
+        
+	jwtClaims.getClaimsMap().entrySet().forEach(x -> { m.put(x.getKey(), x.getValue()); });
+        System.err.println(m); 
+
+        //        claims.setClaim("picture",idToken.getPayload().getUnknownKeys().get("picture")); // additional claims/attributes about the subject can be added
+
+        u.setEmail(jwtClaims.getStringClaimValue("email"));
+        u.setFirstname(jwtClaims.getStringClaimValue("firstname"));
+        u.setLastname(jwtClaims.getStringClaimValue("lastname"));
+        u.setEmailVerified((Boolean)jwtClaims.getClaimValue("email_verified"));
         u.setEmailVerified(Boolean.TRUE);
         u.setActivated(Boolean.TRUE);
+        
+	u.setPassword(Long.toHexString(Double.doubleToLongBits(Math.random())));
+
        return userDAO.create(u);
     }
     
