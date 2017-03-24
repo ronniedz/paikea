@@ -13,54 +13,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class TokenDAO extends AbstractDAO<Token> {
-    private UserDAO userDAO;
 
-    public TokenDAO(SessionFactory sessionFactory, UserDAO userDAO) {
+    public TokenDAO(SessionFactory sessionFactory) {
 	super(sessionFactory);
-	this.userDAO = userDAO;
     }
 
-//    public Token findOrCreateTokenForUser(Long userId) {
-//	Optional<User> foundUser = userDAO.findById(userId);
-//	Optional<Token> token = Optional.empty();
-//
-//	if (foundUser.isPresent()) {
-//	    User user = foundUser.get();
-//	    token = findTokenForUser(user);
-//
-//	    if (!token.isPresent()) {
-//		Token model = new Token(userId, null);
-//		model.setUserId(userId);
-//		model.setToken(UUID.randomUUID());
-//		return persist(model);
-//	    }
-//	}
-//
-//	return token.orElse(null);
-//    }
-
-    public Optional<Token> findUserWithToken(String subject) {
-//	User 
- Criteria criteria = criteria().add(Restrictions.eq("subject", subject));
-//	return Optional.ofNullable(uniqueResult(criteria));
-//	Criteria criteria = criteria()
-//		.createAlias("user", "u").add(Restriction.eq("u.id", 1L));
-//		.setFetchMode('parent.child', FetchMode.JOIN);
-//
-//	criteria.add(Restrictions.eq("status", "Escalate To");
-//
-//	.createAlias("mate", "mt", Criteria.LEFT_JOIN, Restrictions.like("mt.name", "good%") )
-//	.addOrder(Order.asc("mt.age"))
-	
-	return Optional.ofNullable(uniqueResult(criteria));
-//	this.uniqueResult(criteria().add(Restrictions.eq("subject", subject)));
-	
-    }
-    
-    public Optional<Token> findTokenForUser(User user) {
-	Criteria criteria = criteria().createAlias("user", "u").add(
-		Restrictions.eq("u.id", user.getId()));
-	
+    public Optional<Token> findBySubject(String subject) {
+	Criteria criteria = criteria().add(Restrictions.eq("subject", subject));
+//	return Optional.ofNullable(namedQuery("cab.bean.srvcs.tube4kids.core.Token.findBySubject").setParameter("subject", subject).uniqueResult());
 	return Optional.ofNullable(uniqueResult(criteria));
     }
 

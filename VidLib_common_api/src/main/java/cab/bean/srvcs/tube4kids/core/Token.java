@@ -48,6 +48,7 @@ public class Token {
     private User user;
     
     public Token() {}
+    
     public Token(User user, String subject, String issuer) {
 	this.user = user;
 	this.subject = subject;

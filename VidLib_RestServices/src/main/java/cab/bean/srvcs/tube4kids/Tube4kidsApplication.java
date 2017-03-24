@@ -62,7 +62,7 @@ import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
 import cab.bean.srvcs.tube4kids.resources.AgeGroupResource;
 import cab.bean.srvcs.tube4kids.resources.ChildResource;
 import cab.bean.srvcs.tube4kids.resources.GenreResource;
-import cab.bean.srvcs.tube4kids.resources.GoogleAuthNResource;
+import cab.bean.srvcs.tube4kids.resources.AuthNVerityResource;
 import cab.bean.srvcs.tube4kids.resources.PlaylistResource;
 import cab.bean.srvcs.tube4kids.resources.UserResource;
 import cab.bean.srvcs.tube4kids.resources.VideoResource;
@@ -135,34 +135,29 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
     private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
 
-	
-        final YouTubeAPIProxy ytProxyClient = new YouTubeAPIProxy(configuration.getProxySearchUrl());
+	final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
+	final YouTubeAPIProxy ytProxyClient = new YouTubeAPIProxy(configuration.getProxySearchUrl());
+
+	final UserDAO userDAO = new UserDAO(hibernateBundle.getSessionFactory());
+        final TokenDAO tokenDAO = new TokenDAO(hibernateBundle.getSessionFactory());
 
         final VideoDAO videoDAO = new VideoDAO(hibernateBundle.getSessionFactory());
         final GenreDAO genreDAO = new GenreDAO(hibernateBundle.getSessionFactory());
-
-        final UserDAO userDAO = new UserDAO(hibernateBundle.getSessionFactory());
-        final TokenDAO tokenDAO = new TokenDAO(hibernateBundle.getSessionFactory(), userDAO);
-        
         final PlaylistDAO playlistDAO = new PlaylistDAO(hibernateBundle.getSessionFactory());
         final AgeGroupDAO ageGroupDAO = new AgeGroupDAO(hibernateBundle.getSessionFactory());
-	    
         final ChildDAO childDAO = new ChildDAO(hibernateBundle.getSessionFactory());
-        final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
+        
 
         jerseyConf.register(new YouTubeVideoResource(ytProxyClient));
 
         jerseyConf.register(new GenreResource(genreDAO));
         jerseyConf.register(new UserResource(userDAO));
         jerseyConf.register(new AgeGroupResource(ageGroupDAO));
-        
         jerseyConf.register(new ChildResource(childDAO, videoDAO, playlistDAO));
-        
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
-        
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
 
-        jerseyConf.register(new GoogleAuthNResource(tokenDAO, userDAO , configuration.getJwtTokenSecret(), configuration.getClientId()));
+        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO , configuration.getJwtTokenSecret(), configuration.getClientId()));
         
         jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
@@ -172,12 +167,9 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	    String jwtSecret = configuration.getJwtTokenSecret();
 
         JWTAuthenticator authenticator = new UnitOfWorkAwareProxyFactory(hibernateBundle)
-        		.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class, UserDAO.class}, new Object[]{tokenDAO, userDAO });
+        		.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO});
   
-//        JWTAuthenticator authenticator = new JWTAuthenticator(tokenDAO, userDAO );
-        
         JwtAuthFilter<User> authFilter = buildJwtAuthFilter(jwtSecret, configuration.getClientId(), authenticator );
-        
         
         jerseyConf.register(new AuthDynamicFeature(authFilter));
         jerseyConf.register(RolesAllowedDynamicFeature.class);
@@ -196,9 +188,6 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	}
         
 	final JwtConsumer consumer = new JwtConsumerBuilder()
-//        .setSkipAllValidators()
-//        .setDisableRequireSignature()
-//        .setSkipSignatureVerification()
 	.setExpectedAudience(clientId)
         .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
         .setRequireExpirationTime() // the JWT must have an expiration time

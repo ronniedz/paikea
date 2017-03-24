@@ -6,6 +6,7 @@ import cab.bean.srvcs.tube4kids.db.UserDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.LongParam;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -31,7 +32,8 @@ public class UserResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    public Response deleteUser(@PathParam("id") Long id) {
+    @RolesAllowed("ADMIN")
+   public Response deleteUser(@PathParam("id") Long id) {
     	userDAO.delete(id);
 	return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -45,6 +47,7 @@ public class UserResource {
 
     @POST
     @UnitOfWork
+    @RolesAllowed("ADMIN")
     public User createUser(User user) {
         return userDAO.create(user);
     }
