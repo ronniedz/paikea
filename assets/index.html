@@ -21,17 +21,19 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta name="google-signin-scope" content="profile email">
-    <meta name="google-signin-client_id" content="16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com">
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+<head>
+<meta name="google-signin-scope" content="profile email">
+<meta name="google-signin-client_id"
+	content="16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com">
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 
-   </head>
-  <body>
-    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
-    <script>
+</head>
+<body>
+	<div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+	<script>
       function onSignIn(googleUser) {
         // Useful data for your client-side scripts:
         var profile = googleUser.getBasicProfile();
@@ -44,62 +46,33 @@
 
         // The ID token you need to pass to your backend:
         var id_token = googleUser.getAuthResponse().id_token;
-        console.log("ID Token: " + id_token);
-/* 
-		var id_token = authResult.currentUser.get().getAuthResponse().id_token;
-		alert(id_token);
- */
+
 				$('#authResult').append('<br/>id_token : ');
 				$('#authResult').append(id_token);
 					
  				var xhr = new XMLHttpRequest();
 				xhr.open('POST', 'http://localhost:8080/api/auth/gcallback');
 				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
 				xhr.onload = function() {
 				  console.log('Signed in as: ' + xhr.responseText);
 		      var jsonResponse = JSON.parse(xhr.responseText);
-		      $('#authResult').append('<br/>xhr.responseText : ' + xhr.responseText);
-		      $('#authResult').append('<br/>token val : ' + jsonResponse.token);
-setCookie("beancab", jsonResponse.token, 1);
+		      $('#authResult').append('<br/><b>BeanCab Token: </b><code>' + jsonResponse.token +"</code>");
+					setCookie("beancab", jsonResponse.token, 1);
 				};
+
 				xhr.send('id_token=' + id_token);
-//				document.cookie = "beancab="  + id_token);
-function setCookie(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-}
-/* 
-        $.ajax({
-            headers : {
-                'Accept' : 'application/json',
-                'Content-Type' : 'application/json'
-            },
-            url : 'http://localhost:8080/wutup/venues/12',
-            type : 'PATCH',
-            data : JSON.stringify({description: "842490812321309213801923 gonzagazors"}),
-            success : function(response, textStatus, jqXhr) {
-                console.log("Venue Successfully Patched!");
-            },
-            error : function(jqXHR, textStatus, errorThrown) {
-                // log the error to the console
-                console.log("The following error occured: " + textStatus, errorThrown);
-            },
-            complete : function() {
-                console.log("Venue Patch Ran");
-            }
-        });
-        $(document).ready(function(){
-            
-        })
+
+				function setCookie(cname, cvalue, exdays) {
+				    var d = new Date();
+				    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+				    var expires = "expires="+ d.toUTCString();
+				    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+				}
         
-	    	
- */        
       };
     </script>
-    <div id="authResult">
-    </div>
-    
-  </body>
+	<div id="authResult"></div>
+
+</body>
 </html>
