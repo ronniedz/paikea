@@ -57,11 +57,9 @@
 				xhr.onload = function() {
 				  console.log('Signed in as: ' + xhr.responseText);
 		      var jsonResponse = JSON.parse(xhr.responseText);
-		      $('#authResult').append('<br/><b>BeanCab Token: </b><code>' + jsonResponse.token +"</code>");
-
 		      // Can set Cookie OR
 		      // Header -> "Authorization: Bearer [token]"
-					setCookie("beancab", jsonResponse.token, 1);
+				setCookie("beancab", jsonResponse.token, 1);
 				};
 
 				xhr.send('id_token=' + id_token);

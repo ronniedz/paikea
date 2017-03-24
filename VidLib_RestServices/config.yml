@@ -66,7 +66,7 @@ assets:
     # Override requests to /dashboard/${1} to instead look in 
     # ${working directory}/src/main/resources/assets/${1}
 #    /assets: /Users/ronalddennison/Projects/Paikea/assets/
-    /: /Users/ronalddennison/Projects/Paikea/assets/
+    /: /var/www/kidvid/Paikea/assets/
 
 
     
