@@ -28,16 +28,12 @@ public class JWTAuthenticator implements Authenticator<JwtContext, User> {
     @Override
     public Optional<User> authenticate(JwtContext context) {
 	
-        // All JsonWebTokenExceptions will result in a 401 Unauthorized response.
         try {
-            
-            final String subject = context.getJwtClaims().getSubject();
-            Optional<Token> t = tokenDAO.findBySubject(subject);
-            if (t.isPresent()) {
-        		return Optional.of(t.get().getUser());
-            }
-            return Optional.empty(); 
+            return Optional.of(
+        	    	tokenDAO.findUserBySubject(context.getJwtClaims().getSubject())
+        	    );
         }
+        // All JsonWebTokenExceptions will result in a 401 Unauthorized response.
         catch (MalformedClaimException e) { return Optional.empty(); }
     }
 }

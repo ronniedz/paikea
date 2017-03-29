@@ -1,11 +1,9 @@
 package cab.bean.srvcs.tube4kids;
+
+
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.AuthenticationException;
-import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
-import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -20,35 +18,24 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
 import java.io.UnsupportedEncodingException;
-import java.security.Principal;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import javax.ws.rs.container.ContainerRequestContext;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
-import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
-import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.keys.HmacKey;
-import org.neo4j.driver.v1.Driver;
 
-import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
-
-import cab.bean.srvcs.tube4kids.auth.ExampleAuthenticator;
-import cab.bean.srvcs.tube4kids.auth.ExampleAuthorizer;
 import cab.bean.srvcs.tube4kids.auth.JWTAuthenticator;
 import cab.bean.srvcs.tube4kids.cli.RenderCommand;
-import cab.bean.srvcs.tube4kids.filter.DateRequiredFeature;
-import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
 import cab.bean.srvcs.tube4kids.core.User;
-
 //import cab.bean.srvcs.tube4kids.core.AgeGroup;
 import cab.bean.srvcs.tube4kids.db.AgeGroupDAO;
 import cab.bean.srvcs.tube4kids.db.ChildDAO;
@@ -58,38 +45,27 @@ import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
+import cab.bean.srvcs.tube4kids.filter.DateRequiredFeature;
+import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
 import cab.bean.srvcs.tube4kids.resources.AgeGroupResource;
+import cab.bean.srvcs.tube4kids.resources.AuthNVerityResource;
 import cab.bean.srvcs.tube4kids.resources.ChildResource;
 import cab.bean.srvcs.tube4kids.resources.GenreResource;
-import cab.bean.srvcs.tube4kids.resources.AuthNVerityResource;
 import cab.bean.srvcs.tube4kids.resources.PlaylistResource;
+import cab.bean.srvcs.tube4kids.resources.ProtectedResource;
 import cab.bean.srvcs.tube4kids.resources.UserResource;
 import cab.bean.srvcs.tube4kids.resources.VideoResource;
 import cab.bean.srvcs.tube4kids.resources.YouTubeVideoResource;
-import cab.bean.srvcs.tube4kids.resources.ProtectedResource;
-import cab.bean.srvcs.tube4kids.resources.ViewResource;
-import cab.bean.srvcs.tube4kids.resources.FilteredResource;
+
+import com.fasterxml.jackson.datatype.joda.JodaMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 //import cab.bean.srvcs.tube4kids.resources.PeopleResource;
 //import cab.bean.srvcs.tube4kids.resources.PersonResource;
 
 
-
-
-
-import org.glassfish.jersey.server.ServerProperties;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.joda.JodaMapper;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-
-
 public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
-
-    public static void main(String[] args) throws Exception {
-        new Tube4kidsApplication().run(args);
-    }
 
     private final HibernateBundle<Tube4kidsConfiguration> hibernateBundle = 
 	new ScanningHibernateBundle<Tube4kidsConfiguration>("cab.bean.srvcs.tube4kids.core") {
@@ -99,12 +75,36 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         }
     };
 
+    public final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
+
+    public static void main(String[] args) throws Exception {
+        new Tube4kidsApplication().run(args);
+    }
+
     @Override
     public String getName() {
         return "tube4kids";
     }
+    
+    @Override
+    public void run(Tube4kidsConfiguration configuration, Environment environment) {
+	Map<String, Object> properties = new HashMap<>();
+	properties.put(ServerProperties.WADL_FEATURE_DISABLE, false);
+	environment.jersey().getResourceConfig().addProperties(properties);
 
-    public final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
+	environment.healthChecks().register("template", new TemplateHealthCheck(configuration.buildTemplate()));
+	environment.jersey().register(DateRequiredFeature.class);
+
+	jsonProvider.setMapper(new JodaMapper());
+
+	environment.jersey().register(jsonProvider);
+	// Contain this REST service to a sub-directory (<code>/api/</code>)
+	environment.jersey().setUrlPattern("/api/*");
+
+	buildResources(configuration, environment.jersey());
+
+	setupCORS(environment);
+    }
 
     @Override
     public void initialize(Bootstrap<Tube4kidsConfiguration> bootstrap) {
@@ -146,31 +146,26 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         final PlaylistDAO playlistDAO = new PlaylistDAO(hibernateBundle.getSessionFactory());
         final AgeGroupDAO ageGroupDAO = new AgeGroupDAO(hibernateBundle.getSessionFactory());
         final ChildDAO childDAO = new ChildDAO(hibernateBundle.getSessionFactory());
+
         
+        final String jwtSecret = configuration.getJwtTokenSecret();
+
+        final JWTAuthenticator authenticator = new UnitOfWorkAwareProxyFactory(hibernateBundle)
+        		.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO});
+  
+        final JwtAuthFilter<User> authFilter = buildJwtAuthFilter(jwtSecret, configuration.getClientId(), authenticator );
 
         jerseyConf.register(new YouTubeVideoResource(ytProxyClient));
-
         jerseyConf.register(new GenreResource(genreDAO));
         jerseyConf.register(new UserResource(userDAO));
         jerseyConf.register(new AgeGroupResource(ageGroupDAO));
         jerseyConf.register(new ChildResource(childDAO, videoDAO, playlistDAO));
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
-
         jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO , configuration.getJwtTokenSecret(), configuration.getClientId()));
         
-        jerseyConf.register(new ViewResource());
+//        jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
-        
-
-
-	    String jwtSecret = configuration.getJwtTokenSecret();
-
-        JWTAuthenticator authenticator = new UnitOfWorkAwareProxyFactory(hibernateBundle)
-        		.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO});
-  
-        JwtAuthFilter<User> authFilter = buildJwtAuthFilter(jwtSecret, configuration.getClientId(), authenticator );
-        
         jerseyConf.register(new AuthDynamicFeature(authFilter));
         jerseyConf.register(RolesAllowedDynamicFeature.class);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
@@ -205,36 +200,9 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
             .buildAuthFilter();
     }
 
-    @Override
-    public void run(Tube4kidsConfiguration configuration, Environment environment) {
-
-        // ADD WADL
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(ServerProperties.WADL_FEATURE_DISABLE, false);
-        environment.jersey().getResourceConfig().addProperties(properties);
-
-
-        environment.healthChecks().register("template", new TemplateHealthCheck( configuration.buildTemplate() ));
-        environment.jersey().register(DateRequiredFeature.class);
-
-        	
-//        ObjectMapper mapper = new ObjectMapper();
-//        mapper.registerModule(new JodaModule());
-
-        
-	this.jsonProvider.setMapper(new JodaMapper());
-	environment.jersey().register(this.jsonProvider);
-	environment.jersey().setUrlPattern("/api/*");
-
-        buildResources(configuration, environment.jersey());
-
-
-        environment.jersey().register(new FilteredResource());
-        
-        setupCORS(environment);
-    }
     private void setupCORS(Environment environment) {
-        final FilterRegistration.Dynamic cors =  environment.servlets().addFilter("CORS", CrossOriginFilter.class);
+
+	final FilterRegistration.Dynamic cors =  environment.servlets().addFilter("CORS", CrossOriginFilter.class);
 
         // Configure CORS parameters:
         // 	'Access-Control-Allow-Origin: *'
@@ -268,7 +236,5 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 //	    filter.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
 //	    filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
 	  }
-
-    
         
 }

@@ -28,4 +28,10 @@ public class TokenDAO extends AbstractDAO<Token> {
         return persist(beanToken);
     }
 
+    public User findUserBySubject(String subject) {
+	Optional<Token> t = findBySubject(subject);
+	
+	return t.isPresent() ? t.get().getUser() : null; 
+    }
+
 }

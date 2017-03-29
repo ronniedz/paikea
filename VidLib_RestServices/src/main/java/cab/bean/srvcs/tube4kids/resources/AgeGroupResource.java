@@ -20,7 +20,6 @@ import java.util.List;
 
 @Path("/age")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({"MANAGER"})
 public class AgeGroupResource {
 
     private final AgeGroupDAO ageGroupDAO;
@@ -31,6 +30,7 @@ public class AgeGroupResource {
 
     @POST
     @UnitOfWork
+    @PermitAll
     public AgeGroup createAgeGroup(AgeGroup ageGroup) {
         return ageGroupDAO.create(ageGroup);
     }
@@ -39,6 +39,7 @@ public class AgeGroupResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
+    @RolesAllowed({"MANAGER"})
     public Response deleteAgeGroup(@PathParam("id") Long id) {
     	ageGroupDAO.delete(id);
 	return Response.status(Response.Status.NO_CONTENT).build();
@@ -46,7 +47,6 @@ public class AgeGroupResource {
 
     @GET
     @UnitOfWork
-    @PermitAll
     public List<AgeGroup> listAges() {
         return ageGroupDAO.findAll();
     }
