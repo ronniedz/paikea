@@ -67,6 +67,11 @@ import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 
 public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
+    private GoogleAPIClientConfiguration googleAPIConf;
+    private JWTConfiguration jwtConf;
+    
+    public final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
+
     private final HibernateBundle<Tube4kidsConfiguration> hibernateBundle = 
 	new ScanningHibernateBundle<Tube4kidsConfiguration>("cab.bean.srvcs.tube4kids.core") {
         @Override
@@ -75,19 +80,17 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         }
     };
 
-    public final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
-
     public static void main(String[] args) throws Exception {
         new Tube4kidsApplication().run(args);
-    }
-
-    @Override
-    public String getName() {
-        return "tube4kids";
     }
     
     @Override
     public void run(Tube4kidsConfiguration configuration, Environment environment) {
+	
+	jwtConf = configuration.getJwtConfiguration();
+	googleAPIConf = configuration.getGoogleAPIClientConfiguration();
+	
+	
 	Map<String, Object> properties = new HashMap<>();
 	properties.put(ServerProperties.WADL_FEATURE_DISABLE, false);
 	environment.jersey().getResourceConfig().addProperties(properties);
@@ -99,7 +102,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
 	environment.jersey().register(jsonProvider);
 	// Contain this REST service to a sub-directory (<code>/api/</code>)
-	environment.jersey().setUrlPattern("/api/*");
+	environment.jersey().setUrlPattern(configuration.getAppContextUri());
 
 	buildResources(configuration, environment.jersey());
 
@@ -118,19 +121,23 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
         bootstrap.addCommand(new RenderCommand());
         bootstrap.addBundle(new ConfiguredAssetsBundle("/assets", "/", "index.html"));
+        
         bootstrap.addBundle(new MigrationsBundle<Tube4kidsConfiguration>() {
             @Override
             public DataSourceFactory getDataSourceFactory(Tube4kidsConfiguration configuration) {
                 return configuration.getDataSourceFactory();
             }
         });
+        
         bootstrap.addBundle(hibernateBundle);
+        
         bootstrap.addBundle(new ViewBundle<Tube4kidsConfiguration>() {
             @Override
             public Map<String, Map<String, String>> getViewConfiguration(Tube4kidsConfiguration configuration) {
                 return configuration.getViewRendererConfiguration();
             }
         });
+        
     }
 
     private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
@@ -147,14 +154,6 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         final AgeGroupDAO ageGroupDAO = new AgeGroupDAO(hibernateBundle.getSessionFactory());
         final ChildDAO childDAO = new ChildDAO(hibernateBundle.getSessionFactory());
 
-        
-        final String jwtSecret = configuration.getJwtTokenSecret();
-
-        final JWTAuthenticator authenticator = new UnitOfWorkAwareProxyFactory(hibernateBundle)
-        		.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO});
-  
-        final JwtAuthFilter<User> authFilter = buildJwtAuthFilter(jwtSecret, configuration.getClientId(), authenticator );
-
         jerseyConf.register(new YouTubeVideoResource(ytProxyClient));
         jerseyConf.register(new GenreResource(genreDAO));
         jerseyConf.register(new UserResource(userDAO));
@@ -162,41 +161,37 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new ChildResource(childDAO, videoDAO, playlistDAO));
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
-        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO , configuration.getJwtTokenSecret(), configuration.getClientId()));
+        
+        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, googleAPIConf, jwtConf));
         
 //        jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
-        jerseyConf.register(new AuthDynamicFeature(authFilter));
+        jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
         jerseyConf.register(RolesAllowedDynamicFeature.class);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
    }
 
-    private JwtAuthFilter<User> buildJwtAuthFilter(String jwtSecret, String clientId, JWTAuthenticator authenticator) {
-        
-	HmacKey key = null;
-	
-	try {
-	    key = new HmacKey(jwtSecret.getBytes("UTF-8") );
-	} catch (UnsupportedEncodingException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-        
-	final JwtConsumer consumer = new JwtConsumerBuilder()
-	.setExpectedAudience(clientId)
-        .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
-        .setRequireExpirationTime() // the JWT must have an expiration time
-        .setRequireSubject() // the JWT must have a subject claim
-        .setVerificationKey(key) // verify the signature with the public key
-        .setRelaxVerificationKeyValidation() // relaxes key length requirement
-        .build(); // create the JwtConsumer instance 
+    private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) {
+
 	return
             new JwtAuthFilter.Builder<User>()
-            .setCookieName("beancab")
-            .setJwtConsumer(consumer)
-            .setRealm("Video Library")
-            .setPrefix("Bearer")
-            .setAuthenticator(authenticator)
+            .setCookieName(jwtConf.getCookieName())
+            .setJwtConsumer(
+        	      new JwtConsumerBuilder()
+            	.setExpectedAudience(jwtConf.getAudienceId())
+        	        .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
+        	        .setRequireExpirationTime() // the JWT must have an expiration time
+        	        .setRequireSubject() // the JWT must have a subject claim
+        	        .setVerificationKey(jwtConf.getVerificationKey()) // verify the signature with the public key
+        	        .setRelaxVerificationKeyValidation() // relaxes key length requirement
+        	        .build()
+        	    )
+            .setRealm(jwtConf.getRealmName())
+            .setPrefix(jwtConf.getAuthHeaderPrefix())
+            .setAuthenticator(
+        	    	new UnitOfWorkAwareProxyFactory(hibernateBundle)
+        	    	.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO})
+        	    )
             .buildAuthFilter();
     }
 
@@ -210,8 +205,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_TIMING_ORIGINS_PARAM, "54000");
 
-        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_REQUEST_HEADERS_HEADER, "*");
-        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_HEADERS_HEADER, "*");
+//        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_REQUEST_HEADERS_HEADER, "*");
+//        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_HEADERS_HEADER, "*");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "*");
 //       cors.setInitParameter("allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
 //        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin");
@@ -237,4 +232,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 //	    filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
 	  }
         
+    @Override
+    public String getName() {
+        return "tube4kids";
+    }
 }

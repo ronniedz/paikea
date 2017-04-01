@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.neo4j.driver.v1.GraphDatabase;
@@ -29,8 +30,11 @@ import org.neo4j.driver.v1.Driver;
 
 
 public class Tube4kidsConfiguration extends Configuration  implements AssetsBundleConfiguration {
-    
+
     @Valid
+    @NotNull
+    private String appContextUri;
+
     @NotNull
     @JsonProperty
     private Neo4JRestServerConfiguration neo4jConf = new Neo4JRestServerConfiguration();
@@ -56,13 +60,21 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     @NotNull
     private Map<String, Map<String, String>> viewRendererConfiguration = Collections.emptyMap();
 
-    @Valid
+    @JsonProperty
     private GraphiteReporterFactory graphiteReporterFactory = new GraphiteReporterFactory();
     
-    @Valid
     @NotNull
     @JsonProperty
-    private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
+    private AssetsConfiguration assets;
+//     private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
+
+    @NotNull
+    @JsonProperty
+    public final GoogleAPIClientConfiguration googleAPIClientConfiguration = new GoogleAPIClientConfiguration();
+    
+    @NotNull
+    @JsonProperty
+    public final JWTConfiguration jwtConfiguration = new JWTConfiguration();
 
     @Override
     public AssetsConfiguration getAssetsConfiguration() {
@@ -146,27 +158,7 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     public void setGraphiteReporterFactory(GraphiteReporterFactory graphiteReporterFactory) {
         this.graphiteReporterFactory = graphiteReporterFactory;
     }
-
-    @NotEmpty
-//    private String jwtTokenSecret = "dfwzsdzwh823zebdwdz772632gdsbd";
-    private String jwtTokenSecret = "MIIDJjCCAg6gAwIBAgIIRvo0sON9ghswDQYJKoZIhvcNAQEFBQAwNjE0MDIGA1UE AxMrZmVkZXJhdG"
-    	+ "VkLXNpZ25vbi5zeXN0ZW0uZ3NlcnZpY2VhY2NvdW50LmNvbTAe Fw0xNzAzMTgxMTQzMzRaFw0xNzA"
-    + "zMjExMjEzMzRaMDYxNDAyBgNVBAMTK2ZlZGVy YXRlZC1zaWdub24uc3lzdGVtLmdzZXJ2aWNlYWNjb3"
-    	+ "VudC5jb20wggEiMA0GCSqG SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKusBxoJVow5QkfWZ4eahqe//HB"
-    + "PiZiTHd LA6AQYtZl23WEPw9OsF8mfrEroG1iWEynqCmdBfabH+0j9vLaATmYwJyqVZS8ebP y5/FkHsaMqV"
-    	+ "xmxtWik4djJTsMXp8TYS7muwCvjrgnAHaaurYnvQ0XzZa7+b52ZTG wIQMXPxDyCL8iI206c5Qmm8hfOyNM"
-    + "JPqvyJWg12d/utyPiHAEC8Xe+fiJ8I5d65l ipNgmKiNX56L1U7zZSvyrlLa3KFSCYnQbji9MU7JyTwAiZiRaYeUA"
-    	+ "+tk58z6x68A CisDYNiGrJsKaXDsFo+BCYeol/qz4RyzZChbAff8EYzzcDSxlSNjAgMBAAGjODA2 MAwGA1UdE"
-    + "wEB/wQCMAAwDgYDVR0PAQH/BAQDAgeAMBYGA1UdJQEB/wQMMAoGCCsG AQUFBwMCMA0GCSqGSIb3DQEBBQUAA4IBAQAFjXMzgmrx+y/WR1jaLNvmqscE8Ga8 T5xX+Qwtfqdh7X0hEc3ROglS"
-    	+ "O7Hah9EsnjjBfXD6KD776fnbc06ieQhI9HkxCRw+ wnWuwwBwjcFrqeovRcBbKFtNMPNWo2cX4p/t4ebpJ3tctYNjk9qXBsJlPrZkz4yB SgV963r4CaJ8rPJaiItMIh6nRplZhZsCJkLKjqt+jGgeXBb/FVoE/IS34rwVmKui 0pR2/9+bILZEtldH1cO2ffzD4FzqUirmN3UfXN8JG02jHmxfQ+/CMZ05oXyjYwcP asfBBbDz7"
-    + "7ymDveEkvsSPgrzCkXBzrEpMUtttlXnt0nVzH2VGE/av7ED";
     
-
-    public String getJwtTokenSecret() {
-//        return jwtTokenSecret.getBytes("UTF-8");
-        return jwtTokenSecret;
-    }
-
     public Driver getNeo4jDriver() {
 	return  GraphDatabase.driver(
 	    neo4jConf.getURI(),
@@ -174,8 +166,26 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
 	);
     }
 
-    public String getClientId() {
-	return "16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com";
+    @JsonProperty
+    public GoogleAPIClientConfiguration getGoogleAPIClientConfiguration() {
+        return googleAPIClientConfiguration;
+    }
+
+    @JsonProperty
+    public JWTConfiguration getJwtConfiguration() {
+        return jwtConfiguration;
+    }
+
+    public String getAppContextUri() {
+	return appContextUri ;
+    }
+
+    /**
+     * @param appContextUri the appContextUri to set
+     */
+    @JsonProperty
+    public void setAppContextUri(String appUriPrefix) {
+        this.appContextUri = appUriPrefix;
     }
 
 }

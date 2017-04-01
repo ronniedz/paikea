@@ -39,7 +39,7 @@ public class AgeGroupResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed({"MANAGER"})
+    @RolesAllowed({"ADMIN"})
     public Response deleteAgeGroup(@PathParam("id") Long id) {
     	ageGroupDAO.delete(id);
 	return Response.status(Response.Status.NO_CONTENT).build();

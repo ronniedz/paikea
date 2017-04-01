@@ -40,13 +40,14 @@ https://accounts.google.com/o/oauth2/iframerpc?action=issueToken&response_type=t
 	
 	function onSignIn(googleUser) {
 	  var outputBox = $('#authResult');
+	  var debugContent = $('#debugContent');
 		
     // The ID token you need to pass to your backend:
     var id_token = googleUser.getAuthResponse().id_token;
     var profile = googleUser.getBasicProfile();
     
-	  dumpProperties(googleUser, outputBox, '<h2>googleUser Object properties</h2>', false);
-	  dumpProperties(profile, outputBox, '<h2>profile Object properties</h2>', true);
+	  dumpProperties(googleUser, debugContent, '<h2>googleUser Object properties</h2>', false);
+	  dumpProperties(profile, debugContent, '<h2>profile Object properties</h2>', true);
  
     outputBox.append('<h4>Token from Google</h4> Sent to beancab<br/>');
     outputBox.append(id_token);
@@ -65,6 +66,11 @@ https://accounts.google.com/o/oauth2/iframerpc?action=issueToken&response_type=t
 		    var jsonResponse = JSON.parse(resp);
 		    // Set Cookie
 				setCookie("beancab", jsonResponse.token, 1);
+
+				console.log(jsonResponse);
+			  outputBox.append('<h4>BeanToken</h4>To be stored in cookie</br>');
+				outputBox.append(jsonResponse.token);
+							
 				// 	Alterntaively, you can set the 'Authorization' header in every request ...: 
 				//	xhr.setRequestHeader("Authorization", "Bearer " + jsonResponse.token);
 	    }
@@ -91,16 +97,31 @@ https://accounts.google.com/o/oauth2/iframerpc?action=issueToken&response_type=t
 			 	valcell = $('<td class="value"></td>');
 			 	row.append(valcell);
 			 	valcell.html(
-//					typ == 'function' ? ( doFunc ? obj[nm]() : obj[nm]) :
-					 	typ == 'function' ? obj[nm].toString() :
-						 	(typ == 'object' ? dumpProperties(obj[nm], valcell, 'inner', false) : obj[nm] )
+//					 	typ == 'function' ? obj[nm].toString() :
+					typ == 'function' ? ( doFunc ? obj[nm]() : obj[nm].toString()) :
+					(typ == 'object' ? dumpProperties(obj[nm], valcell, 'inner', false) : obj[nm] )
 				);
 		  }
 		}
+		
 };
+
+$(function(){
+
+	$('#ytlogout').on('click', function(event) {
+/* 		event.preventDefault();
+		alert('logging out of YT' + this.href);
+		$.ajax({ 'url' : this.href }); 
+ */	});
+	
+});
 </script>
-<h4>This is just a dump of the returned objects</h4>
+
+<a id="ytlogout" href="https://www.youtube.com/logout" target="_blank">Logout of youtube</a>
+
 <div id="authResult"></div>
+<h4>A debug/learning dump of the returned object</h4>
+<div id="debugContent"></div>
 <!--
  <iframe style="width: 94%; height: 600px;"  src="/api/application.wadl"></iframe>
 -->

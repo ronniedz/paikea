@@ -1,3 +1,5 @@
+appContextUri: /api/
+
 template: Hello, %s!
 
 defaultName: ${DW_DEFAULT_NAME:-Stranger}
@@ -63,10 +65,6 @@ server:
 
 assets:
   overrides:
-    # Override requests to /dashboard/${1} to instead look in 
-    # ${working directory}/src/main/resources/assets/${1}
-#    /assets: /Users/ronalddennison/Projects/Paikea/assets/
-#    /: /Users/ronalddennison/Projects/Paikea/assets/
     /: ../assets/
 
 
@@ -138,4 +136,20 @@ neo4jConf:
   path: /
   username: neo4j
   password: mango
+
+googleAPIClientConfiguration:
+  clientId: "16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com"
+  secret: "5aLltV9mfyeteSV9ihPo77Yt"
+  
+##  verificationUri: "/api/auth/gallback"
+
+jwtConfiguration:
+  verificationKey: "5aLltV9mfyeteSV9ihPo77YtVkLXNpZ25vbi5zeXN0ZW0uZ3NlcnZpY2VhY2NvdW50LmNvbTAe"
+  audienceId: "client.apps.beancabfamilyuser.com"
+  issuer: "apps.beancab.com"
+  cookieName: beancab
+  realmName: "Children's Video Library"
+  authHeaderPrefix: Bearer
+  keyId: "beancab.com_rsapublic"
+
 

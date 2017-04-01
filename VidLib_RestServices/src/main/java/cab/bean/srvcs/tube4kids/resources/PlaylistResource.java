@@ -1,5 +1,6 @@
 package cab.bean.srvcs.tube4kids.resources;
 
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.UriBuilder;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.core.Playlist;
+import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
@@ -36,7 +38,7 @@ import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 public class PlaylistResource extends BaseResource {
 
     // TODO JWT auth
-    private final long fakeUserId = 1;
+//    private final long fakeUserId = 1;
     private final PlaylistDAO playlistDAO;
     private final VideoDAO videoDAO;
     
@@ -48,10 +50,10 @@ public class PlaylistResource extends BaseResource {
 
     @POST
     @UnitOfWork
-    public Response createPlaylist(Playlist playlist) {
+    public Response createPlaylist(Playlist playlist, @Auth User user) { 
 	
 	// TODO JWT auth
-	playlist.setUserId(fakeUserId);
+	playlist.setUserId(user.getId());
 	
 	Playlist p = playlistDAO.create(playlist);
 	
@@ -65,7 +67,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/pick/{pid: [0-9]+}")
     @PUT
     @UnitOfWork
-    public Response pickPlaylist(@PathParam("pid") Long pid, Playlist destPlaylist ) {
+    public Response pickPlaylist(@PathParam("pid") Long pid, Playlist destPlaylist, @Auth User user) {
 	
 	// TODO In the future won't need to liberate() as only decoupled playlists will be findable 
 	Playlist org = liberatePlaylist(pid);
@@ -76,7 +78,7 @@ public class PlaylistResource extends BaseResource {
 	    destPlaylist.setTitle(org.getTitle() + " (picked)");
 	}
 	//  TODO - get user from context 
-	destPlaylist.setUserId(2L);
+	destPlaylist.setUserId(user.getId());
 	
 	destPlaylist = playlistDAO.create(destPlaylist);
 	

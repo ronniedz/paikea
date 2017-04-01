@@ -1,5 +1,6 @@
 package cab.bean.srvcs.tube4kids.resources;
 
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.IntParam;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.UriBuilder;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
+import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.ChildDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
@@ -39,7 +41,7 @@ import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 @Produces(MediaType.APPLICATION_JSON)
 public class ChildResource extends BaseResource {
 
-    private final long fakeUserId = 1L;
+//    private final long fakeUserId = 1L;
     private final ChildDAO childDAO;
     private final VideoDAO videoDAO;
     private final PlaylistDAO playlistDAO;
@@ -52,11 +54,11 @@ public class ChildResource extends BaseResource {
 
     @POST
     @UnitOfWork
-    public Response createChild(List<Child> children) {
+    public Response createChild(List<Child> children, @Auth User user) {
         final boolean ifMini = isMinimalRequest();
     
         List<?> outp = children.stream().map( aChild -> {
-            	aChild.setUserId(fakeUserId); // TODO add real user
+            	aChild.setUserId(user.getId()); 
             	aChild.setCreated(new Timestamp(java.lang.System.currentTimeMillis()));
             	return childDAO.create(aChild, ifMini);
     	}).collect(Collectors.toList());

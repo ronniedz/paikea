@@ -42,17 +42,23 @@ public class Token {
     private String subject;
 
     @Column
-    private String issuer;
+    private String idp;
     
+    @Column
+    private String issuer = "beancab";
+    
+    @Column
+    private String audience;
+
     @OneToOne
     private User user;
     
     public Token() {}
     
-    public Token(User user, String subject, String issuer) {
+    public Token(User user, String subject, String idp) {
 	this.user = user;
 	this.subject = subject;
-	this.issuer = issuer;
+	this.idp = idp;
     }
 
     public long getId() {
@@ -85,6 +91,22 @@ public class Token {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
+
+    public String getIdp() {
+        return idp;
+    }
+
+    public void setIdp(String idp) {
+        this.idp = idp;
     }
 
     

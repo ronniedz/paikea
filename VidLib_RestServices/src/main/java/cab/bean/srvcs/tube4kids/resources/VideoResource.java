@@ -12,6 +12,7 @@ import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
 import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 import cab.bean.srvcs.tube4kids.utils.StringTool;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
@@ -147,9 +148,8 @@ public class VideoResource extends BaseResource {
     @Path("/{vid}")
     @PATCH
     @UnitOfWork
-    public Response addGenre(@PathParam("vid") String vid, Long[] genreIds) {
+    public Response addGenre(@PathParam("vid") String vid, Long[] genreIds, @Auth User user) {
 	
-	User user = userDAO.findById(1L).get();
 	ResponseData dat = new ResponseData();
 
 	try {
@@ -203,9 +203,7 @@ public class VideoResource extends BaseResource {
 
     @POST
     @UnitOfWork
-    public Response createVideos(List<Video> videos) {
-
-	User user = userDAO.findById(1L).get();
+    public Response createVideos(List<Video> videos, @Auth User user) {
 
 	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());
 	Map<String, String> paramMap = ImmutableMap.of("part", "contentDetails,snippet", "id" ,vids);
@@ -214,7 +212,7 @@ public class VideoResource extends BaseResource {
 	
 	for (int syncedIndex = 0; syncedIndex <  videos.size(); syncedIndex++ ) {
 	    Video tempVideo = videos.get(syncedIndex);
-	    tempVideo.setUserId(1L);
+	    tempVideo.setUserId(user.getId());
 	    tempVideo.setUser(user);
 	    tempVideo.getVideoGenres().forEach( g -> {
 		g.getPk().setUser(user);
