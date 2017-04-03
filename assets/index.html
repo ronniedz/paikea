@@ -65,8 +65,9 @@ https://accounts.google.com/o/oauth2/iframerpc?action=issueToken&response_type=t
 	    if (xhr.readyState === xhr.DONE) {
 		    var jsonResponse = JSON.parse(resp);
 		    // Set Cookie
-				setCookie("beancab", jsonResponse.token, 1);
-
+//				setCookie("beancab", jsonResponse.token, 1);
+// Cookie being set by server now
+		    
 				console.log(jsonResponse);
 			  outputBox.append('<h4>BeanToken</h4>To be stored in cookie</br>');
 				outputBox.append(jsonResponse.token);

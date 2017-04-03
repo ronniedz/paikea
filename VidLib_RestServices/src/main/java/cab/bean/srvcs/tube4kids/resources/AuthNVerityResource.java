@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
+import java.text.DateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +111,7 @@ public class AuthNVerityResource extends BaseResource {
 		
 		LOGGER.debug("subject in: '{}'", subject);
 		
+//		Optional<Token> t = tokenDAO.findBySubjectAndIssuer(subject, userValues.getIssuer());
 		Optional<Token> t = tokenDAO.findBySubject(subject);
 
 		if ( t.isPresent() )  {
@@ -121,14 +125,20 @@ public class AuthNVerityResource extends BaseResource {
 		} else {
 
 		    user = createUser(userValues);
-		    beanToken = new Token(user, subject, userValues.getIssuer());
+		    beanToken = new Token(user, subject);
 		    beanToken.setAudience(jwtConf.getAudienceId());
+		    
+		    // Original issuer now saved as IdProvider
+		    beanToken.setIdp(userValues.getIssuer());
+		    // Make this server the issuer of this bean
+		    beanToken.setIssuer(request.getServerName());
 
 		    dat.setStatus(Status.CREATED);
 
 		    LOGGER.debug("t.notPresent beanToken:\n'{}'", beanToken);
 		}
-
+		// Remove prior value
+		userValues.removeIssuer();
 		updateUser(user, userValues, beanToken);
 		
 		jwt = makeJwt(userValues, beanToken);
@@ -141,11 +151,53 @@ public class AuthNVerityResource extends BaseResource {
 	}
 	ResponseBuilder rb = doPOST(dat);
 	if (jwt != null) {
-	    rb.cookie(new NewCookie(jwtConf.getCookieName(), jwt));
+	    NewCookie cookie = genCookie(jwt, jwtConf, request);
+	    rb.cookie(cookie);
 	}
 	return rb.build();
     }
 
+    private NewCookie genCookie(String value, JWTConfiguration conf, HttpServletRequest request) {
+
+	final String name = conf.getCookieName();
+        final String path = request.getServletContext().getContextPath() + "/";
+        final String domain = request.getServerName();
+        final String comment = "Access Token";
+	final int maxAge = conf.getMaxAge();
+	final boolean secure = conf.isSecure();
+	boolean httpOnly = conf.isHttpOnly();
+	
+	Calendar c = Calendar.getInstance();
+	c.add(Calendar.MINUTE, conf.getCookieTTL());
+	final Date expiry = c.getTime();
+
+	LOGGER.debug("name {},  path: {} , domain {} ,  maxAge: {} , expiry: {} , secure: {} , httpOnly: {} ",
+		name, path, domain, maxAge, expiry, secure, httpOnly);
+
+	return new
+	  NewCookie(name, value, path, domain, NewCookie.DEFAULT_VERSION, comment,
+		  maxAge, expiry, secure, httpOnly);
+
+/*
+        NewCookie(String name, String value, String path, String domain, int version, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly)
+
+        Create a new instance.
+
+        Parameters:
+        name the name of the cookie
+        value the value of the cookie
+        path the URI path for which the cookie is valid
+        domain the host domain for which the cookie is valid
+        version the version of the specification to which the cookie complies
+        comment the comment
+        maxAge the maximum age of the cookie in seconds
+        expiry the cookie expiry date.
+        secure specifies whether the cookie will only be sent over a secure connection
+        httpOnly if true make the cookie HTTP only, i.e. only visible as part of an HTTP request.
+*/
+        
+	
+    }
     private void updateUser(User user, Map<String, Object> userValues, Token beanToken) {
 
 	try {
@@ -176,7 +228,6 @@ public class AuthNVerityResource extends BaseResource {
     }
 
     private String makeJwt(Map<String, Object> m,  Token beanToken) {
-
         // Create the Claims, which will be the content of the JWT
         final JwtClaims claims = new JwtClaims();
         claims.setIssuer(beanToken.getIssuer());  // who creates the token and signs it

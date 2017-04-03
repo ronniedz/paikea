@@ -134,6 +134,40 @@ public class JWTConfiguration {
     public void setVerificationKey(Key verificationKey) {
         this.verificationKey = verificationKey;
     }
+
+public boolean isSecure() {
+    // TODO Auto-generated method stub
+    return false;
+}
+
+public boolean isHttpOnly() {
+    // TODO Auto-generated method stub
+    return false;
+}
+
+/**
+ * @return Value in seconds
+ */
+public int getClockSkew() {
+    // TODO Auto-generated method stub
+    return 30;
+}
+
+/**
+ * @return Value in seconds
+ */
+public int getMaxAge() {
+    // TODO Auto-generated method stub
+    return 3600;
+}
+
+/**
+ * @return Value in minutes
+ */
+public int getCookieTTL() {
+    // TODO Auto-generated method stub
+    return 1440;
+}
     
 
 

@@ -18,12 +18,20 @@ public class TokenDAO extends AbstractDAO<Token> {
 	super(sessionFactory);
     }
 
+    public Optional<Token> findBySubjectAndIssuer(String subject, String issuer) {
+	Criteria criteria = criteria().add(Restrictions.eq("subject", subject))
+		.add(Restrictions.like("idp", issuer));
+//	return Optional.ofNullable(namedQuery("cab.bean.srvcs.tube4kids.core.Token.findBySubject").setParameter("subject", subject).uniqueResult());
+	return Optional.ofNullable(uniqueResult(criteria));
+    }
+
+    
     public Optional<Token> findBySubject(String subject) {
 	Criteria criteria = criteria().add(Restrictions.eq("subject", subject));
 //	return Optional.ofNullable(namedQuery("cab.bean.srvcs.tube4kids.core.Token.findBySubject").setParameter("subject", subject).uniqueResult());
 	return Optional.ofNullable(uniqueResult(criteria));
     }
-
+    
     public Token create(Token beanToken) {
         return persist(beanToken);
     }

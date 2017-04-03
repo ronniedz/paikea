@@ -1,6 +1,7 @@
 package cab.bean.srvcs.tube4kids;
 
 
+import static java.util.Collections.singletonMap;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -32,6 +33,8 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.auth.JWTAuthenticator;
 import cab.bean.srvcs.tube4kids.cli.RenderCommand;
@@ -66,6 +69,7 @@ import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 
 
 public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Tube4kidsApplication.class);
 
     private GoogleAPIClientConfiguration googleAPIConf;
     private JWTConfiguration jwtConf;
@@ -90,10 +94,11 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	jwtConf = configuration.getJwtConfiguration();
 	googleAPIConf = configuration.getGoogleAPIClientConfiguration();
 	
-	
-	Map<String, Object> properties = new HashMap<>();
-	properties.put(ServerProperties.WADL_FEATURE_DISABLE, false);
-	environment.jersey().getResourceConfig().addProperties(properties);
+	LOGGER.debug("App cont path: {} ", environment.getApplicationContext().getContextPath() );
+
+	environment.jersey().getResourceConfig().addProperties(
+	   singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false)
+	);
 
 	environment.healthChecks().register("template", new TemplateHealthCheck(configuration.buildTemplate()));
 	environment.jersey().register(DateRequiredFeature.class);
@@ -162,6 +167,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
         
+        
         jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, googleAPIConf, jwtConf));
         
 //        jerseyConf.register(new ViewResource());
@@ -179,7 +185,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
             .setJwtConsumer(
         	      new JwtConsumerBuilder()
             	.setExpectedAudience(jwtConf.getAudienceId())
-        	        .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
+        	        .setAllowedClockSkewInSeconds(jwtConf.getClockSkew()) // allow some leeway in validating time based claims to account for clock skew
         	        .setRequireExpirationTime() // the JWT must have an expiration time
         	        .setRequireSubject() // the JWT must have a subject claim
         	        .setVerificationKey(jwtConf.getVerificationKey()) // verify the signature with the public key

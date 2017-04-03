@@ -64,6 +64,10 @@ public class IdTokenVerity {
 	public String getIssuer() {
 	    return (String) get("issuer");
 	}
+
+	public String removeIssuer() {
+	    return (String) remove("issuer");
+	}
     }
 
 

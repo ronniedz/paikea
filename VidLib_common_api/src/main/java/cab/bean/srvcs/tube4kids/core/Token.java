@@ -55,10 +55,9 @@ public class Token {
     
     public Token() {}
     
-    public Token(User user, String subject, String idp) {
+    public Token(User user, String subject) {
 	this.user = user;
 	this.subject = subject;
-	this.idp = idp;
     }
 
     public long getId() {
