@@ -1,0 +1,65 @@
+/**
+* @Author: gajo
+* @Date:   2016-06-15T00:04:22-07:00
+* @Last modified by:   gajo
+* @Last modified time: 2016-08-19T10:57:00-07:00
+*/
+
+.header {
+  color: #39FF14;
+  width: 100%;
+  left: 0;
+  top: 0;
+  background-color: #FFF;
+  z-index: 7;
+  position: fixed;
+}
+
+.container {
+  margin: 0 auto;
+  padding: 0;
+  max-width: $max-content-width;
+}
+
+.brand {
+  text-decoration: none;
+  font-size: 1.75em; /* ~28px */
+}
+
+.brandTxt {
+  margin-left: 10px;
+  color: inherit;
+}
+
+.googlogin {
+  position: relative;
+  float: right;
+}
+
+.banner {
+  text-align: center;
+}
+
+.bannerTitle {
+  margin: 0;
+  padding: 10px;
+  font-weight: normal;
+  font-size: 4em;
+  line-height: 1em;
+}
+
+.bannerDesc {
+  padding: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.25em;
+  margin: 0;
+}
+
+.headeratomwrap {
+  display: inline-block;
+  border: solid 1px;
+  font-size: 0.75em; /* ~28px */
+  color: gray;
+  margin-left: 2px;
+  margin-right: 2px;
+}

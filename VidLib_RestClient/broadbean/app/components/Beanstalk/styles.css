@@ -1,0 +1,30 @@
+/**
+* @Author: gajo
+* @Date:   2016-08-14T22:57:04-07:00
+* @Last modified by:   gajo
+* @Last modified time: 2016-08-15T22:16:00-07:00
+*/
+
+.videouiparent {
+  z-index: 4;
+  position: fixed;
+  top: 50px;
+  display: inline-block;
+  pointer-events: none;
+}
+
+.navmenu {
+  background-color: #FFF;
+  z-index: 5;
+  position: fixed;
+  top: 24px;
+}
+
+.playlistwrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.marginparent {
+  z-index: 6;
+}

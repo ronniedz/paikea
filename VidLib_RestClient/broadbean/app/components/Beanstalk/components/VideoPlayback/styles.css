@@ -1,0 +1,12 @@
+/**
+* @Author: gajo
+* @Date:   2016-06-28T00:20:15-07:00
+* @Last modified by:   gajo
+* @Last modified time: 2016-08-12T11:22:30-07:00
+*/
+
+.playerwrap {
+  display: none;
+  visibility: hidden;
+  pointer-events: none;
+}
