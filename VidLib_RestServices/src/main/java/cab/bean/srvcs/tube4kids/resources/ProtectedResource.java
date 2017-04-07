@@ -16,7 +16,7 @@ import javax.ws.rs.core.SecurityContext;
 @Produces(MediaType.TEXT_PLAIN)
 public class ProtectedResource {
 
-    @PermitAll
+    @RolesAllowed("ADMIN")
     @GET
     public String showSecret(@Context SecurityContext context) {
 	User user = (User) context.getUserPrincipal();

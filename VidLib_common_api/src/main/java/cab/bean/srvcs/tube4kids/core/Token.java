@@ -44,6 +44,9 @@ public class Token {
     @Column
     private String idp;
     
+    @Column(nullable=false)
+    private boolean active = false;
+    
     @Column
     private String issuer = "beancab";
     
@@ -106,6 +109,20 @@ public class Token {
 
     public void setIdp(String idp) {
         this.idp = idp;
+    }
+
+    /**
+     * @return the active
+     */
+    public boolean isActive() {
+        return active;
+    }
+
+    /**
+     * @param active the active to set
+     */
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     

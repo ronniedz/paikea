@@ -35,9 +35,10 @@ import lombok.ToString;
 })
 @Data
 public class User implements Principal {
-
-    @Transient
-    private final Set<String> roles;
+    
+    @ManyToMany( fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.ALL )
+    @JoinTable(name = "user_role")
+    private Set<Role> roles = new HashSet<Role>();
 
     @Column(name = "id", nullable = false)
     @Id
@@ -89,17 +90,16 @@ public class User implements Principal {
     private String activationCode;
 
     public User() {
-	this.roles = new HashSet<String>();
     }
 
     public User(String name) {
+	this();
 	this.email = name;
-	this.roles = null;
     }
 
-    public User(String name, Set<String> roles) {
+    public User(String name, Set<Role> roles) {
 	this.email = name;
-	this.roles = roles;
+	this.roles.addAll(roles);
     }
 
     public String getName() {
@@ -107,7 +107,20 @@ public class User implements Principal {
 	// return this.firstname + " " + this.lastname;
     }
 
-    public Set<String> getRoles() {
+    
+    public Set<Role> getRoles() {
 	return roles;
     }
+
+    public void setRoles(Set<Role> roles) {
+	this.roles = roles;
+    }
+    public boolean addRole(Role role) {
+	return roles.add(role);
+    }
+    
+    public boolean hasRole(String role) {
+	return roles.contains(new Role(role));
+    }
 }
+

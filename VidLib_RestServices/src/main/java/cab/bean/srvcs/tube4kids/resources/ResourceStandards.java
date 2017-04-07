@@ -72,6 +72,23 @@ public abstract class ResourceStandards {
      * @return
      * 		a responseBuilder
      */
+//    protected ResponseBuilder doPOST(ResponseData respData, String redirStr) {
+//
+//	boolean isOk = respData.success;
+//	ResponseBuilder rb = Response
+//		.status(isOk
+//			? respData.hasEntity() ? Response.Status.CREATED : Response.Status.NO_CONTENT
+//				: Response.Status.BAD_REQUEST);
+//	
+//	if (respData.success &&  ! respData.hasLocation()) {
+//	    rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
+//	}
+//	
+//	
+//	parseRespData( respData, rb);
+//	return rb;
+//    }
+    
     protected ResponseBuilder doPOST(ResponseData respData) {
 	boolean isOk = respData.success;
 	ResponseBuilder rb = Response

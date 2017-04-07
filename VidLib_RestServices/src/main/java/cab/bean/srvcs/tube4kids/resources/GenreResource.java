@@ -6,6 +6,7 @@ import io.dropwizard.jersey.PATCH;
 import java.net.URI;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -34,6 +35,7 @@ public class GenreResource extends BaseResource {
 
     /** Create **/
     @POST
+    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response createGenre(Genre genre) {
 	Genre o = genreDAO.create(genre);
@@ -63,6 +65,7 @@ public class GenreResource extends BaseResource {
     /** Update **/
     @Path("/{id: [0-9]+}")
     @PATCH
+    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response updateGenre(@PathParam("id") Long id, Genre genreDat) {
 	genreDat.setId(id);
@@ -71,6 +74,7 @@ public class GenreResource extends BaseResource {
     
     /** Update **/
     @PATCH
+    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response updateGenre(Genre objectData) {
 
@@ -90,6 +94,7 @@ public class GenreResource extends BaseResource {
     /** Delete **/
     @Path("/{id: [0-9]+}")
     @DELETE
+    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response deleteGenre(@PathParam("id") Long id) {
 	

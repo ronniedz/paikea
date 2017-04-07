@@ -2,10 +2,15 @@ package cab.bean.srvcs.tube4kids;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
+
 import org.jose4j.keys.HmacKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class JWTConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JWTConfiguration.class);
 
     private String audienceId = "client.apps.beancabfamilyuser.com";
     private String authHeaderPrefix = "Bearer";
@@ -116,9 +121,17 @@ public class JWTConfiguration {
 
    /**
      * @return the verificationKey
+ * @throws Exception 
      */
     public void setVerificationKey(String keyValue) throws UnsupportedEncodingException {
-	verificationKey =  new HmacKey(keyValue.getBytes("UTF-8"));
+	try {
+	    verificationKey =  new HmacKey(keyValue.getBytes("UTF-8"));
+	} catch (UnsupportedEncodingException e) {
+	    LOGGER.error("HMAC failed");
+	    LOGGER.error("exception: {}", e.getMessage());
+	    e.printStackTrace();
+	    throw e;
+	}
     }
 
    /**
@@ -167,6 +180,11 @@ public int getMaxAge() {
 public int getCookieTTL() {
     // TODO Auto-generated method stub
     return 1440;
+}
+
+public float getTokenExpiration() {
+    // TODO Auto-generated method stub
+    return 10;
 }
     
 

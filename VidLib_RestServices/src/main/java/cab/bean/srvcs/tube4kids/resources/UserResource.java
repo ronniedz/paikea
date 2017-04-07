@@ -3,6 +3,7 @@ package cab.bean.srvcs.tube4kids.resources;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.LongParam;
 
@@ -45,6 +46,13 @@ public class UserResource {
 	return userDAO.findById(id.get());
     }
 
+    @Path("/self")
+    @GET
+    @UnitOfWork
+    public Optional<User> self(@Auth User user) {
+	return userDAO.findById(user.getId());
+    }
+    
     @POST
     @UnitOfWork
     @RolesAllowed("ADMIN")

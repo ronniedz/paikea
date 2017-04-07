@@ -35,3 +35,14 @@ INSERT INTO `user` (`id`, `email`, `email_verified`, `password`, `activated`, `f
 INSERT INTO `user` (`id`, `email`, `email_verified`, `password`, `activated`, `firstname`, `lastname`, `updated_at`, `last_login`, `reset_password_code`, `activated_at`, `created_at`, `activation_code`) VALUES (3, 'abc@pqrsw.com', 1, 'opener', 1, 'User3', 'Ulast3', '2016-09-14 03:19:12', NULL, NULL, NULL, NULL, NULL);
 
 COMMIT;
+
+START TRANSACTION;
+USE `mydb`;
+INSERT INTO `role` (`id`, `name`) VALUES (1, 'sudo');
+INSERT INTO `role` (`id`, `name`) VALUES (2, 'admin');
+INSERT INTO `role` (`id`, `name`) VALUES (3, 'moderator');
+INSERT INTO `role` (`id`, `name`) VALUES (4, 'editor');
+INSERT INTO `role` (`id`, `name`) VALUES (5, 'leader');
+INSERT INTO `role` (`id`, `name`) VALUES (6, 'user');
+
+COMMIT;

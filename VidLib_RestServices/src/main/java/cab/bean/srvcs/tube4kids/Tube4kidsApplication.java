@@ -36,6 +36,7 @@ import org.jose4j.keys.HmacKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cab.bean.srvcs.tube4kids.auth.AccessAuthorizer;
 import cab.bean.srvcs.tube4kids.auth.JWTAuthenticator;
 import cab.bean.srvcs.tube4kids.cli.RenderCommand;
 import cab.bean.srvcs.tube4kids.core.User;
@@ -45,6 +46,7 @@ import cab.bean.srvcs.tube4kids.db.ChildDAO;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
 import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
+import cab.bean.srvcs.tube4kids.db.RoleDAO;
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
@@ -91,8 +93,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     @Override
     public void run(Tube4kidsConfiguration configuration, Environment environment) {
 	
-	jwtConf = configuration.getJwtConfiguration();
-	googleAPIConf = configuration.getGoogleAPIClientConfiguration();
+	this.jwtConf = configuration.getJwtConfiguration();
+	this.googleAPIConf = configuration.getGoogleAPIClientConfiguration();
 	
 	LOGGER.debug("App cont path: {} ", environment.getApplicationContext().getContextPath() );
 
@@ -109,7 +111,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	// Contain this REST service to a sub-directory (<code>/api/</code>)
 	environment.jersey().setUrlPattern(configuration.getAppContextUri());
 
-	buildResources(configuration, environment.jersey());
+	buildResources(configuration, environment);
 
 	setupCORS(environment);
     }
@@ -145,12 +147,15 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
     }
 
-    private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
+    private void buildResources(Tube4kidsConfiguration configuration, Environment environment) {
 
+	final JerseyEnvironment jerseyConf = environment.jersey();
+	
 	final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
 	final YouTubeAPIProxy ytProxyClient = new YouTubeAPIProxy(configuration.getProxySearchUrl());
 
 	final UserDAO userDAO = new UserDAO(hibernateBundle.getSessionFactory());
+	final RoleDAO roleDAO = new RoleDAO(hibernateBundle.getSessionFactory());
         final TokenDAO tokenDAO = new TokenDAO(hibernateBundle.getSessionFactory());
 
         final VideoDAO videoDAO = new VideoDAO(hibernateBundle.getSessionFactory());
@@ -168,7 +173,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
         
         
-        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, googleAPIConf, jwtConf));
+        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, googleAPIConf, jwtConf));
         
 //        jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
@@ -185,7 +190,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
             .setJwtConsumer(
         	      new JwtConsumerBuilder()
             	.setExpectedAudience(jwtConf.getAudienceId())
-        	        .setAllowedClockSkewInSeconds(jwtConf.getClockSkew()) // allow some leeway in validating time based claims to account for clock skew
+        	        .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
         	        .setRequireExpirationTime() // the JWT must have an expiration time
         	        .setRequireSubject() // the JWT must have a subject claim
         	        .setVerificationKey(jwtConf.getVerificationKey()) // verify the signature with the public key
@@ -198,6 +203,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         	    	new UnitOfWorkAwareProxyFactory(hibernateBundle)
         	    	.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO})
         	    )
+        	    .setAuthorizer(new UnitOfWorkAwareProxyFactory(hibernateBundle).create(AccessAuthorizer.class))
             .buildAuthFilter();
     }
 

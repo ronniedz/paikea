@@ -17,6 +17,7 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -147,6 +148,7 @@ public class VideoResource extends BaseResource {
 //    
     @Path("/{vid}")
     @PATCH
+    @RolesAllowed({"editor", "leader","admin", "ADMIN", "user"})
     @UnitOfWork
     public Response addGenre(@PathParam("vid") String vid, Long[] genreIds, @Auth User user) {
 	
@@ -187,6 +189,7 @@ public class VideoResource extends BaseResource {
 
     @Path("/{id}")
     @DELETE
+    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response deleteVideo(@PathParam("id") String id) {
 	ResponseData dat = new ResponseData();
@@ -202,6 +205,7 @@ public class VideoResource extends BaseResource {
 //  }
 
     @POST
+    @RolesAllowed({"editor", "leader","admin", "ADMIN", "user"})
     @UnitOfWork
     public Response createVideos(List<Video> videos, @Auth User user) {
 
