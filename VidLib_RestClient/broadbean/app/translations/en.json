@@ -1,0 +1,18 @@
+{
+  "app.components.LocaleToggle.de": "German",
+  "app.components.LocaleToggle.en": "English",
+  "bean.components.global.google.login": "login with Google",
+  "bean.components.global.google.logout": "logout with Google",
+  "bean.components.NavMenu.recommendations": "Recommendations",
+  "bean.components.NavMenu.search.placeholder": "Search",
+  "bean.components.NavMenu.search.submit": "Submit",
+  "bean.components.NavMenu.createChild": "create child",
+  "bean.containers.OffSpringPage.createPlaylist": "create new playlist",
+  "bean.components.PlaylistsList.doLoop": "loop videos",
+  "bean.components.PlaylistsList.stopLoop": "stop looping",
+  "bean.components.Footer.about": "about",
+  "bean.components.Footer.contact": "contact",
+  "bean.components.Footer.privacy": "privacy",
+  "bean.components.DeleteVideo.delete": "delete"
+
+}

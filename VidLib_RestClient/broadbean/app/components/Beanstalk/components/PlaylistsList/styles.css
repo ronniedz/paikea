@@ -1,0 +1,25 @@
+/**
+* @Author: gajo
+* @Date:   2016-06-24T09:28:26-07:00
+* @Last modified by:   gajo
+* @Last modified time: 2016-08-14T23:15:57-07:00
+*/
+.pgtokenanchor {
+  font-size: 1.5em;
+  border: solid;
+}
+
+.playlistItem {
+  display: inline-block;
+  height: 100%;
+}
+
+.listgroup {
+  height: 100%;
+  width: 100%;
+  display: inline-block;
+}
+
+.pagetokenwrap {
+  text-align: center;
+}

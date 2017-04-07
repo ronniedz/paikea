@@ -1,0 +1,19 @@
+/**
+* @Author: gajo
+* @Date:   2016-06-21T16:53:00-07:00
+* @Last modified by:   gajo
+* @Last modified time: 2016-11-11T01:18:26-08:00
+*/
+
+.menusctn {
+  display: inline-block;
+  border: solid gray 1px;
+}
+
+.kidbutn {
+  border: solid gray 1px;
+}
+
+.textinput {
+  border: solid gray 1px;
+}
