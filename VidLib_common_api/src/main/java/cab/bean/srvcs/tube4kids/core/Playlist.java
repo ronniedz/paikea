@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 })
 @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ToString(exclude= {"reviewers"})
+@ToString(exclude= {"reviewers", "creator"})
 @NoArgsConstructor
 //EqualsAndHashCode(exclude= {"reviewers", "creator"})
 @EqualsAndHashCode(of  = {"id"})

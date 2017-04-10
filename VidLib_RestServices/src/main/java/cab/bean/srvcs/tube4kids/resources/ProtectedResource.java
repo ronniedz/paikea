@@ -1,5 +1,6 @@
 package cab.bean.srvcs.tube4kids.resources;
 
+import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.core.User;
 import io.dropwizard.auth.Auth;
 
@@ -16,14 +17,14 @@ import javax.ws.rs.core.SecurityContext;
 @Produces(MediaType.TEXT_PLAIN)
 public class ProtectedResource {
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed({Role.Names.MEMBER_ROLE})
     @GET
     public String showSecret(@Context SecurityContext context) {
 	User user = (User) context.getUserPrincipal();
         return String.format("Hey there, %s. You know the secret! %d", user.getName(), user.getId());
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed({Role.Names.ADMIN_ROLE})
     @GET
     @Path("admin")
     public String showAdminSecret(@Auth User user) {

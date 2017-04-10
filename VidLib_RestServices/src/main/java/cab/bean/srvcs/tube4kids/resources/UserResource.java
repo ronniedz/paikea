@@ -1,7 +1,7 @@
 package cab.bean.srvcs.tube4kids.resources;
 
 import cab.bean.srvcs.tube4kids.core.User;
-import cab.bean.srvcs.tube4kids.core.User;
+import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -22,6 +22,7 @@ import java.util.Optional;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.MEMBER_ROLE})
 public class UserResource {
 
     private final UserDAO userDAO;
@@ -33,8 +34,7 @@ public class UserResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed("ADMIN")
-   public Response deleteUser(@PathParam("id") Long id) {
+   public Response deleteUser(@Auth User user, @PathParam("id") Long id) {
     	userDAO.delete(id);
 	return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -55,7 +55,7 @@ public class UserResource {
     
     @POST
     @UnitOfWork
-    @RolesAllowed("ADMIN")
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.USER_MANAGER_ROLE}) 
     public User createUser(User user) {
         return userDAO.create(user);
     }

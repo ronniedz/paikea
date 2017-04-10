@@ -1,7 +1,9 @@
 package cab.bean.srvcs.tube4kids.core;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,7 +31,7 @@ import lombok.ToString;
 })
 @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ToString
+@ToString(exclude= {"playlists"})
 @EqualsAndHashCode(exclude= {
 	"email","password", "roles", "activated", "lastLogin", "resetPasswordCode", "activatedAt",
 	"createdAt", "updatedAt", "activationCode"
@@ -37,7 +40,9 @@ import lombok.ToString;
 public class User implements Principal {
     
     @ManyToMany( fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.ALL )
-    @JoinTable(name = "user_role")
+    @JoinTable(name = "user_role",
+	joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+	inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles = new HashSet<Role>();
 
     @Column(name = "id", nullable = false)
@@ -45,7 +50,7 @@ public class User implements Principal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "userId")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Playlist> playlists;
 
     @JsonIgnore
@@ -107,16 +112,21 @@ public class User implements Principal {
 	// return this.firstname + " " + this.lastname;
     }
 
-    
-    public Set<Role> getRoles() {
-	return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-	this.roles = roles;
-    }
+//    
+//    public Set<Role> getRoles() {
+//	return roles;
+//    }
+//
+//    public void setRoles(Set<Role> roles) {
+//	this.roles = roles;
+//    }
     public boolean addRole(Role role) {
 	return roles.add(role);
+    }
+    
+    public boolean hasAnyRole(String... rolenames) {
+	final List<String> needles = Arrays.asList(rolenames);
+	return (this.roles.stream().map(Role::getName).filter(straw -> needles.contains(straw)).count() > 0 );
     }
     
     public boolean hasRole(String role) {

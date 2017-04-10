@@ -4,9 +4,13 @@ import cab.bean.srvcs.tube4kids.core.Video;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
@@ -20,6 +24,14 @@ public class VideoDAO extends AbstractDAO<Video> {
         return Optional.ofNullable(get(id));
     }
 
+    public List<Video> findWithIds(java.util.Collection<String>  vids) {
+	return criteria().add(Restrictions.in("id",  vids) ).list();
+    }
+
+    public List<Video> findWithIds(String... vids) {
+	return findWithIds(Arrays.asList(vids));
+    }
+    
     public Video create(Video video) {
         return persist(video);
     }

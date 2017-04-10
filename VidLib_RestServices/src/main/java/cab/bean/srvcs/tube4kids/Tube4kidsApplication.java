@@ -5,6 +5,7 @@ import static java.util.Collections.singletonMap;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.auth.Authorizer;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -96,7 +97,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	this.jwtConf = configuration.getJwtConfiguration();
 	this.googleAPIConf = configuration.getGoogleAPIClientConfiguration();
 	
-	LOGGER.debug("App cont path: {} ", environment.getApplicationContext().getContextPath() );
+	LOGGER.debug("Application context path: {} ", environment.getApplicationContext().getContextPath() );
 
 	environment.jersey().getResourceConfig().addProperties(
 	   singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false)
@@ -203,7 +204,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         	    	new UnitOfWorkAwareProxyFactory(hibernateBundle)
         	    	.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO})
         	    )
-        	    .setAuthorizer(new UnitOfWorkAwareProxyFactory(hibernateBundle).create(AccessAuthorizer.class))
+//          Add Authorizer
+        	    .setAuthorizer( (principal, role) -> principal.hasRole(role))
             .buildAuthFilter();
     }
 
@@ -212,40 +214,28 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	final FilterRegistration.Dynamic cors =  environment.servlets().addFilter("CORS", CrossOriginFilter.class);
 
         // Configure CORS parameters:
-        // 	'Access-Control-Allow-Origin: *'
         cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "*");
+//      cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
+
         cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_TIMING_ORIGINS_PARAM, "54000");
 
-//        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_REQUEST_HEADERS_HEADER, "*");
-//        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_HEADERS_HEADER, "*");
-        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "*");
-//       cors.setInitParameter("allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
-//        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin");
-
-//      cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "OPTIONS,GET,PUT,POST,DELETE,HEAD,PATCH");
         cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_METHODS_HEADER, "OPTIONS,GET,PUT,POST,DELETE,HEAD,PATCH");
         cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_REQUEST_METHOD_HEADER, "OPTIONS,GET,PUT,POST,DELETE,HEAD,PATCH");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "OPTIONS,GET,PUT,POST,DELETE,HEAD,PATCH");
-
         cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
+
         // Add URL mapping
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, "true");
         cors.setInitParameter(CrossOriginFilter.PREFLIGHT_MAX_AGE_PARAM, "54000");
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
-
-
-	
-//	FilterRegistration.Dynamic filter = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
-//	    filter.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE,OPTIONS");
-//	    filter.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
-//	    filter.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
-//	    filter.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
-//	    filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
-	  }
+    }
         
     @Override
     public String getName() {
         return "tube4kids";
     }
+
 }
+

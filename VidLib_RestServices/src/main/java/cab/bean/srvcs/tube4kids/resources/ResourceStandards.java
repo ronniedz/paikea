@@ -13,6 +13,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
 
+import cab.bean.srvcs.tube4kids.resources.utils.RoleHelper;
+
 /**
  * Adds a predictable structure to responses for Rest verbs.
  * The "standard" is adapted from:

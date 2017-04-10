@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -30,7 +31,9 @@ import javax.ws.rs.core.UriBuilder;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import cab.bean.srvcs.tube4kids.core.Child;
+import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.core.Playlist;
+import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.ChildDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
@@ -54,6 +57,7 @@ public class ChildResource extends BaseResource {
 
     @POST
     @UnitOfWork
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.CHILD_EDIT })
     public Response createChild(List<Child> children, @Auth User user) {
         final boolean ifMini = isMinimalRequest();
     
@@ -73,7 +77,8 @@ public class ChildResource extends BaseResource {
     @Path("/{cid}")
     @GET
     @UnitOfWork
-    public Response viewChild(@PathParam("cid") Long cid) {
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.CHILD_EDIT , Role.Names.CHILD_ROLE})
+    public Response viewChild(@Auth User user, @PathParam("cid") Long cid) {
 	
 	Child child = childDAO.findById(cid).orElse(null);
 	
@@ -88,7 +93,8 @@ public class ChildResource extends BaseResource {
     @Path("/{cid}/pl/{pid}")
     @PATCH
     @UnitOfWork
-    public Response playlist(@PathParam("cid") Long cid, @PathParam("pid") Long pid) {
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.CHILD_EDIT , Role.Names.CHILD_ROLE})
+    public Response playlist(@Auth User user, @PathParam("cid") Long cid, @PathParam("pid") Long pid) {
 	ResponseData dat = new ResponseData();
 	try {
 	    Child child = childDAO.findById(cid).get();
@@ -111,7 +117,8 @@ public class ChildResource extends BaseResource {
     @Path("/{cid}/pl/{pid}")
     @DELETE
     @UnitOfWork
-    public Response dePlaylist(@PathParam("cid") Long cid, @PathParam("pid") Long pid) {
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.CHILD_EDIT , Role.Names.CHILD_ROLE})
+    public Response dePlaylist(@Auth User user, @PathParam("cid") Long cid, @PathParam("pid") Long pid) {
 	ResponseData dat = new ResponseData();
 	try {
 	    Child child = childDAO.findById(cid).get();
@@ -133,7 +140,8 @@ public class ChildResource extends BaseResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    public Response deleteChild(@PathParam("id") Long id) {
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.CHILD_EDIT })
+    public Response deleteChild(@Auth User user, @PathParam("id") Long id) {
 	Child child = childDAO.delete(id);
 	ResponseData dat = new ResponseData().setSuccess(child != null);
 	dat.setEntity(isMinimalRequest() ? null : child);
@@ -148,7 +156,8 @@ public class ChildResource extends BaseResource {
 
     @GET
     @UnitOfWork
-    public Response listChildren() {
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE})
+    public Response listChildren(@Auth User user) {
         List<Child> list = childDAO.findAll();
 	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }
