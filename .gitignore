@@ -13,4 +13,6 @@ target
 **/.checkstyle
 .checkstyle
 assets/**
+!assets/goog_signin.html
+!assets/sample.html
 **/*.pid

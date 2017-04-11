@@ -21,7 +21,7 @@
 			<p>
 				Status at Google:<br/>
 				<div class="g-signin2" style="position: relative; left: 2%; top: 4%" data-onsuccess="onSignIn" data-theme="dark"></div>
-			<!-- 
+			<!--
 			https://accounts.google.com/o/oauth2/iframerpc?action=issueToken&response_type=token%20id_token&scope=openid%20profile%20email&client_id=16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com&login_hint=AJDLj6JUa8yxXrhHdWRHIV0S13cAWLW3gHcQGvVT7SwK9fhIKmsDY2rcGjoNzfu_A9C8Mox9nJm5mAxUFhy2TscjrAFTGfazyg&ss_domain=http%3A%2F%2Flocalhost%3A8080&origin=http%3A%2F%2Flocalhost%3A8080
 			 -->
 			</p>
@@ -45,13 +45,13 @@
 			<input type="submit" id="callback_button"></input>
 		</fieldset>
 	</form>
-	
-	
+
+
 	<div style="background-color: #298a2a;" id="authd">
 		<div class="lepht">
 			<h5>Access Protected routes:</h5>
 		</div>
-		
+
 		<div class="ryght">
 			<form action="/api/auth/revoke" method="post" id="revoke">
 				<fieldset>
@@ -70,12 +70,12 @@
 curr_cookie = readCookie("beancab");
 
 function set_steps() {
-	
+
 	var googleOk = ! $('#ytlogout').hasClass('beHidden');
 	var beancabOk = curr_cookie != null;
 
 	if (googleOk) {
-		if ( $('#callback').parents('#TEMPLATES').length == 1) { 
+		if ( $('#callback').parents('#TEMPLATES').length == 1) {
 			steps.addLItem('#callback');
 		}
 		$('#ytlogout').removeClass('beHidden');
@@ -84,14 +84,14 @@ function set_steps() {
 		$('#ytlogout').addClass('beHidden');
 		steps.dropLItem('#callback');
 	}
-	
+
 	if (beancabOk) {
 		steps.addLItem('#authd');
 		$('#authd').removeClass('beHidden');
-		
+
 		$('#revoke').show();
 		$('#beancab_token').val(curr_cookie);
-		
+
 //		$('#callback_button').attr('disabled', 'disabled');
 	}
 	else {
@@ -100,7 +100,7 @@ function set_steps() {
 		$('#callback_button').show();
 		$('#revoke').hide();
 	}
-		
+
 }
 
 
@@ -115,9 +115,9 @@ $(document).ready(function(){
 	ytlogout = $('#ytlogout');
 	callbackForm.attr('disabled', 'disabled');//.css({'background-color':'grey'});
 	outputBox = $('#authResult');
-	
-	
-	
+
+
+
 	steps = $('#steps');
 	steps.addLItem = function(elemId) {
 		var elem = $(elemId)
@@ -139,17 +139,17 @@ $(document).ready(function(){
 	 set_steps();
 	});
 });
-	
+
 	function onSignIn(googleUser) {
-		
+
     // The ID token you need to pass to your backend:
     var id_token = googleUser.getAuthResponse().id_token;
     var profile = googleUser.getBasicProfile();
-    
+
 /*
 		dumpProperties(googleUser, debugContent, '<h2>googleUser Object properties</h2>', false);
 	  dumpProperties(profile, debugContent, '<h2>profile Object properties</h2>', true);
- */ 
+ */
 
     showProfile(profile, outputBox);
 
@@ -159,7 +159,7 @@ $(document).ready(function(){
 		ytlogout.removeClass('beHidden');
 		steps.addLItem($('#callback'));
 		set_steps();
-		
+
     function showProfile(profile, dest) {
 			var map = {
 				'Id': profile.getId(),
@@ -189,7 +189,7 @@ $(document).ready(function(){
 		  var expires = "expires="+ d.toUTCString();
 		  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 		}
-		
+
 		function dumpProperties(obj, dest, sectitle, doFunc) {
 			dest.append('<h2>' + sectitle + '</h2>');
 		  table = $('<table cellpadding="5px" border=1px >');
@@ -207,7 +207,7 @@ $(document).ready(function(){
 				);
 		  }
 		}
-		
+
 };
 function readCookie(name) {
     var nameEQ = name + "=";
