@@ -1,9 +1,6 @@
 package cab.bean.srvcs.tube4kids.resources;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -12,8 +9,6 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
-
-import cab.bean.srvcs.tube4kids.resources.utils.RoleHelper;
 
 /**
  * Adds a predictable structure to responses for Rest verbs.
