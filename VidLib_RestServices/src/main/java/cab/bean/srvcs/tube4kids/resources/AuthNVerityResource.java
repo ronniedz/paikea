@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.GoogleAPIClientConfiguration;
 import cab.bean.srvcs.tube4kids.JWTConfiguration;
+import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.RoleDAO;
@@ -74,6 +76,8 @@ import     javax.ws.rs.core.HttpHeaders;
 @Path("/auth")
 public class AuthNVerityResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthNVerityResource.class);
+
+    private static final int preOffset = 1; // minute
 
     private final JsonFactory jsonFactory = new JacksonFactory();
 //    private String clientId = null;
@@ -164,14 +168,16 @@ public class AuthNVerityResource extends BaseResource {
 		userValues.removeIssuer();
 		updateUser(user, userValues, beanToken);
 		
-		jwt = makeJwt(userValues, beanToken);
+		int ttl_mins =  jwtConf.getTokenExpiration();
+		
+		jwt = makeJwt(userValues, beanToken, ttl_mins);
 		redirUri = getRedirect(user);
 		dat.setLocation(redirUri);
 
 		dat.setEntity(
 	            ImmutableMap.of(
 	            	"access_token", jwt,
-	                	"expires_in", jwtConf.getCookieTTL() * 60,
+	                	"expires_in", (ttl_mins - preOffset) * 60,
 	                	"token_type", "Bearer"
 	            )
 		);
@@ -184,14 +190,12 @@ public class AuthNVerityResource extends BaseResource {
 	if (jwt != null) {
 
 	    Calendar c = Calendar.getInstance();
-	    c.add(Calendar.MINUTE, jwtConf.getCookieTTL());
+	    // Expire cookie before token
+	    c.add(Calendar.MINUTE, jwtConf.getTokenExpiration() - preOffset);
 	    final Date expiry = c.getTime();
 	    final int maxAge = jwtConf.getMaxAge();
-	    
-	    NewCookie cookie = genCookie(jwt, jwtConf, request, maxAge, expiry);
-	    rb.cookie(cookie);
+	    rb.cookie(genCookie(jwt, jwtConf, request, maxAge, expiry));
 	}
-
 	return rb.build();
     }
 
@@ -210,8 +214,10 @@ public class AuthNVerityResource extends BaseResource {
 //	if (user != null) {
 //	}
 		Calendar c = Calendar.getInstance();
-		c.add(Calendar.MINUTE, jwtConf.getCookieTTL());
+		c.add(Calendar.MINUTE, 1);
 		final Date expiry = c.getTime();
+		
+		// Zero, to retire cookie
 		final int maxAge = 0;
 //		dat.setSuccess(true);
 		cookie = genCookie("", jwtConf, request, maxAge, expiry);
@@ -314,7 +320,10 @@ public class AuthNVerityResource extends BaseResource {
 	}
 
 	beanToken.setUser(userDAO.create(user));
+	
 	tokenDAO.create(beanToken);
+	userValues.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
+
     }
 
     private User createUser(Map<String, Object> userValues) {
@@ -332,15 +341,15 @@ public class AuthNVerityResource extends BaseResource {
 	u.setPassword(Long.toHexString(Double.doubleToLongBits(Math.random())));
     
 //	String[] rolenames = {"sudo", "admin", "moderator", "editor", "leader","user"};
-	String[] rolenames = {"editor", "leader","user"};
     
-	for(String rname : rolenames) {
+	for(String rname : Role.Names.SUDO) {
 	    u.addRole(roleDAO.findByName(rname).get());
 	}
 	return u;
     }
 
-    private String makeJwt(Map<String, Object> m,  Token beanToken) {
+    @SuppressWarnings("unchecked")
+    private String makeJwt(Map<String, Object> m,  Token beanToken, float token_ttl) {
 
 	// Create the Claims, which will be the content of the JWT
         final JwtClaims claims = new JwtClaims();
@@ -348,17 +357,18 @@ public class AuthNVerityResource extends BaseResource {
         claims.setSubject(beanToken.getSubject());
         
         claims.setAudience(beanToken.getAudience()); // to whom the token is intended to be sent
-        claims.setExpirationTimeMinutesInTheFuture(jwtConf.getTokenExpiration()); // time when the token will expire (10 minutes from now)
+        claims.setExpirationTimeMinutesInTheFuture(token_ttl); // time when the token will expire
 //        claims.setGeneratedJwtId(); // a unique identifier for the token
         claims.setIssuedAtToNow();  // when the token was issued/created (now)
         claims.setNotBeforeMinutesInThePast(2); // time before which the token is not yet valid (2 minutes ago)
 
         m.entrySet().forEach(x -> { 
-            claims.setClaim(x.getKey(), x.getValue()); // additional claims/attributes about the subject can be added
+            if ( x.getValue() instanceof java.util.Collection) {
+                claims.setStringListClaim(x.getKey(), (List<String>) x.getValue()); // multi-valued claims work too and will end up as a JSON array
+            } else {
+        		claims.setClaim(x.getKey(), x.getValue()); // additional claims/attributes about the subject can be added
+            }
         });
-
-        // TODO DETERMINE PROPER ROLES
-        claims.setStringListClaim("groups", Arrays.asList("member")); // multi-valued claims work too and will end up as a JSON array
 
         // A JWT is a JWS and/or a JWE with JSON claims as the payload.
         // In this example it is a JWS so we create a JsonWebSignature object.

@@ -6,6 +6,7 @@ import io.dropwizard.jersey.PATCH;
 import java.net.URI;
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -19,11 +20,13 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 
 import cab.bean.srvcs.tube4kids.core.Genre;
+import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
 import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 
 @Path("/genre")
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.CONTENT_MODERATOR_ROLE, Role.Names.UI_MANAGER_ROLE})
 public class GenreResource extends BaseResource {
 
     private final GenreDAO genreDAO;
@@ -35,7 +38,7 @@ public class GenreResource extends BaseResource {
 
     /** Create **/
     @POST
-    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
+    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.UI_MANAGER_ROLE})
     @UnitOfWork
     public Response createGenre(Genre genre) {
 	Genre o = genreDAO.create(genre);
@@ -57,6 +60,7 @@ public class GenreResource extends BaseResource {
     /** Retrieve **/
     @GET
     @UnitOfWork
+    @PermitAll
     public Response listGenres() {
 	List<Genre> list = genreDAO.findAll();
 	return doGET(new ResponseData(list).setSuccess(list != null)).build();
@@ -65,7 +69,6 @@ public class GenreResource extends BaseResource {
     /** Update **/
     @Path("/{id: [0-9]+}")
     @PATCH
-    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response updateGenre(@PathParam("id") Long id, Genre genreDat) {
 	genreDat.setId(id);
@@ -74,7 +77,6 @@ public class GenreResource extends BaseResource {
     
     /** Update **/
     @PATCH
-    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response updateGenre(Genre objectData) {
 
@@ -94,7 +96,6 @@ public class GenreResource extends BaseResource {
     /** Delete **/
     @Path("/{id: [0-9]+}")
     @DELETE
-    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
     public Response deleteGenre(@PathParam("id") Long id) {
 	
@@ -109,6 +110,7 @@ public class GenreResource extends BaseResource {
     @Path("/{id: [0-9]+}")
     @GET
     @UnitOfWork
+    @PermitAll
     public Response viewGenre(@PathParam("id") Long id) {
 	Genre g = genreDAO.retrieve(id);
 	ResponseData dat = new ResponseData().setSuccess(g != null);

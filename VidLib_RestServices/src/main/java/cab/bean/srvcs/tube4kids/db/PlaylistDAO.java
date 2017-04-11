@@ -36,23 +36,23 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
     	
     	if ( o != null ) {
     	Session sess = currentSession();
-    	User u = o.getCreator();
+    	User u = o.getUser();
     	
     	if (u !=null) { 
     	    u.getPlaylists().remove(o);
     	    sess.update(u);
     	}
 
-        	if ( o.getReviewers() != null && ! o.getReviewers().isEmpty()) {
-        	    
-        	    o.getReviewers()
-        	     .stream()
-        	     .filter( ch -> ch.getPlaylists().remove(o))
-        	     .map( ch -> {
-        		 sess.update(ch);
-        		 return ch;
-        	     });
-        	}
+//        	if ( o.getReviewers() != null && ! o.getReviewers().isEmpty()) {
+//        	    
+//        	    o.getReviewers()
+//        	     .stream()
+//        	     .filter( ch -> ch.getPlaylists().remove(o))
+//        	     .map( ch -> {
+//        		 sess.update(ch);
+//        		 return ch;
+//        	     });
+//        	}
         	
         	if (o.getVideos() != null) o.getVideos().clear();
 
@@ -71,9 +71,9 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
         return list(namedQuery("cab.bean.srvcs.tube4kids.core.Playlist.findAll"));
     }
 
-    public List<Playlist> findUserLists(Long userId) {
+    public List<Playlist> findUserLists(User user) {
         return list(
-        		namedQuery("cab.bean.srvcs.tube4kids.core.Playlist.findUserLists").setParameter("userId", userId)
+        		namedQuery("cab.bean.srvcs.tube4kids.core.Playlist.findUserLists").setParameter("user", user)
         	);
     }
     
@@ -88,6 +88,12 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
 	    o = (Playlist) session.merge(objectData);
 	}
 	return o;
+    }
+
+    public Set<Playlist> loadUser(User user) {
+	currentSession().load(user, user.getId());
+	user.getPlaylists().size();
+	return user.getPlaylists();
     }
 
 }

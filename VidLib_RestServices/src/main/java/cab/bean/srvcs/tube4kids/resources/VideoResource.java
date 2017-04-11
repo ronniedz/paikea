@@ -2,6 +2,7 @@ package cab.bean.srvcs.tube4kids.resources;
 
 import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 import cab.bean.srvcs.tube4kids.core.Playlist;
+import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.VideoGenre;
@@ -17,6 +18,7 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.LongParam;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -49,6 +51,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 @Path("/video")
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.MEMBER_ROLE}) 
 public class VideoResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoResource.class);
 
@@ -75,9 +78,9 @@ public class VideoResource extends BaseResource {
 	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
     }
 
-    private Map<String, Object> unwrap(Record r, String unkey) {
-	return r.asMap(x -> x.asMap()).get(unkey);
-    }
+//    private Map<String, Object> unwrap(Record r, String unkey) {
+//	return r.asMap(x -> x.asMap()).get(unkey);
+//    }
     
     @GET
     @Path("shiz")
@@ -106,18 +109,11 @@ public class VideoResource extends BaseResource {
     @Path("/{vid}")
     @GET
     @UnitOfWork
+    @PermitAll
     public Response viewVideo(@PathParam("vid") String vid) {
 	Video v = videoDAO.findById(vid).orElse(null);
 	return doGET(new ResponseData(v).setSuccess(v != null)).build();
     }
-
-//    
-//    @Path("/{vid}")
-//    @PATCH
-//    @UnitOfWork
-//    public Optional<Video> viewVideo(@PathParam("vid") String vid) {
-//	return videoDAO.findById(vid);
-//    }
 
 //    @Path("/add/{cn}/{vids}")
 //    @GET
@@ -148,8 +144,8 @@ public class VideoResource extends BaseResource {
 //    
     @Path("/{vid}")
     @PATCH
-    @RolesAllowed({"editor", "leader","admin", "ADMIN", "user"})
     @UnitOfWork
+    @RolesAllowed({Role.Names.GUARDIAN_ROLE, Role.Names.CONTENT_MODERATOR_ROLE}) 
     public Response addGenre(@PathParam("vid") String vid, Long[] genreIds, @Auth User user) {
 	
 	ResponseData dat = new ResponseData();
@@ -189,9 +185,9 @@ public class VideoResource extends BaseResource {
 
     @Path("/{id}")
     @DELETE
-    @RolesAllowed({"editor", "leader","admin", "ADMIN"})
     @UnitOfWork
-    public Response deleteVideo(@PathParam("id") String id) {
+    @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.CONTENT_MODERATOR_ROLE}) 
+    public Response deleteVideo(@PathParam("id") String id, @Auth User user) {
 	ResponseData dat = new ResponseData();
 	Video video = videoDAO.delete(id);
 	return doDELETE(dat.setSuccess(video != null).setEntity(isMinimalRequest() ? null : video)).build();
@@ -205,8 +201,8 @@ public class VideoResource extends BaseResource {
 //  }
 
     @POST
-    @RolesAllowed({"editor", "leader","admin", "ADMIN", "user"})
     @UnitOfWork
+    @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.CONTENT_MODERATOR_ROLE}) 
     public Response createVideos(List<Video> videos, @Auth User user) {
 
 	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());

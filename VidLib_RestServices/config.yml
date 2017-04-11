@@ -151,5 +151,9 @@ jwtConfiguration:
   realmName: "Children's Video Library"
   authHeaderPrefix: Bearer
   keyId: "beancab.com_rsapublic"
-
+  secure: false
+  httpOnly: false
+  clockSkew: 30 # in seconds
+  maxAge: 3600
+  tokenExpiration: 1440 # in minutes
 

@@ -20,7 +20,12 @@ public class JWTConfiguration {
     private String realmName = "Children's Video Library";
     private String signatureAlgorithm = org.jose4j.jws.AlgorithmIdentifiers.HMAC_SHA256; //	"HS256"
     private Key verificationKey = null;
-    
+    private boolean secure = false;
+    private boolean httpOnly = false;
+    private int clockSkew = 30; // in seconds
+    private int maxAge = 3600;
+    private int tokenExpiration = 1440; // in minutes
+
     /**
      * @return the audienceId
      */
@@ -148,45 +153,79 @@ public class JWTConfiguration {
         this.verificationKey = verificationKey;
     }
 
-public boolean isSecure() {
-    // TODO Auto-generated method stub
-    return false;
-}
-
-public boolean isHttpOnly() {
-    // TODO Auto-generated method stub
-    return false;
-}
-
-/**
- * @return Value in seconds
- */
-public int getClockSkew() {
-    // TODO Auto-generated method stub
-    return 30;
-}
-
-/**
- * @return Value in seconds
- */
-public int getMaxAge() {
-    // TODO Auto-generated method stub
-    return 3600;
-}
-
-/**
- * @return Value in minutes
- */
-public int getCookieTTL() {
-    // TODO Auto-generated method stub
-    return 1440;
-}
-
-public float getTokenExpiration() {
-    // TODO Auto-generated method stub
-    return 10;
-}
+    /**
+     * @return the secure
+     */
+    public boolean isSecure() {
+        return secure;
+    }
     
+    /**
+     * @param secure the secure to set
+     */
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+    
+    /**
+     * @return the httpOnly
+     */
+    public boolean isHttpOnly() {
+        return httpOnly;
+    }
+    
+    /**
+     * @param httpOnly the httpOnly to set
+     */
+    public void setHttpOnly(boolean httpOnly) {
+        this.httpOnly = httpOnly;
+    }
+    
+    /**
+     * @return the clockSkew
+     */
+    public int getClockSkew() {
+        return clockSkew;
+    }
+    
+    /**
+     * @param clockSkew the clockSkew to set
+     */
+    public void setClockSkew(int clockSkew) {
+        this.clockSkew = clockSkew;
+    }
+    
+    /**
+     * @return the maxAge
+     */
+    public int getMaxAge() {
+        return maxAge;
+    }
+    
+    /**
+     * @param maxAge the maxAge to set
+     */
+    public void setMaxAge(int maxAge) {
+        this.maxAge = maxAge;
+    }
+    
+    /**
+     * Expiry in minutes
+     * @return the tokenExpiration
+     */
+    public int getTokenExpiration() {
+        return tokenExpiration;
+    }
+    
+    /**
+     * @param tokenExpiration the tokenExpiration to set
+     */
+    public void setTokenExpiration(int tokenExpiration) {
+        this.tokenExpiration = tokenExpiration;
+    }
+    
+    
+
 
 
     

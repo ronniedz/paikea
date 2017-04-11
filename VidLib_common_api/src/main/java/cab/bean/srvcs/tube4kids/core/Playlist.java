@@ -38,14 +38,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
         
         @NamedQuery(
             	name = "cab.bean.srvcs.tube4kids.core.Playlist.findUserLists",
-            	query = "SELECT p FROM Playlist p where p.userId = :userId"
+            	query = "SELECT p FROM Playlist p where p.user = :user"
         	)
 })
 @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ToString(exclude= {"reviewers"})
+@ToString(exclude= {"reviewers", "user"})
 @NoArgsConstructor
-//EqualsAndHashCode(exclude= {"reviewers", "creator"})
+//EqualsAndHashCode(exclude= {"reviewers", "user"})
 @EqualsAndHashCode(of  = {"id"})
 @Data
 public class Playlist implements Comparable<Playlist>{
@@ -56,14 +56,16 @@ public class Playlist implements Comparable<Playlist>{
     private Long id;
 
     //JsonProperty(value="creator_id", access=JsonProperty.Access.READ_ONLY)
-    @Column(name = "user_id", nullable = true)
-    private Long userId;
+//    @Column(name = "user_id", nullable = true)
+//    private Long userId;
 
+ //   @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    //Transient
+    //JoinColumn(name = "user_id", nullable = false, updatable = false, insertable = false)
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = true, updatable = false, insertable = false)
-    @Transient
-    private User creator;
+    @ManyToOne
+    private User user;
+//	@JoinColumn(name="cart_id", nullable=false)
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -78,8 +80,8 @@ public class Playlist implements Comparable<Playlist>{
     	inverseJoinColumns = @JoinColumn(name = "video_id", referencedColumnName = "video_id"))
     private Set<Video> videos;
     
+    //@Transient
     @JsonIgnore
-    //Transient
     @ManyToMany(
 	    mappedBy = "playlists",
 	    targetEntity = Child.class,
