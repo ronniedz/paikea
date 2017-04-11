@@ -92,7 +92,6 @@ class GoogleSignIn extends Component {
           }
 
           console.log('!!!!!!!!!!!')
-          
           console.log('user', user)
           console.log(user.getBasicProfile())
           console.log(user.getAuthResponse())

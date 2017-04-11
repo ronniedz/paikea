@@ -12,5 +12,6 @@ target
 **/.classpath
 **/.checkstyle
 .checkstyle
+!assets/goog_signin.html
 assets/**
 **/*.pid
