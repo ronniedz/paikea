@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<meta name="google-signin-scope" content="profile email">
+	<meta name="google-signin-client_id" content="16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com">
+
+	<script src="https://apis.google.com/js/platform.js" async defer></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<style type="text/css">
+	.beHidden{ display: none;}
+	.lepht { width: 45%; float: left; display: inline-block; }
+	.ryght { width: 45%; float: right; display: inline-block; }
+	</style>
+</head>
+<body>
+<ol id="steps">
+	<li>
+	<br/>
+		<div style="border: 1px solid red;" class="lepht">
+			<p>
+				Status at Google:<br/>
+				<div class="g-signin2" style="position: relative; left: 2%; top: 4%" data-onsuccess="onSignIn" data-theme="dark"></div>
+			<!--
+			https://accounts.google.com/o/oauth2/iframerpc?action=issueToken&response_type=token%20id_token&scope=openid%20profile%20email&client_id=16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com&login_hint=AJDLj6JUa8yxXrhHdWRHIV0S13cAWLW3gHcQGvVT7SwK9fhIKmsDY2rcGjoNzfu_A9C8Mox9nJm5mAxUFhy2TscjrAFTGfazyg&ss_domain=http%3A%2F%2Flocalhost%3A8080&origin=http%3A%2F%2Flocalhost%3A8080
+			 -->
+			</p>
+			<a id="ytlogout" class="beHidden" href="https://www.youtube.com/logout" target="_blank">Logout of youtube</a>
+		</div>
+		<div id="authResult" class="ryght"></div>
+	</li>
+</ol>
+
+
+<div id="TEMPLATES" style="display: none; position:relative; clear: both;">
+<p>
+<hr width="100%" style="clear: both; height: 20px; background-color: #333;" />
+</p>
+
+	<form action="/api/auth/gcallback" method="post" id="callback">
+		<fieldset>
+			<legend>Exchange Google accessToken for Beancab Token</legend>
+			<textarea name="id_token" id="token" rows="10" cols="100"></textarea>
+			<br/>
+			<input type="submit" id="callback_button"></input>
+		</fieldset>
+	</form>
+
+
+	<div style="background-color: #298a2a;" id="authd">
+		<div class="lepht">
+			<h5>Access Protected routes:</h5>
+		</div>
+
+		<div class="ryght">
+			<form action="/api/auth/revoke" method="post" id="revoke">
+				<fieldset>
+					<legend>Exit Beancab</legend>
+					<textarea name="id_token" id="beancab_token" rows="10" cols="100"></textarea>
+					<br/>
+					<input type="submit"></input>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+
+</div>
+<script type="text/javascript">
+
+curr_cookie = readCookie("beancab");
+
+function set_steps() {
+
+	var googleOk = ! $('#ytlogout').hasClass('beHidden');
+	var beancabOk = curr_cookie != null;
+
+	if (googleOk) {
+		if ( $('#callback').parents('#TEMPLATES').length == 1) {
+			steps.addLItem('#callback');
+		}
+		$('#ytlogout').removeClass('beHidden');
+	}
+	else {
+		$('#ytlogout').addClass('beHidden');
+		steps.dropLItem('#callback');
+	}
+
+	if (beancabOk) {
+		steps.addLItem('#authd');
+		$('#authd').removeClass('beHidden');
+
+		$('#revoke').show();
+		$('#beancab_token').val(curr_cookie);
+
+//		$('#callback_button').attr('disabled', 'disabled');
+	}
+	else {
+		steps.dropLItem('#authd');
+		$('#authd').addClass('beHidden');
+		$('#callback_button').show();
+		$('#revoke').hide();
+	}
+
+}
+
+
+$(document).ready(function(){
+
+	if (curr_cookie != null && curr_cookie.trim() == "") {
+		curr_cookie = null;
+	}
+
+	callbackForm = $('#callback');
+	authd = $('#authd');
+	ytlogout = $('#ytlogout');
+	callbackForm.attr('disabled', 'disabled');//.css({'background-color':'grey'});
+	outputBox = $('#authResult');
+
+
+
+	steps = $('#steps');
+	steps.addLItem = function(elemId) {
+		var elem = $(elemId)
+		li = $('<li>');
+		li.append(elem);
+		li.appendTo(this);
+	};
+
+	steps.dropLItem = function(elemId) {
+		var elem = $(elemId)
+		var outr = elem.parent('li');
+		elem.appendTo($('#TEMPLATES'));
+		outr.remove();
+	};
+
+	$('#revoke').submit(function( event ) {
+	 curr_cookie = null;
+	 alert("logged out");
+	 set_steps();
+	});
+});
+
+	function onSignIn(googleUser) {
+
+    // The ID token you need to pass to your backend:
+    var id_token = googleUser.getAuthResponse().id_token;
+    var profile = googleUser.getBasicProfile();
+
+/*
+		dumpProperties(googleUser, debugContent, '<h2>googleUser Object properties</h2>', false);
+	  dumpProperties(profile, debugContent, '<h2>profile Object properties</h2>', true);
+ */
+
+    showProfile(profile, outputBox);
+
+ // outputBox.append('<span><h4>Token from Google</h4>' + id_token + '</span>');
+
+		$('#token').val(id_token);
+		ytlogout.removeClass('beHidden');
+		steps.addLItem($('#callback'));
+		set_steps();
+
+    function showProfile(profile, dest) {
+			var map = {
+				'Id': profile.getId(),
+				'Name': profile.getName(),
+				'Given Name': profile.getGivenName(),
+				'Family Name': profile.getFamilyName(),
+				'Image <Url>': profile.getImageUrl(),
+				'Email': profile.getEmail()
+			};
+
+			var table = $("<table id='userinfo'/>");
+			var wrap = $("<p/>");
+			table.append('<caption align="left"><b>User info from Google</b></caption>');
+			for ( n in map) {
+					showv = n.includes('Url')
+						? '<img width="50px" src="' + map[n] + '"/><br/><small><i>' + map[n] + '</i></small>'
+						:  map[n];
+					table.append('<tr><th>' + n + '<th><td>' + showv+'<td></tr>');
+			}
+			wrap.append(table);
+			outputBox.append(wrap);
+    }
+
+		function setCookie(cname, cvalue, exdays) {
+		  var d = new Date();
+		  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+		  var expires = "expires="+ d.toUTCString();
+		  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+		}
+
+		function dumpProperties(obj, dest, sectitle, doFunc) {
+			dest.append('<h2>' + sectitle + '</h2>');
+		  table = $('<table cellpadding="5px" border=1px >');
+		  dest.append(table);
+		  for (var nm in obj) {
+			 	typ = typeof(obj[nm]);
+			 	row = $('<tr><th>' + nm + ':</th><td>' + typ + '</td></tr>');
+			 	table.append(row);
+			 	valcell = $('<td class="value"></td>');
+			 	row.append(valcell);
+			 	valcell.html(
+//					 	typ == 'function' ? obj[nm].toString() :
+					typ == 'function' ? ( doFunc ? obj[nm]() : obj[nm].toString()) :
+					(typ == 'object' ? dumpProperties(obj[nm], valcell, 'inner', false) : obj[nm] )
+				);
+		  }
+		}
+
+};
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+</script>
+
+<!--
+ <iframe style="width: 94%; height: 600px;"  src="/api/application.wadl"></iframe>
+-->
+ </body>
+</html>
