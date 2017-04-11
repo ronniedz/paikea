@@ -8,6 +8,7 @@
 import React, { PropTypes, Component } from 'react'
 import { FormattedMessage } from 'react-intl'
 import messages from './messages'
+import GoogleLogo from 'components/GoogleLogo'
 
 class GoogleSignIn extends Component {
   constructor(props) {
@@ -131,7 +132,7 @@ class GoogleSignIn extends Component {
       display: 'inline-block',
       background: '#d14836',
       color: '#fff',
-      width: 170,
+      width: 35,
       border: '1px solid transparent',
       fontSize: 11,
       fontWeight: 'bold',
@@ -139,23 +140,26 @@ class GoogleSignIn extends Component {
     }
     const { cssClass, children } = this.props
     const { signedIn } = this.state
-    return (
-      !signedIn
+    return <div style={{ display: 'inline-block' }}>
+      <GoogleLogo />
+      {(
+        !signedIn
         ? <button
           className={cssClass}
           onClick={this.onLoginClick}
           style={cssClass ? {} : style}
-        >
-          {<FormattedMessage {...messages.login_google} />}
-        </button>
-        : <button
-          className={cssClass}
-          onClick={this.onLogoutClick}
-          style={cssClass ? {} : style}
-        >
-          {<FormattedMessage {...messages.logout_google} />}
-        </button>
-    )
+          >
+            {<FormattedMessage {...messages.login_google} />}
+          </button>
+          : <button
+            className={cssClass}
+            onClick={this.onLogoutClick}
+            style={cssClass ? {} : style}
+            >
+              {<FormattedMessage {...messages.logout_google} />}
+            </button>
+      )}
+    </div>
   }
 }
 

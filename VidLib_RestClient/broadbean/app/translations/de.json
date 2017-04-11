@@ -1,8 +1,8 @@
 {
   "app.components.LocaleToggle.de": "Deutsche",
   "app.components.LocaleToggle.en": "Englisch",
-  "bean.components.global.google.login": "Login mit Google",
-  "bean.components.global.google.logout": "Logout mit Google",
+  "bean.components.global.google.login": "Login",
+  "bean.components.global.google.logout": "Logout",
   "bean.components.NavMenu.recommendations": "Empfehlungen",
   "bean.components.NavMenu.search.placeholder": "Suche",
   "bean.components.NavMenu.search.submit": "Eintragen",

@@ -76,6 +76,7 @@ https://accounts.google.com/o/oauth2/iframerpc?action=issueToken&response_type=t
 				//	xhr.setRequestHeader("Authorization", "Bearer " + jsonResponse.token);
 	    }
 		};
+		console.log('id_token.length', id_token.length)
 
 		// Execute POST to beancab-callback
 		xhr.send('id_token=' + id_token);

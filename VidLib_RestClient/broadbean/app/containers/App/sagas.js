@@ -96,6 +96,7 @@ export function * handleExternalAuthenticators() {
     console.log('authuser', authuser)
     if (authuser) {
       console.log('authuser.id_token', authuser.id_token)
+      console.log('authuser.id_token', authuser.id_token.length)
       const formData = new URLSearchParams()
       formData.append('id_token', authuser.id_token)
       const beanToken = yield call(request, auth.endpoint, { body: formData, ...head.auth })
