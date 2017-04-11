@@ -58,8 +58,7 @@ public class PlaylistResource extends BaseResource {
     @UnitOfWork
     public Response createPlaylist(Playlist playlist, @Auth User user) { 
 	
-	// TODO JWT auth
-	playlist.setUserId(user.getId());
+	playlist.setUser(user);
 	
 	Playlist p = playlistDAO.create(playlist);
 	
@@ -103,7 +102,7 @@ public class PlaylistResource extends BaseResource {
   }
   
 
-  @Path("/{id}")
+  @Path("/{id: [0-9]+}")
   @DELETE
   @UnitOfWork
   public Response deletePlaylist(@PathParam("id") Long id) {
@@ -122,11 +121,11 @@ public class PlaylistResource extends BaseResource {
     @UnitOfWork
     public Response pickPlaylist(@PathParam("pid") Long pid, Playlist destPlaylist, @Auth User user) {
 	// TODO In the future won't need to liberate() as only decoupled playlists will be findable 
-	Playlist org = liberatePlaylist(pid);
+	Playlist org = liberatePlaylist(pid, user);
 	if ( destPlaylist.getTitle().isEmpty()) {
 	    destPlaylist.setTitle(org.getTitle() + " (picked)");
 	}
-	destPlaylist.setUserId(user.getId());
+//	destPlaylist.setUser(user);
 	destPlaylist = playlistDAO.create(destPlaylist);
 	destPlaylist.setVideos(org.getVideos().stream().map(orgVid -> { 
 	    return videoDAO.findById(orgVid.getVideoId()).get();
@@ -153,22 +152,23 @@ public class PlaylistResource extends BaseResource {
     @Path("/liberate/{pid: [0-9]+}")
     @PUT
     @UnitOfWork
-    @RolesAllowed({Role.Names.GUARDIAN_ROLE, Role.Names.MEMBER_ROLE}) 
-    public Playlist liberatePlaylist(@PathParam("pid") Long pid) {
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    public Playlist liberatePlaylist(@PathParam("pid") Long pid, @Auth User user) {
 	
 	Playlist org = playlistDAO.retrieve(pid);
-	if (org.getUserId() == null) {
-	    return org;
-	}
 	
 	Playlist o = new Playlist();
 
 	o.setTitle(org.getTitle() + " (copy)");
+	o.setUser(user);
 	o = playlistDAO.create(o);
-	
-	o.setVideos(org.getVideos().stream().map(orgVid -> { 
-	    return videoDAO.findById(orgVid.getVideoId()).get();
-	}).collect(Collectors.toSet()));
+
+	Set<String>  needles = org.getVideos().stream().map(Video::getVideoId).collect(Collectors.toSet()); 
+		
+	o.getVideos().addAll(videoDAO.findWithIds(needles));
+//	o.setVideos(org.getVideos().stream().map(orgVid -> { 
+//	    return videoDAO.findById(orgVid.getVideoId()).get();
+//	}).collect(Collectors.toSet()));
 	
 	return playlistDAO.create(o);
     }
@@ -189,16 +189,16 @@ public class PlaylistResource extends BaseResource {
     @UnitOfWork
     @RolesAllowed({Role.Names.GUARDIAN_ROLE, Role.Names.MEMBER_ROLE}) 
     public Response listUserPlaylists(@PathParam("userId") LongParam userId, @Auth User user) {
-	return doGET(new ResponseData( playlistDAO.findUserLists(userId.get())).setSuccess(true)).build();
+	return doGET(new ResponseData( playlistDAO.findUserLists(user)).setSuccess(true)).build();
     }
 
     
     @Path("/my")
     @GET
     @UnitOfWork
-    @RolesAllowed({Role.Names.MEMBER_ROLE}) 
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
     public Response listOwnPlaylists(@Auth User user) {
-	return doGET(new ResponseData( user.getPlaylists()).setSuccess(true)).build();
+	return doGET(new ResponseData( playlistDAO.loadUser(user)).setSuccess(true)).build();
     }
     
     @Path("/video/{pidVal: [0-9]+}")
@@ -208,7 +208,7 @@ public class PlaylistResource extends BaseResource {
     public Response addVideos(@PathParam("pidVal") Long pidVal, Set<String> videoIds, @Auth User user) {
 	
 	ResponseData dat = new ResponseData().setSuccess(false);
-	
+	Set<Playlist> upls = playlistDAO.loadUser(user);
 	if (  user.getPlaylists().stream().map(Playlist::getId).collect(Collectors.toSet()).contains(pidVal)
 	    || user.hasAnyRole(Names.PLAYLIST_MANAGER)
 	) {

@@ -17,14 +17,14 @@ import javax.ws.rs.core.SecurityContext;
 @Produces(MediaType.TEXT_PLAIN)
 public class ProtectedResource {
 
-    @RolesAllowed({Role.Names.MEMBER_ROLE})
+    @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE})
     @GET
     public String showSecret(@Context SecurityContext context) {
 	User user = (User) context.getUserPrincipal();
         return String.format("Hey there, %s. You know the secret! %d", user.getName(), user.getId());
     }
 
-    @RolesAllowed({Role.Names.ADMIN_ROLE})
+    @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE})
     @GET
     @Path("admin")
     public String showAdminSecret(@Auth User user) {

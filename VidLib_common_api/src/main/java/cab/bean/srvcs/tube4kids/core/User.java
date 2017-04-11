@@ -34,7 +34,7 @@ import lombok.ToString;
 @ToString(exclude= {"playlists"})
 @EqualsAndHashCode(exclude= {
 	"email","password", "roles", "activated", "lastLogin", "resetPasswordCode", "activatedAt",
-	"createdAt", "updatedAt", "activationCode"
+	"createdAt", "updatedAt", "activationCode", "children", "playlists"
 })
 @Data
 public class User implements Principal {
@@ -50,8 +50,11 @@ public class User implements Principal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Playlist> playlists;
+    
+    @OneToMany(mappedBy="parent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Child> children;
 
     @JsonIgnore
     @Transient

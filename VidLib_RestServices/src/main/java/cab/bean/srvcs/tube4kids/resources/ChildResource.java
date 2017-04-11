@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -62,7 +63,7 @@ public class ChildResource extends BaseResource {
         final boolean ifMini = isMinimalRequest();
     
         List<?> outp = children.stream().map( aChild -> {
-            	aChild.setUserId(user.getId()); 
+            	aChild.setParent(user); 
             	aChild.setCreated(new Timestamp(java.lang.System.currentTimeMillis()));
             	return childDAO.create(aChild, ifMini);
     	}).collect(Collectors.toList());
@@ -96,21 +97,58 @@ public class ChildResource extends BaseResource {
     @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.CHILD_EDIT , Role.Names.CHILD_ROLE})
     public Response playlist(@Auth User user, @PathParam("cid") Long cid, @PathParam("pid") Long pid) {
 	ResponseData dat = new ResponseData();
-	try {
-	    Child child = childDAO.findById(cid).get();
-	    Playlist pl = rc.getResource(PlaylistResource.class).liberatePlaylist(pid);
-	    if (pl == null || child == null) {
-		dat.setSuccess(false).setStatus(Response.Status.NOT_FOUND);
-	    } else {
-		pl.setUserId(child.getUserId());
+
+	Optional<Child > childOpt = user.getChildren().stream().filter(child -> cid.equals(child.getId()) ).findFirst();
+	
+	if (childOpt.isPresent()) {
+
+	    Playlist pl = null;
+	    
+	    if ( (pl = playlistDAO.retrieve(pid)) != null) {
+		
+		pl.setUser(user);
+
+//		Child child = childOpt.get();
+		Child child = childDAO.findChildWIthPlaylists(cid).get();
+		
+//		System.out.println("Child: "+ child);
+
 		child.getPlaylists().add(pl);
+//		child.addPlaylist(pl);
+//		Set<Playlist> childLists = childDAO.getPlaylistOf(child);
+//		childLists.add(pl);
+//		child.setPlaylists(childLists);
 		child = childDAO.create(child); // Update the Child
-		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? pl : child.getPlaylists());
+		dat.setSuccess(true).setEntity(isMinimalRequest() ? pl : child.getPlaylists());
 	    }
-	} catch (Exception nsee) {
-	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST);
+	    else {
+		dat
+		.setSuccess(false).setStatus(Response.Status.NOT_FOUND)
+		.setErrorMessage(String.format("Playlist with id [%d] not found", pid))
+		;
+	    }
+	} else {
+	    dat.setSuccess(false)
+	    .setErrorMessage(String.format("Child with id [%d] not found", cid))
+	    .setStatus(Response.Status.BAD_REQUEST);
 	}
         return doPATCH(dat).build();
+
+//	try {
+//	    Child child = childDAO.findById(cid).get();
+//	    Playlist pl = rc.getResource(PlaylistResource.class).liberatePlaylist(pid);
+//	    if (pl == null || child == null) {
+//		dat.setSuccess(false).setStatus(Response.Status.NOT_FOUND);
+//	    } else {
+//		pl.setUser(child.getParent());
+////		child.getPlaylists().add(pl);
+//		child = childDAO.create(child); // Update the Child
+//		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? pl : pl);
+//	    }
+//	} catch (Exception nsee) {
+//	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST);
+//	}
+//        return doPATCH(dat).build();
     }
     
     
@@ -120,15 +158,26 @@ public class ChildResource extends BaseResource {
     @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.CHILD_EDIT , Role.Names.CHILD_ROLE})
     public Response dePlaylist(@Auth User user, @PathParam("cid") Long cid, @PathParam("pid") Long pid) {
 	ResponseData dat = new ResponseData();
+//	Optional<Child > childOpt = user.getChildren().stream().filter(child -> cid.equals(child.getId()) ).findFirst();
+//	
+//	if (childOpt.isPresent()) {
+//
+//	    Playlist pl = null;
+//	    
+//	    if ( (pl = playlistDAO.retrieve(pid)) != null) {
+//		
+//	    }
+//	    
+//	}
 	try {
 	    Child child = childDAO.findById(cid).get();
 	    Playlist pl = playlistDAO.retrieve(pid);
 	    if (pl == null || child == null) {
 		dat.setSuccess(false).setStatus(Response.Status.NOT_FOUND);
 	    } else {
-		child.getPlaylists().remove(pl);
+//		child.getPlaylists().remove(pl);
 		child = childDAO.create(child); // Update the Child
-		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? pl : child.getPlaylists());
+		dat.setSuccess(child != null).setEntity(isMinimalRequest() ? pl : pl);
 	    }
 	} catch (Exception nsee) {
 	    dat.setSuccess(false).setStatus(Response.Status.BAD_REQUEST)
