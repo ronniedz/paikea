@@ -26,6 +26,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.core.Playlist;
@@ -82,38 +84,68 @@ public class PlaylistResource extends BaseResource {
 //  @UnitOfWork
 //  public Response updatePlaylist(@PathParam("pid") Long pid, Playlist objectData) {
 
-  /** Update **/
-  @PATCH
-  @UnitOfWork
-  public Response updatePlaylist(Playlist objectData) {
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @PATCH
+    @UnitOfWork
+    public Response updatePlaylist(Playlist objectData, @Auth User user) {
 	
+	ResponseData dat = new ResponseData().setSuccess(false);
+
+	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	Playlist o = playlistDAO.update(objectData);
-	
-	ResponseData dat = new ResponseData()
-		.setSuccess(o != null)
-		.setEntity(isMinimalRequest() ? null : o );
-	
-	if ( o != null) {
-	    dat.setLocation( UriBuilder.fromResource(this.getClass()).path(o.getId().toString()).build() );
+	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	    // LOAD lazy collection of playlists
+	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(objectData.getId())).findFirst();
+	}
+	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	    subjectPlaylistOpt = playlistDAO.findById(objectData.getId());
 	}
 
-      return doPATCH(dat).build();
+	if (subjectPlaylistOpt != null  ) {
+	    if (subjectPlaylistOpt.isPresent()) {
+		Playlist o = playlistDAO.update(subjectPlaylistOpt.get());
+		dat.setSuccess(true).setEntity(isMinimalRequest() ? null : o );
+		dat.setLocation( UriBuilder.fromResource(this.getClass()).path(o.getId().toString()).build() );
+	    }
+	    else {
+		dat.setStatus(Response.Status.NOT_FOUND).setErrorMessage("No such playlist");
+	    }
+	}
+	else {
+	    dat.setStatus(Response.Status.FORBIDDEN);
+	}
+
+	return doPATCH(dat).build();
   }
   
 
   @Path("/{id: [0-9]+}")
   @DELETE
   @UnitOfWork
-  public Response deletePlaylist(@PathParam("id") Long id) {
-	
-	Playlist o = playlistDAO.delete(id);
-	
-	ResponseData dat = new ResponseData()
-		.setSuccess(o != null)
-		.setEntity(isMinimalRequest() ? null : o );
+  public Response deletePlaylist(@PathParam("id") Long pidVal, @Auth User user) {
 
-      return doDELETE(dat).build();
+	
+	ResponseData dat = new ResponseData().setSuccess(false);
+
+	Optional<Playlist> subjectPlaylistOpt = null;
+	
+	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	    // LOAD lazy collection of playlists
+	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
+	}
+	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
+	}
+
+	if (subjectPlaylistOpt != null  ) {
+	    if (subjectPlaylistOpt.isPresent()) {
+		Playlist o = playlistDAO.delete(pidVal);
+	
+	dat.setSuccess(o != null)
+		.setEntity(isMinimalRequest() ? null : o );
+	    }
+	}
+	return doDELETE(dat).build();
   }
     
     @Path("/pick/{pid: [0-9]+}")
@@ -184,13 +216,13 @@ public class PlaylistResource extends BaseResource {
 //
 
 
-    @Path("/user/{userId: [0-9]+}")
-    @GET
-    @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE}) 
-    public Response listUserPlaylists(@PathParam("userId") LongParam userId, @Auth User user) {
-	return doGET(new ResponseData( playlistDAO.findUserLists(user)).setSuccess(true)).build();
-    }
+//    @Path("/user/{userId: [0-9]+}")
+//    @GET
+//    @UnitOfWork
+//    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+//    public Response listUserPlaylists(@PathParam("userId") LongParam userId, @Auth User user) {
+//	return doGET(new ResponseData( playlistDAO.findUserLists(user)).setSuccess(true)).build();
+//    }
 
     
     @Path("/my")
@@ -198,7 +230,7 @@ public class PlaylistResource extends BaseResource {
     @UnitOfWork
     @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
     public Response listOwnPlaylists(@Auth User user) {
-	return doGET(new ResponseData( playlistDAO.loadUser(user)).setSuccess(true)).build();
+	return doGET(new ResponseData( playlistDAO.loadUserPlaylists(user)).setSuccess(true)).build();
     }
     
     @Path("/video/{pidVal: [0-9]+}")
@@ -208,12 +240,23 @@ public class PlaylistResource extends BaseResource {
     public Response addVideos(@PathParam("pidVal") Long pidVal, Set<String> videoIds, @Auth User user) {
 	
 	ResponseData dat = new ResponseData().setSuccess(false);
-	Set<Playlist> upls = playlistDAO.loadUser(user);
-	if (  user.getPlaylists().stream().map(Playlist::getId).collect(Collectors.toSet()).contains(pidVal)
-	    || user.hasAnyRole(Names.PLAYLIST_MANAGER)
-	) {
-	    Playlist p = null;
-	    if ( (p = playlistDAO.findById(pidVal).orElse(null)) != null ) {
+
+	Optional<Playlist> subjectPlaylistOpt = null;
+	
+	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	    
+	    // LOAD lazy collection of playlists
+	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
+	    
+	}
+	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
+	}
+
+	if (subjectPlaylistOpt != null  ) {
+
+	    if (subjectPlaylistOpt.isPresent()) {
+		Playlist p = subjectPlaylistOpt.get();
 		Tuple t = bulkFindUtil(videoIds);
 		p.getVideos().addAll(t.videos);
 		p = playlistDAO.create(p); // SaveOrUpdate Playlist
@@ -225,8 +268,7 @@ public class PlaylistResource extends BaseResource {
 	    else {
 		dat.setStatus(Response.Status.NOT_FOUND).setErrorMessage("No such playlist");
 	    }
-	}
-	else {
+	} else {
 	    dat.setStatus(Response.Status.FORBIDDEN);
 	}
         return doPATCH(dat).build();
@@ -264,18 +306,29 @@ public class PlaylistResource extends BaseResource {
     @RolesAllowed({Names.GUARDIAN_ROLE, Names.PLAYLIST_MANAGER_ROLE})
     public Response dropVideos(@PathParam("pidVal") Long pidVal, @PathParam("videoIds") String videoIds, @Auth User user) {
 	ResponseData dat = new ResponseData().setSuccess(false);
+
+	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	if (  user.getPlaylists().stream().map(Playlist::getId).collect(Collectors.toSet()).contains(pidVal)
-	    || user.hasAnyRole(Names.PLAYLIST_MANAGER)
-	) {
-	    Playlist p = null;
-	    if ( (p = playlistDAO.findById(pidVal).orElse(null)) != null ) {
-		Tuple t = bulkFindUtil(videoIds.split(SPLIT_PARAM_REGEX));
-		p.getVideos().removeAll(t.videos);
-		p = playlistDAO.create(p); // SaveOrUpdate Playlist
-		dat.setSuccess(p != null).setEntity(isMinimalRequest() ? null : p);
-		if ( t.delta == 0) {
-		    dat.setErrorMessage(String.format("%d of selected videos were not found", t.delta));
+	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	    
+	    // LOAD lazy collection of playlists
+	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
+	    
+	}
+	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
+	}
+
+	if (subjectPlaylistOpt != null  ) {
+
+	    if (subjectPlaylistOpt.isPresent()) {
+		Playlist subjectPlaylist = subjectPlaylistOpt.get();
+		Tuple tuple = bulkFindUtil(videoIds.split(SPLIT_PARAM_REGEX));
+		subjectPlaylist.getVideos().removeAll(tuple.videos);
+		subjectPlaylist = playlistDAO.create(subjectPlaylist); // SaveOrUpdate Playlist
+		dat.setSuccess(subjectPlaylist != null).setEntity(isMinimalRequest() ? null : subjectPlaylist);
+		if ( tuple.delta == 0) {
+		    dat.setErrorMessage(String.format("%d of selected videos were not found", tuple.delta));
 		}
 	    }
 	    else {

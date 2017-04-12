@@ -129,11 +129,15 @@ public class User implements Principal {
     
     public boolean hasAnyRole(String... rolenames) {
 	final List<String> needles = Arrays.asList(rolenames);
-	return (this.roles.stream().map(Role::getName).filter(straw -> needles.contains(straw)).count() > 0 );
+	return (this.roles.stream().filter(straw -> needles.contains(straw.getName())).count() > 0 );
     }
     
     public boolean hasRole(String role) {
 	return roles.contains(new Role(role));
+    }
+
+    public boolean isMyPlaylist(Long pidVal) {
+	return this.playlists.stream().filter(plitem -> plitem.getId().equals(pidVal)).count() > 0;
     }
 }
 

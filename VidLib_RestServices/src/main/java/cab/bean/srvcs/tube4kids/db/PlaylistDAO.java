@@ -90,7 +90,7 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
 	return o;
     }
 
-    public Set<Playlist> loadUser(User user) {
+    public Set<Playlist> loadUserPlaylists(User user) {
 	currentSession().load(user, user.getId());
 	user.getPlaylists().size();
 	return user.getPlaylists();
