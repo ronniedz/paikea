@@ -140,26 +140,28 @@ class GoogleSignIn extends Component {
     }
     const { cssClass, children } = this.props
     const { signedIn } = this.state
-    return <div style={{ display: 'inline-block' }}>
-      <GoogleLogo />
-      {(
-        !signedIn
-        ? <button
-          className={cssClass}
-          onClick={this.onLoginClick}
-          style={cssClass ? {} : style}
-          >
-            {<FormattedMessage {...messages.login_google} />}
-          </button>
-          : <button
+    return (
+      <div style={{ display: 'inline-block' }}>
+        <GoogleLogo />
+        {(
+          !signedIn
+          ? <button
             className={cssClass}
-            onClick={this.onLogoutClick}
+            onClick={this.onLoginClick}
             style={cssClass ? {} : style}
+          >
+              {<FormattedMessage {...messages.login_google} />}
+          </button>
+            : <button
+              className={cssClass}
+              onClick={this.onLogoutClick}
+              style={cssClass ? {} : style}
             >
-              {<FormattedMessage {...messages.logout_google} />}
+                {<FormattedMessage {...messages.logout_google} />}
             </button>
-      )}
-    </div>
+        )}
+      </div>
+    )
   }
 }
 
