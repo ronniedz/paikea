@@ -308,9 +308,8 @@ public class AuthNVerityResource extends BaseResource {
         secure specifies whether the cookie will only be sent over a secure connection
         httpOnly if true make the cookie HTTP only, i.e. only visible as part of an HTTP request.
 */
-        
-	
     }
+    
     private void updateUser(User user, Map<String, Object> userValues, Token beanToken) {
 
 	try {
@@ -334,13 +333,12 @@ public class AuthNVerityResource extends BaseResource {
 	} catch (IllegalAccessException | InvocationTargetException e) {
 	    e.printStackTrace();
 	}
+
 	// TODO figure out issue with this boolean propagation
-//	u.setEmailVerified((Boolean) userValues.getOrDefault("email_verified", Boolean.TRUE));
+        //	u.setEmailVerified((Boolean) userValues.getOrDefault("email_verified", Boolean.TRUE));
 	u.setEmailVerified(Boolean.TRUE);
 	u.setActivated(Boolean.TRUE);
 	u.setPassword(Long.toHexString(Double.doubleToLongBits(Math.random())));
-    
-//	String[] rolenames = {"sudo", "admin", "moderator", "editor", "leader","user"};
     
 	for(String rname : Role.Names.SUDO) {
 	    u.addRole(roleDAO.findByName(rname).get());

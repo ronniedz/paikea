@@ -51,7 +51,6 @@ public abstract class ResourceStandards {
     
 //    protected UriBuilder uriBuilder;
 
-    
     protected ResourceStandards() {
 //	this.uriBuilder = UriBuilder.fromResource(this.getClass());
     }

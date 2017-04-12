@@ -187,7 +187,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/user/{userId: [0-9]+}")
     @GET
     @UnitOfWork
-    @RolesAllowed({Role.Names.GUARDIAN_ROLE, Role.Names.MEMBER_ROLE}) 
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE}) 
     public Response listUserPlaylists(@PathParam("userId") LongParam userId, @Auth User user) {
 	return doGET(new ResponseData( playlistDAO.findUserLists(user)).setSuccess(true)).build();
     }
