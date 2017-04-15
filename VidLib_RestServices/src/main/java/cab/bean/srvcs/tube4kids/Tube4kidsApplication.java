@@ -169,7 +169,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new GenreResource(genreDAO));
         jerseyConf.register(new UserResource(userDAO));
         jerseyConf.register(new AgeGroupResource(ageGroupDAO));
-        jerseyConf.register(new ChildResource(childDAO, videoDAO, playlistDAO));
+        jerseyConf.register(new ChildResource(childDAO, userDAO, playlistDAO, roleDAO));
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
         

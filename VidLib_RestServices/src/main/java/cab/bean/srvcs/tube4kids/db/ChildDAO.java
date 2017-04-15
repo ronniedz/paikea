@@ -1,14 +1,15 @@
 package cab.bean.srvcs.tube4kids.db;
 
-import cab.bean.srvcs.tube4kids.core.Child;
-import cab.bean.srvcs.tube4kids.core.Playlist;
 import io.dropwizard.hibernate.AbstractDAO;
-
-import org.hibernate.SessionFactory;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import org.hibernate.SessionFactory;
+
+import cab.bean.srvcs.tube4kids.core.Child;
+import cab.bean.srvcs.tube4kids.core.Playlist;
 
 public class ChildDAO extends AbstractDAO<Child> {
 
@@ -24,12 +25,14 @@ public class ChildDAO extends AbstractDAO<Child> {
 	return (Long) currentSession().save(child);
     }
     
+    public Child delete(Child o) {
+	currentSession().delete(o);
+	return o;
+    }
+    
     public Child delete(Long id) {
 	Child o = get(id);
-	if ( o != null ) {
-	    currentSession().delete(o);
-	}
-	return o;
+	return delete(o);
     }
 
     public List<Child> findAll() {
@@ -41,13 +44,11 @@ public class ChildDAO extends AbstractDAO<Child> {
     }
 
 
-    public Optional<Child> findChildWIthPlaylists(Long id) {
+    public Optional<Child> findByIdLoadPlaylists(Long id) {
 	Child child = get(id);
 	if (child !=null) { child.getPlaylists().size(); }
 	return Optional.ofNullable(child);
     }
-
-
     
     public Object create(Child aChild,  boolean identOnly) {
 	return identOnly ? currentSession().save(aChild) : this.create(aChild);

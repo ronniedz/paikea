@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import cab.bean.srvcs.tube4kids.GoogleAPIClientConfiguration;
 import cab.bean.srvcs.tube4kids.JWTConfiguration;
 import cab.bean.srvcs.tube4kids.core.Role;
+import cab.bean.srvcs.tube4kids.core.Role.Names;
 import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.RoleDAO;
@@ -72,6 +74,11 @@ import com.google.common.collect.ImmutableMap;
 
 import     javax.ws.rs.core.HttpHeaders;
 
+
+/**
+ * Authentication Resource. Offers 2 means for logging out: /logout as well as /revoke.
+ * 'revoke' provides a means to POST the id_token and maybe use by an admin to revoke  another's token 
+ */
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/auth")
 public class AuthNVerityResource extends BaseResource {
@@ -140,7 +147,7 @@ public class AuthNVerityResource extends BaseResource {
 		Optional<Token> t = tokenDAO.findBySubject(subject);
 
 		if ( t.isPresent() )  {
-
+		    
 		    beanToken = t.get();
 		    user = beanToken.getUser();
 		    
@@ -172,7 +179,7 @@ public class AuthNVerityResource extends BaseResource {
 		
 		jwt = makeJwt(userValues, beanToken, ttl_mins);
 		redirUri = getRedirect(user);
-		dat.setLocation(redirUri);
+//		dat.setLocation(redirUri);
 
 		dat.setEntity(
 	            ImmutableMap.of(
@@ -199,31 +206,116 @@ public class AuthNVerityResource extends BaseResource {
 	return rb.build();
     }
 
+    @Path("logout")
+    @GET
+    @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response logout(@Context HttpServletRequest request) {
+
+	Optional<String> idTokenStringOpt = getTokenFromCookieOrHeader(request);
+
+	LOGGER.debug("deleting token {}", idTokenStringOpt.get());
+	ResponseData dat = (new ResponseData()).setSuccess(false);
+
+	if (idTokenStringOpt.isPresent()) {
+	    String idTokenString = idTokenStringOpt.get();
+
+	    IdTokenVerity itv = new IdTokenVerity(googleAPIConf.getClientId(), jsonFactory);
+
+	    GoogleIdToken googleToken;
+	    try {
+		googleToken = itv.parse(idTokenString);
+
+
+		final Payload payload = googleToken.getPayload();
+		final String subject = payload.getSubject();
+
+		Token beanToken = null;
+
+		// Optional<Token> t = tokenDAO.findBySubjectAndIssuer(subject,
+		Optional<Token> t = tokenDAO.findBySubject(subject);
+
+		if (t.isPresent()) {
+
+		    beanToken = t.get();
+
+		    // Invalidate the token
+		    beanToken.setActive(false);
+		    tokenDAO.create(beanToken);
+		    
+		    dat.setStatus(Status.OK);
+		    LOGGER.debug("t.isPresent beanToken:\n'{}'", beanToken);
+		}
+	    } catch (IOException e) {
+		throw new javax.ws.rs.BadRequestException(e.getCause());
+	    }
+	}
+
+	Calendar c = Calendar.getInstance();
+	c.add(Calendar.MINUTE, 1);
+
+	// Zero, to retire cookie
+	final int maxAge = 0;
+
+	return doGET(dat).cookie(
+		genCookie("", jwtConf, request, maxAge, c.getTime())
+	).build();
+    }
+
+
     @Path("revoke")
     @POST
     @UnitOfWork
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response logout(@FormParam("id_token") String token, @Context HttpServletRequest request) {
-
-	LOGGER.debug("deleting token {}" , token);
+    @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE}) 
+    public Response revoke(@FormParam("id_token") String idTokenString, @Context HttpServletRequest request) {
 	
-	ResponseData dat = (new ResponseData()).setSuccess(true);
-	NewCookie cookie = null;
-
-//	if (user != null) {
-//	}
-		Calendar c = Calendar.getInstance();
-		c.add(Calendar.MINUTE, 1);
-		final Date expiry = c.getTime();
+	LOGGER.debug("deleting token {}" , idTokenString);
+	ResponseData dat = (new ResponseData()).setSuccess(false);
+	
+	    IdTokenVerity itv = new IdTokenVerity(googleAPIConf.getClientId(), jsonFactory);
+	    
+	    GoogleIdToken googleToken;
+	    try {
+		googleToken = itv.parse(idTokenString);
 		
-		// Zero, to retire cookie
-		final int maxAge = 0;
-//		dat.setSuccess(true);
-		cookie = genCookie("", jwtConf, request, maxAge, expiry);
-	return  doPOST(dat).cookie(cookie).build();
+		final Payload payload = googleToken.getPayload();
+		final String subject = payload.getSubject();
+		
+		Token beanToken = null;
+		User user =  null;
+		
+		LOGGER.debug("subject in: '{}'", subject);
+		
+		Optional<Token> t = tokenDAO.findBySubject(subject);
+		
+		if ( t.isPresent() )  {
+		    
+		    beanToken = t.get();
+		    
+		    beanToken.setActive(false);
+		    tokenDAO.create(beanToken);
+		    dat.setStatus(Status.OK);
+		    LOGGER.debug("t.isPresent beanToken:\n'{}'", beanToken);
+		} 
+	    } catch (IOException e) {
+		e.printStackTrace();
+		throw  new javax.ws.rs.BadRequestException(e.getCause());
+	    }
+	    
+	
+	Calendar c = Calendar.getInstance();
+	c.add(Calendar.MINUTE, 1);
+	// Zero, to retire cookie
+	final int maxAge = 0;
+	// dat.setSuccess(true);
+	return  doPOST(dat).cookie(
+		genCookie("", jwtConf, request, maxAge,  c.getTime())
+	).build();
     }
     
+
     private URI getRedirect(User user) {
 	URI uri = null;
 	
@@ -237,6 +329,8 @@ public class AuthNVerityResource extends BaseResource {
 	return uri;
 	
     }
+
+
     private Optional<String> getTokenFromCookieOrHeader(HttpServletRequest request) {
 	Enumeration<String> re = request.getHeaders(AUTHORIZATION);
 	if ( re != null && re.hasMoreElements()) {
@@ -249,7 +343,8 @@ public class AuthNVerityResource extends BaseResource {
         final Optional<String> cookieToken = getTokenFromCookie(request);
         return cookieToken.isPresent() ? cookieToken : Optional.empty();
     }
-    
+
+
     private Optional<String> getTokenFromHeader( final String header) {
         if (header != null) {
             int space = header.indexOf(' ');
@@ -265,6 +360,7 @@ public class AuthNVerityResource extends BaseResource {
         return Optional.empty();
     }
 
+
     private Optional<String> getTokenFromCookie(HttpServletRequest request) {
 	for( Cookie tokenCookie: request.getCookies()) {
             if (tokenCookie.getName().equals(jwtConf.getCookieName())) {
@@ -273,7 +369,8 @@ public class AuthNVerityResource extends BaseResource {
         }
         return Optional.empty();
     }
-    
+
+
     private NewCookie genCookie(String value, JWTConfiguration conf, HttpServletRequest request, int maxAge, Date expiry) {
 
 	final String name = conf.getCookieName();
@@ -309,7 +406,8 @@ public class AuthNVerityResource extends BaseResource {
         httpOnly if true make the cookie HTTP only, i.e. only visible as part of an HTTP request.
 */
     }
-    
+
+
     private void updateUser(User user, Map<String, Object> userValues, Token beanToken) {
 
 	try {
@@ -324,6 +422,7 @@ public class AuthNVerityResource extends BaseResource {
 	userValues.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
 
     }
+
 
     private User createUser(Map<String, Object> userValues) {
 	User u = new User();
@@ -340,11 +439,12 @@ public class AuthNVerityResource extends BaseResource {
 	u.setActivated(Boolean.TRUE);
 	u.setPassword(Long.toHexString(Double.doubleToLongBits(Math.random())));
     
-	for(String rname : Role.Names.SUDO) {
+	for(String rname : Names.MEMBER) {
 	    u.addRole(roleDAO.findByName(rname).get());
 	}
 	return u;
     }
+
 
     @SuppressWarnings("unchecked")
     private String makeJwt(Map<String, Object> m,  Token beanToken, float token_ttl) {

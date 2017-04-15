@@ -30,7 +30,7 @@ public class JWTAuthenticator implements Authenticator<JwtContext, User> {
 	
         try {
             return Optional.of(
-        	    	tokenDAO.findUserBySubject(context.getJwtClaims().getSubject())
+        	    	tokenDAO.findActiveBySubject(context.getJwtClaims().getSubject())
         	    );
         }
         // All JsonWebTokenExceptions will result in a 401 Unauthorized response.
