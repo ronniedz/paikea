@@ -29,9 +29,7 @@ public class JWTAuthenticator implements Authenticator<JwtContext, User> {
     public Optional<User> authenticate(JwtContext context) {
 	
         try {
-            return Optional.of(
-        	    	tokenDAO.findActiveBySubject(context.getJwtClaims().getSubject())
-        	    );
+            return tokenDAO.findUserByActiveSubject(context.getJwtClaims().getSubject());
         }
         // All JsonWebTokenExceptions will result in a 401 Unauthorized response.
         catch (MalformedClaimException e) { return Optional.empty(); }

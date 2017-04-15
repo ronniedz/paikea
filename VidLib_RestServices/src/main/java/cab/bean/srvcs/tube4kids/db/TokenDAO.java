@@ -26,20 +26,23 @@ public class TokenDAO extends AbstractDAO<Token> {
 	return Optional.ofNullable(uniqueResult(criteria));
     }
 
-    
+
     public Optional<Token> findBySubject(String subject) {
 	Criteria criteria = criteria()
 		.add(Restrictions.eq("subject", subject));
 	return Optional.ofNullable(uniqueResult(criteria));
     }
-    
-    public Optional<Token> findActiveBySubject(String subject) {
+
+
+    public Optional<User> findUserByActiveSubject(String subject) {
 	Criteria criteria = criteria()
 		.add(Restrictions.eq("active", true))
 		.add(Restrictions.eq("subject", subject));
-	return Optional.ofNullable(uniqueResult(criteria));
+	Token token = uniqueResult(criteria);
+	return Optional.ofNullable(token != null ? token.getUser() : null);
     }
-    
+
+
     public Token create(Token beanToken) {
         return persist(beanToken);
     }
