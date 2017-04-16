@@ -38,8 +38,11 @@ import {
 
 import {
   putIt,
-  httpHeaders as head,
 } from '../shared'
+
+import {
+  httpOptions as head,
+} from 'utils/request'
 
 /**
  * YouTube-bean search request/response handler

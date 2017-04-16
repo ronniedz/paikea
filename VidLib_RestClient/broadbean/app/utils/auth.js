@@ -3,10 +3,6 @@
 import request from './request'
 
 import {
-  httpHeaders as head,
-} from 'containers/shared'
-
-import {
   agegroup,
   auth,
 } from 'siteconfig'
@@ -28,7 +24,13 @@ function sendAuthRequest(url, options) {
     .then((res) => console.log('res', res))
 }
 
-module.exports = {
+let tokenData
+export const beanToken = (data) => {
+  if (data) { tokenData = data }
+  return tokenData
+}
+
+export default {
   beanlogin(token) {
 
     console.log('token', token)
@@ -50,7 +52,6 @@ module.exports = {
     })
 
 },
-
   getToken: function () {
     return localStorage.token
   },

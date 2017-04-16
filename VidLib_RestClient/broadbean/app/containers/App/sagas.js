@@ -35,30 +35,30 @@ import {
 } from './constants'
 
 import request from 'utils/request'
-// import auth from 'utils/auth'
+import { beanToken } from 'utils/auth'
 
 import {
   agegroup,
-  associatePlaylist,
+  associateChildPlaylistUrl,
   auth,
   playlist,
   userchildren,
 } from 'siteconfig'
 
-console.log('auth', auth)
-
 import {
-  httpHeaders as head,
-} from '../shared'
+  httpOptions as head,
+  authToken,
+} from 'utils/request'
 
 import {
   selectAuthorizedBy,
   selectNewChild,
   selectAddVideo,
- } from './selectors'
+} from './selectors'
+
+import R from 'ramda'
 
 import { browserHistory } from 'react-router'
-
 import { selectYTBeanResults } from 'containers/SearchPage/selectors'
 
 function * generateSeriesCalls(targets, stem, body) {
@@ -93,32 +93,25 @@ export function * addVideosToPlaylist() {
 export function * handleExternalAuthenticators() {
   while (yield take(SET_AUTHORIZED_BY)) {
     const authuser = yield select(selectAuthorizedBy())
-    console.log('authuser', authuser)
     if (authuser) {
-      console.log('authuser.id_token', authuser.id_token)
-      console.log('authuser.id_token', authuser.id_token.length)
       const formData = new URLSearchParams()
       formData.append('id_token', authuser.id_token)
-      const beanToken = yield call(request, auth.endpoint, { body: formData, ...head.auth })
+      const authResult = yield call(request, auth.endpoint, { body: formData, ...head.auth })
+      const beantoken = beanToken(authResult.data)
 
-      console.log('beanToken', beanToken)
+      const childrenURL = userchildren.endpoint
+      const childrenResults = yield call(request, childrenURL, { headers: authToken() })
 
-      // const beanLoggedIn = yield auth.beanlogin(
-      //   authuser.id_token
-      // )
-      // console.log('beanLoggedIn', beanLoggedIn)
-/*
-      if (beanLoggedIn) {
-        const requestURL = userchildren.endpoint
-        const results = yield call(request, requestURL)
+      const agegroupURL = agegroup.endpoint
+      const agegroupResults = yield call(request, agegroupURL, { headers: authToken() })
 
-        if (!results.err) {
-          yield put(setUserChildren(results.data))
-        } else {
-          yield put(loadError(results.err))
-        }
+      if (!childrenResults.err && !agegroupResults.err) {
+        yield put(setUserChildren(childrenResults.data))
+        yield put(ageGroupLoaded(agegroupResults.data))
+      } else {
+        yield put(loadError(childrenResults.err))
       }
-*/
+
     } else {
       // auth.logout()
       browserHistory.push('/')
@@ -130,27 +123,30 @@ export function * sendCreateChild() {
   while (yield take(CREATE_CHILD)) {
     const { name, agegroupid } = yield select(selectNewChild())
 
+    const mergeInToken = (option) => R.set(R.lensProp('headers'), R.merge(authToken(), option.headers))(option)
+
     // create child
+    // , ...{ headers: { 'Authorization': `${beantoken.token_type} ${beantoken.access_token}`}}
     const createChildURL = `${userchildren.endpoint}?detail=true`
-    const childCreated = yield call(request, createChildURL, { body: JSON.stringify([{ ageGroupId: agegroupid, name }]), ...head.post })
+    const childCreated = yield call(request, createChildURL, { body: JSON.stringify([{ ageGroupId: agegroupid, name }]), ...mergeInToken(head.post) })
     const childId = get(childCreated, 'data[0].id')
     // end create child
 
     // create default child playlist
-    const requestURL = playlist.endpoint
-    const playlistCreated = yield call(request, requestURL, { body: JSON.stringify({ title: `${name}'s Default Playlist` }), ...head.post })
-    const playlistId = get(playlistCreated, 'data').id
+    const playlistsURL = playlist.endpoint
+    const playlistCreated = yield call(request, playlistsURL, { body: JSON.stringify({ title: `${name}'s Default Playlist` }), ...mergeInToken(head.post) })
+    const playlistId = get(playlistCreated, 'data.id')
     // end create playlist
 
     // associate child to playlist
-    const associatePlaylistURL = associatePlaylist(childId, playlistId)
-    yield call(request, associatePlaylistURL, head.patch)
+    const childPlaylistURL = associateChildPlaylistUrl(childId, playlistId)
+    yield call(request, childPlaylistURL, mergeInToken(head.patch))
     // end associate playlist
 
     // get updated children's list
     if (!childCreated.err & !playlistCreated.err) {
       const listChildrenURL = userchildren.endpoint
-      const results = yield call(request, listChildrenURL)
+      const results = yield call(request, listChildrenURL, { headers: authToken() })
 
       if (!results.err) {
         yield put(setUserChildren(results.data))

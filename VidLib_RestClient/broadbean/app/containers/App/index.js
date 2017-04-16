@@ -35,7 +35,6 @@ import {
   selectVideoDimensions,
 } from './selectors'
 import {
-  retrieveAgeGroup,
   setAuthorizedBy,
   setVidDimensions,
 } from './actions'
@@ -117,7 +116,6 @@ function mapDispatchToProps(dispatch) {
     setAuthorized: (authorized) => {
       console.log('authorized', authorized)
       dispatch(setAuthorizedBy(authorized))
-      dispatch(retrieveAgeGroup())
     },
     dispatch,
   }

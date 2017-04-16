@@ -20,6 +20,7 @@ import { push } from 'react-router-redux'
 import { connect } from 'react-redux'
 import LocaleToggle from 'containers/LocaleToggle'
 import GoogleSignIn from 'components/GoogleSignIn'
+import { gapicid } from 'siteconfig'
 
 export function Header(props) {
   const { changeRoute, setAuthorized } = props
@@ -43,7 +44,7 @@ export function Header(props) {
         <div className={styles.googlogin}>
           <div className={styles.headeratomwrap}>
             <GoogleSignIn
-              clientId={'447179296185-v7eddk6j71u2o1k3oom25bolk8q4a9sf.apps.googleusercontent.com'}
+              clientId={gapicid}
               callback={responseGoogle}
               offline={false}
               setAuthorized={setAuthorized}

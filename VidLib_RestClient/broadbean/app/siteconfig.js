@@ -6,7 +6,11 @@
 */
 // defaultparams: '&part=snippet&maxResults=15&order=date&publishedAfter=2006-01-01T00%3A00%3A00Z&regionCode=BR&relevanceLanguage=PT&type=video&videoCaption=any&videoDuration=long&videoLicense=youtube&videoType=any&fields=etag%2Citems%2Ckind%2CnextPageToken%2CpageInfo'
 
-const domain = ''
+const domain = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : ''
+
+console.log('process.env.NODE_ENV', process.env.NODE_ENV)
+
+export const gapicid = '16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com'
 
 export const videoassets = {
   dimensions: [
@@ -35,8 +39,6 @@ export const videoassets = {
 }
 
 export const search = {
-  // loaded sample query
-  // http://54.153.116.166:8080/ytapi/v1/search?part=snippet&regionCode=US&relevanceLanguage=EN&maxResults=10&order=date&q=oil&type=video&videoCaption=any&videoDuration=long&videoLicense=youtube&videoType=any&fields=etag%2CregionCode%2Citems%2Ckind%2CnextPageToken%2CpageInfo%2CprevPageToken
   endpoint: `${domain}/ytapi/v1/search`,
 
   queryprepend: 'children%2C',
@@ -70,4 +72,4 @@ export const auth = {
   endpoint: `${domain}/api/auth/gcallback`,
 }
 
-export const associatePlaylist = (childId, playlistId) => `${domain}/api/child/${childId}/pl/${playlistId}`
+export const associateChildPlaylistUrl = (childId, playlistId) => `${domain}/api/child/${childId}/pl/${playlistId}`

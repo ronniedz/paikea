@@ -40,13 +40,13 @@ import {
 } from './constants'
 
 import {
-  httpHeaders as head,
-} from '../shared'
+  httpOptions as head,
+} from 'utils/request'
 
 import request from 'utils/request'
 
 import {
-  associatePlaylist,
+  associateChildPlaylistUrl,
   playlist,
   userchildren,
 } from 'siteconfig'
@@ -70,7 +70,7 @@ function * createPlaylist() {
   // end create playlist
 
   // associate child to playlist
-  const associatePlaylistURL = associatePlaylist(childid, playlistId)
+  const associatePlaylistURL = associateChildPlaylistUrl(childid, playlistId)
   const associatedPlaylist = yield call(request, associatePlaylistURL, head.patchmin)
 
   // const action = yield take(RETRIEVE_PLAYLISTS)
