@@ -88,6 +88,11 @@ export const selectAddVideo = () => createSelector(
   )
 )
 
+export const selectPath = () => createSelector(
+  selectGlobal(),
+  (globalState) => globalState.get('path')
+)
+
 export const selectLocationState = () => {
   let prevRoutingState
   let prevRoutingStateJS

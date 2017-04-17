@@ -39,11 +39,11 @@ import {
   RETRIEVE_PLAYLISTS,
 } from './constants'
 
-import {
+import request, {
+  authToken,
+  mergeInToken,
   httpOptions as head,
 } from 'utils/request'
-
-import request from 'utils/request'
 
 import {
   associateChildPlaylistUrl,
@@ -65,18 +65,18 @@ import { LOCATION_CHANGE } from 'react-router-redux'
 function * createPlaylist() {
   const { title, childid } = yield select(selectNewPlaylists())
   let requestURL = playlist.endpoint
-  const playlistCreated = yield call(request, requestURL, { body: JSON.stringify({ title }), ...head.post })
+  const playlistCreated = yield call(request, requestURL, { body: JSON.stringify({ title }), ...mergeInToken(head.post) })
   const playlistId = playlistCreated.data.id
   // end create playlist
 
   // associate child to playlist
   const associatePlaylistURL = associateChildPlaylistUrl(childid, playlistId)
-  const associatedPlaylist = yield call(request, associatePlaylistURL, head.patchmin)
+  const associatedPlaylist = yield call(request, associatePlaylistURL, mergeInToken(head.patchmin))
 
   // const action = yield take(RETRIEVE_PLAYLISTS)
   requestURL = `${userchildren.endpoint}/${childid}`
-  const results = yield call(request, requestURL)
-  console.warn(`this should be merged in ${JSON.stringify(associatedPlaylist)}`)
+  const results = yield call(request, requestURL, { headers: authToken() })
+
   if (!results.err) {
     yield put(playlistsLoaded(results.data))
     const userChildren = yield select(selectUserChildren())
@@ -104,11 +104,13 @@ function * deleteVideoFromPlaylist() {
 function * fetchBeanPlaylistsFlow() {
   const childid = yield select(selectChildId())
   const requestURL = `${userchildren.endpoint}/${childid}`
-  const results = yield call(request, requestURL)
+  const results = yield call(request, requestURL, { headers: authToken() })
+
   if (!results.err) {
     yield put(playlistsLoaded(results.data))
   } else {
-    browserHistory.push('/')
+    throw new Error(results.err)
+    // browserHistory.push('/')
   }
 }
 

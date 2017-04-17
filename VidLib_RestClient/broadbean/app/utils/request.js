@@ -32,11 +32,11 @@ function checkStatus(response) {
 
 export const authToken = () => {
   const beantoken = beanToken()
-  return { 'Authorization': `${beantoken.token_type} ${beantoken.access_token}`}
+  return { Authorization: `${beantoken.token_type} ${beantoken.access_token}` }
 }
 
 const defaults = {
-  headers: {'Content-Type': 'application/json'},
+  headers: { 'Content-Type': 'application/json' },
 }
 export const httpOptions = R.map(e => R.mergeWith((a, b) => R.merge(a, b), defaults, e),
   {
@@ -63,6 +63,8 @@ export const httpOptions = R.map(e => R.mergeWith((a, b) => R.merge(a, b), defau
     },
   }
 )
+
+export const mergeInToken = (option) => R.set(R.lensProp('headers'), R.merge(authToken(), option.headers))(option)
 
 /**
  * Requests a URL, returning a promise

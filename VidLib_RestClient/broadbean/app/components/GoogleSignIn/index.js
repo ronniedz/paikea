@@ -28,7 +28,6 @@ class GoogleSignIn extends Component {
 
   onLoginClick() {
     const { auth2 } = this.state
-    console.log('auth2', auth2)
     const { offline, redirectUri, callback } = this.props
     if (offline) {
       const options = {
@@ -41,7 +40,6 @@ class GoogleSignIn extends Component {
     } else {
       auth2.signIn()
         .then((response) => {
-          console.log('response', response)
           callback(response)
         })
     }
@@ -91,11 +89,6 @@ class GoogleSignIn extends Component {
           if (loggedin && !user.hasGrantedScopes(scope)) {
             auth.currentUser.get().grant({ scope })
           }
-
-          console.log('!!!!!!!!!!!')
-          console.log('user', user)
-          console.log(user.getBasicProfile())
-          console.log(user.getAuthResponse())
 
           if (loggedin) {
             setAuthorized({

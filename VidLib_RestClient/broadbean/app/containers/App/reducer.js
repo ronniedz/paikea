@@ -58,6 +58,7 @@ const initialState = fromJS({
     name: '',
     agegroupid: '',
   },
+  path: '/',
   searchval: '',
   token: {},
   session: {},
@@ -106,6 +107,7 @@ const appReducer = (state = initialState, action) => {
     case SET_AUTHORIZED_BY:
       return state
         .set('authorizedby', action.authorized)
+        .set('path', action.path)
     case SET_VID_DIMENSIONS: {
       return state
         .setIn(['pagedimensions', 'height'], action.dimensions.height)

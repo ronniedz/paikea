@@ -22,7 +22,6 @@ import {
   ytSearchLoaded,
 } from './actions'
 
-import request from 'utils/request'
 import { selectMainSearchVal } from 'containers/App/selectors'
 import {
   selectNavToken,
@@ -40,7 +39,7 @@ import {
   putIt,
 } from '../shared'
 
-import {
+import request, {
   httpOptions as head,
 } from 'utils/request'
 

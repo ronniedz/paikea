@@ -46,7 +46,6 @@ describe('App Actions', () => {
       [createChildSuccess, 'result', CREATE_CHILD_SUCCESS],
       [ageGroupLoaded, 'results', RETRIEVE_AGEGROUP_SUCCESS],
       [sendingRequest, 'sending', SENDING_REQUEST],
-      [setAuthorizedBy, 'authorized', SET_AUTHORIZED_BY],
       [setUser, 'user', SET_USER],
       [setUserChildren, 'children', SET_USER_CHILDREN],
       [setVidDimensions, 'dimensions', SET_VID_DIMENSIONS],

@@ -122,10 +122,11 @@ export function sendingRequest(sending) {
   }
 }
 
-export function setAuthorizedBy(authorized) {
+export function setAuthorizedBy(authorized, path) {
   return {
     type: SET_AUTHORIZED_BY,
     authorized,
+    path,
   }
 }
 

@@ -51,12 +51,6 @@ class OffspringPage extends Component {
     this.createNewPlaylist = this.createNewPlaylist.bind(this)
   }
 
-  componentDidMount() {
-    if (auth.loggedIn()) {
-      this.props.dispatch(retrievePlaylists(this.props.params.id))
-    }
-  }
-
   componentWillReceiveProps(nextprops) {
     const paramid = this.props.params.id
     const nextid = nextprops.params.id

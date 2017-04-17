@@ -39,6 +39,7 @@ describe('appReducer', () => {
         name: '',
         agegroupid: '',
       },
+      path: '/',
       searchval: '',
       token: {},
       session: {},

@@ -32,15 +32,11 @@ export const beanToken = (data) => {
 
 export default {
   beanlogin(token) {
-
-    console.log('token', token)
-
     return new Promise( (resolve, reject) => {
       // if (localStorage.token) {
       //   resolve(true)
       // }
 
-      // pretendRequest(email, password, (res) => {
       prepareAuthRequest(token, (res) => {
         if (res.authenticated) {
           localStorage.token = res.token

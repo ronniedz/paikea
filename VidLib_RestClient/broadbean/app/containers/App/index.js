@@ -13,6 +13,8 @@
  * contain code that should be seen on all pages. (e.g. navigation bar)
  */
 
+/* eslint-disable no-undef */
+
 import React, { PropTypes } from 'react'
 
 // Import the CSS reset, which HtmlWebpackPlugin transfers to the build folder
@@ -43,6 +45,7 @@ import {
 } from 'siteconfig'
 import {
   find,
+  curry,
 } from 'lodash'
 
 class App extends React.Component {
@@ -75,7 +78,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { children, viddim, ...others } = this.props
+    const { children, viddim, setAuthorized, location, ...others } = this.props
     return (
       <div>
         <div className={styles.mainwrap}>
@@ -93,7 +96,7 @@ class App extends React.Component {
                 className={styles.centercol}
                 style={{ width: viddim.width }}
               >
-                <Header {...others} />
+                <Header {...others} setAuthorized={curry(setAuthorized)(_, location.pathname)} />
                 {children}
               </div>
             </div>
@@ -113,9 +116,8 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return {
     setVidDim: (dim) => dispatch(setVidDimensions(dim)),
-    setAuthorized: (authorized) => {
-      console.log('authorized', authorized)
-      dispatch(setAuthorizedBy(authorized))
+    setAuthorized: (authorized, path) => {
+      dispatch(setAuthorizedBy(authorized, path))
     },
     dispatch,
   }
@@ -125,7 +127,9 @@ App.propTypes = {
   authby: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
   children: PropTypes.node,
   dispatch: PropTypes.func,
+  location: PropTypes.object,
   setVidDim: PropTypes.func,
+  setAuthorized: PropTypes.func,
   viddim: PropTypes.object,
 }
 

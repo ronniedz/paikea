@@ -34,9 +34,6 @@ import {
   SET_AUTHORIZED_BY,
 } from './constants'
 
-import request from 'utils/request'
-import { beanToken } from 'utils/auth'
-
 import {
   agegroup,
   associateChildPlaylistUrl,
@@ -45,12 +42,16 @@ import {
   userchildren,
 } from 'siteconfig'
 
-import {
+import request, {
   httpOptions as head,
   authToken,
+  mergeInToken,
 } from 'utils/request'
 
+import { beanToken } from 'utils/auth'
+
 import {
+  selectPath,
   selectAuthorizedBy,
   selectNewChild,
   selectAddVideo,
@@ -59,7 +60,10 @@ import {
 import R from 'ramda'
 
 import { browserHistory } from 'react-router'
+
 import { selectYTBeanResults } from 'containers/SearchPage/selectors'
+import { selectChildId } from 'containers/OffspringPage/selectors'
+import { playlistsLoaded } from 'containers/OffspringPage/actions'
 
 function * generateSeriesCalls(targets, stem, body) {
   yield* targets.map((ea) => call(request, `${stem}/${ea}`, { body: JSON.stringify(body), ...head.patch }))
@@ -92,7 +96,11 @@ export function * addVideosToPlaylist() {
 
 export function * handleExternalAuthenticators() {
   while (yield take(SET_AUTHORIZED_BY)) {
+    // check if authorized by external authenticator
+    //
+
     const authuser = yield select(selectAuthorizedBy())
+    const path = yield select(selectPath())
     if (authuser) {
       const formData = new URLSearchParams()
       formData.append('id_token', authuser.id_token)
@@ -112,6 +120,17 @@ export function * handleExternalAuthenticators() {
         yield put(loadError(childrenResults.err))
       }
 
+      if (path.includes('offspring/')) {
+        const childid = path.match(/offspring\/(.*)$/)[1]
+        const requestURL = `${userchildren.endpoint}/${childid}`
+        const results = yield call(request, requestURL, { headers: authToken() })
+
+        if (!results.err) {
+          yield put(playlistsLoaded(results.data))
+        } else {
+          throw new Error(results.err)
+        }
+      }
     } else {
       // auth.logout()
       browserHistory.push('/')
@@ -122,11 +141,7 @@ export function * handleExternalAuthenticators() {
 export function * sendCreateChild() {
   while (yield take(CREATE_CHILD)) {
     const { name, agegroupid } = yield select(selectNewChild())
-
-    const mergeInToken = (option) => R.set(R.lensProp('headers'), R.merge(authToken(), option.headers))(option)
-
     // create child
-    // , ...{ headers: { 'Authorization': `${beantoken.token_type} ${beantoken.access_token}`}}
     const createChildURL = `${userchildren.endpoint}?detail=true`
     const childCreated = yield call(request, createChildURL, { body: JSON.stringify([{ ageGroupId: agegroupid, name }]), ...mergeInToken(head.post) })
     const childId = get(childCreated, 'data[0].id')
