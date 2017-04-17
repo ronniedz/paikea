@@ -24,7 +24,7 @@ import lombok.EqualsAndHashCode;
 	    query = "SELECT p FROM Child p"
     )
 })
-@EqualsAndHashCode(exclude= {"playlists", "parent"} )
+@EqualsAndHashCode(exclude= {"playlists", "guardian"} )
 @Data
 public class Child {
 
@@ -47,26 +47,20 @@ public class Child {
     private Long ageGroupId;
 
     @JsonProperty(value="guardian", access=JsonProperty.Access.READ_ONLY)
-    public Map<String, Object> getGuardian() {
+    public Map<String, Object> getParentInfo() {
 	Map<String, Object> guardianInfo = new HashMap<String, Object>();
-	if (this.parent != null) {
-	    guardianInfo.put("parent_id", parent.getId());
-	    guardianInfo.put("parent_name", parent.getName());
+	if (this.guardian != null) {
+	    guardianInfo.put("guardiant_id", guardian.getId());
+	    guardianInfo.put("guardian_name",  guardian.getFullName());
 	}
 	return guardianInfo; 
     }
     
     @JsonIgnore
     @ManyToOne(optional=false, cascade= {CascadeType.ALL}, fetch=FetchType.LAZY)
-    private User parent;
+    private User guardian;
 
     @Column(name = "created", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp created;
 
-//    public void addPlaylist(Playlist pl) {
-//	if (this.playlists == null) {
-//	    this.playlists = new HashSet<Playlist>();
-//	}
-//	playlists.add(pl);
-//    }
 }

@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import cab.bean.srvcs.tube4kids.core.Genre;
@@ -39,17 +40,18 @@ import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 
+/**
+ * @author ronalddennison
+ *
+ */
 @Path("/playlist")
 @Produces(MediaType.APPLICATION_JSON)
 @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.ADMIN_ROLE, Names.CONTENT_MODERATOR_ROLE,
     Names.SUDO_ROLE}) 
 public class PlaylistResource extends BaseResource {
 
-    // TODO JWT auth
-//    private final long fakeUserId = 1;
     private final PlaylistDAO playlistDAO;
     private final VideoDAO videoDAO;
-    
     
     public PlaylistResource(PlaylistDAO playlistDAO, VideoDAO videoDAO) {
 	this.playlistDAO = playlistDAO;
@@ -61,10 +63,11 @@ public class PlaylistResource extends BaseResource {
     public Response createPlaylist(Playlist playlist, @Auth User user) { 
 	
 	playlist.setUser(user);
-	
+
 	Playlist p = playlistDAO.create(playlist);
 	
 	boolean respBody =  (p != null);
+
 	ResponseData dat = new ResponseData()
 		.setSuccess(respBody)
 		.setEntity( respBody ? isMinimalRequest() ? p.getId() : p : null);
@@ -123,10 +126,8 @@ public class PlaylistResource extends BaseResource {
   @DELETE
   @UnitOfWork
   public Response deletePlaylist(@PathParam("id") Long pidVal, @Auth User user) {
-
 	
 	ResponseData dat = new ResponseData().setSuccess(false);
-
 	Optional<Playlist> subjectPlaylistOpt = null;
 	
 	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
@@ -140,8 +141,7 @@ public class PlaylistResource extends BaseResource {
 	if (subjectPlaylistOpt != null  ) {
 	    if (subjectPlaylistOpt.isPresent()) {
 		Playlist o = playlistDAO.delete(pidVal);
-	
-	dat.setSuccess(o != null)
+		dat.setSuccess(o != null)
 		.setEntity(isMinimalRequest() ? null : o );
 	    }
 	}
@@ -257,12 +257,12 @@ public class PlaylistResource extends BaseResource {
 
 	    if (subjectPlaylistOpt.isPresent()) {
 		Playlist p = subjectPlaylistOpt.get();
-		Tuple t = bulkFindUtil(videoIds);
-		p.getVideos().addAll(t.videos);
+		Pair<Integer, Collection<Video>> t = bulkFindUtil(videoIds);
+		p.getVideos().addAll(t.getRight());
 		p = playlistDAO.create(p); // SaveOrUpdate Playlist
 		dat.setSuccess(p != null).setEntity(isMinimalRequest() ? null : p);
-		if ( t.delta == 0) {
-		    dat.setErrorMessage(String.format("{%d} of selected videos were not found", t.delta));
+		if ( t.getLeft().equals(0) ) {
+		    dat.setErrorMessage(String.format("{%d} of selected videos were not found", t.getLeft()));
 		}
 	    }
 	    else {
@@ -274,26 +274,19 @@ public class PlaylistResource extends BaseResource {
         return doPATCH(dat).build();
     }
 
-    private class Tuple {
-	  public final int delta; 
-	  public final Collection<Video> videos; 
-	  public Tuple(int delta, Collection<Video> videos) { 
-	    this.delta = delta; 
-	    this.videos = videos; 
-	  }
-    } 
-
-    private Tuple bulkFindUtil(String... videoIds){
-	List<Video> foundVids = videoDAO.findWithIds(videoIds);
-	return new Tuple(videoIds.length - foundVids.size(), foundVids);
+    private Pair<Integer, Collection<Video>> bulkFindUtil(String... videoIds){
+	return bulkFindUtil(Arrays.asList(videoIds));
     }
     
-    private Tuple bulkFindUtil(Collection<String> videoIds){
+    private Pair<Integer, Collection<Video>> bulkFindUtil(Collection<String> videoIds){
 	List<Video> foundVids = videoDAO.findWithIds(videoIds);
-	return new Tuple(videoIds.size() - foundVids.size(), foundVids);
+	return Pair.of(videoIds.size() - foundVids.size(), foundVids);
     }
+    
     /**
-     * Video ids can be sngle or a list of ids. Video ids may be separated by:
+     * Remove videos from playlist.
+     * 
+     * Video ids may be single or a list of ids. Video ids may be separated by:
      * commas, pipes, semicolons or spaces.
      * 
      * @param pidVal
@@ -319,16 +312,19 @@ public class PlaylistResource extends BaseResource {
 	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
 	}
 
+	// User doesn't have access
 	if (subjectPlaylistOpt != null  ) {
 
+	    // ID might be incorrect
 	    if (subjectPlaylistOpt.isPresent()) {
+		
 		Playlist subjectPlaylist = subjectPlaylistOpt.get();
-		Tuple tuple = bulkFindUtil(videoIds.split(SPLIT_PARAM_REGEX));
-		subjectPlaylist.getVideos().removeAll(tuple.videos);
+		Pair<Integer, Collection<Video>> tuple = bulkFindUtil(videoIds.split(SPLIT_PARAM_REGEX));
+		subjectPlaylist.getVideos().removeAll(tuple.getRight());
 		subjectPlaylist = playlistDAO.create(subjectPlaylist); // SaveOrUpdate Playlist
 		dat.setSuccess(subjectPlaylist != null).setEntity(isMinimalRequest() ? null : subjectPlaylist);
-		if ( tuple.delta == 0) {
-		    dat.setErrorMessage(String.format("%d of selected videos were not found", tuple.delta));
+		if ( tuple.getLeft().equals(0) ) {
+		    dat.setErrorMessage(String.format("%d of selected videos were not found", tuple.getLeft()));
 		}
 	    }
 	    else {

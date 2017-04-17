@@ -38,18 +38,20 @@ COMMIT;
 
 START TRANSACTION;
 USE `mydb`;
-INSERT INTO `role` (`id`, `name`) VALUES (1, 'user_manager');
-INSERT INTO `role` (`id`, `name`) VALUES (2, 'role_editor');
-INSERT INTO `role` (`id`, `name`) VALUES (3, 'video_manager');
-INSERT INTO `role` (`id`, `name`) VALUES (4, 'playlist_manager');
-INSERT INTO `role` (`id`, `name`) VALUES (5, 'ui_manager');
-INSERT INTO `role` (`id`, `name`) VALUES (6, 'content_moderator');
-INSERT INTO `role` (`id`, `name`) VALUES (7, 'edit_child');
-INSERT INTO `role` (`id`, `name`) VALUES (8, 'admin');
-INSERT INTO `role` (`id`, `name`) VALUES (9, 'sudo');
-INSERT INTO `role` (`id`, `name`) VALUES (10, 'guardian');
-INSERT INTO `role` (`id`, `name`) VALUES (11, 'child');
-INSERT INTO `role` (`id`, `name`) VALUES (12, 'member');
+INSERT INTO `role` (`name`) VALUES ('sudo');
+INSERT INTO `role` (`name`) VALUES ('admin');
+INSERT INTO `role` (`name`) VALUES ('user_manager');
+INSERT INTO `role` (`name`) VALUES ('role_editor');
+INSERT INTO `role` (`name`) VALUES ('video_manager');
+INSERT INTO `role` (`name`) VALUES ('playlist_manager');
+INSERT INTO `role` (`name`) VALUES ('ui_manager');
+INSERT INTO `role` (`name`) VALUES ('content_moderator');
+INSERT INTO `role` (`name`) VALUES ('guardian');
+INSERT INTO `role` (`name`) VALUES ('edit_child');
+INSERT INTO `role` (`name`) VALUES ('edit_video');
+INSERT INTO `role` (`name`) VALUES ('edit_playlist');
+INSERT INTO `role` (`name`) VALUES ('member');
+INSERT INTO `role` (`name`) VALUES ('child');
 
 
 COMMIT;

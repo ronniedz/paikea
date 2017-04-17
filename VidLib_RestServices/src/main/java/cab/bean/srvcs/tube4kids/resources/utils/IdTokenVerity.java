@@ -15,6 +15,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.common.base.Throwables;
 
 public class IdTokenVerity {
@@ -32,7 +33,22 @@ public class IdTokenVerity {
 	return new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
 	.setAudience(Collections.singletonList(clientId)).build();
     }
-    
+
+    /**
+     * Parses the given ID token string and returns the parsed {@link GoogleIdToken}.
+     *
+     * @param jsonFactory JSON factory
+     * @param idTokenString ID token string
+     * @return parsed Google ID token
+     */
+    public GoogleIdToken parse(String idTokenString)
+        throws IOException {
+      JsonWebSignature jws =
+          JsonWebSignature.parser(jsonFactory).setPayloadClass(Payload.class).parse(idTokenString);
+      return new GoogleIdToken(jws.getHeader(), (Payload) jws.getPayload(), jws.getSignatureBytes(),
+          jws.getSignedContentBytes());
+    }
+     
     public UserValue verifyToken(String idTokenString) throws GeneralSecurityException, IOException {
 	UserValue m = null;
 

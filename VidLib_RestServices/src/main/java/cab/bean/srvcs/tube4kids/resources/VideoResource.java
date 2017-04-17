@@ -3,6 +3,7 @@ package cab.bean.srvcs.tube4kids.resources;
 import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
+import cab.bean.srvcs.tube4kids.core.Role.Names;
 import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.VideoGenre;
@@ -56,36 +57,29 @@ public class VideoResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoResource.class);
 
     private final VideoDAO videoDAO;
-    private final GenreDAO genreDAO;
-    private final UserDAO userDAO;
-    private final Neo4JGraphDAO neo4jGraphDAO;
+//    private final Neo4JGraphDAO neo4jGraphDAO;
     private final YouTubeAPIProxy ytProxyClient;
 
 
     public VideoResource(VideoDAO videoDAO, GenreDAO genreDAO, UserDAO userDAO, Neo4JGraphDAO neo4jGraphDAO, final YouTubeAPIProxy ytProxyClient) {
 	super();
 	this.videoDAO = videoDAO;
-	this.genreDAO = genreDAO;
-	this.userDAO = userDAO;
-	this.neo4jGraphDAO = neo4jGraphDAO;
+//	this.neo4jGraphDAO = neo4jGraphDAO;
         this.ytProxyClient = ytProxyClient;
     }
 
     @GET
     @UnitOfWork
+    @RolesAllowed({Names.ADMIN_ROLE, Names.MEMBER_ROLE, Names.CHILD_ROLE}) 
     public Response listVideos() {
 	Object vList = videoDAO.findAll();
 	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
     }
-
-//    private Map<String, Object> unwrap(Record r, String unkey) {
-//	return r.asMap(x -> x.asMap()).get(unkey);
-//    }
     
-    @GET
-    @Path("shiz")
-    @UnitOfWork
-    public List<Map<String, Object>> listneo() {
+//    @GET
+//    @Path("shiz")
+//    @UnitOfWork
+//    public List<Map<String, Object>> listneo() {
 //	Session session = getSession();
 //	String query = "MATCH (v:Video)-[:WITH]-(genre:Genre) return v;";
 //
@@ -103,8 +97,8 @@ public class VideoResource extends BaseResource {
 	// Video vid = (Video) nv.asObject();
 	// System.out.println(vid.toString());
 	// }
-	return neo4jGraphDAO.listAllVideo();
-    }
+//	return neo4jGraphDAO.listAllVideo();
+//    }
 
     @Path("/{vid}")
     @GET
@@ -115,48 +109,19 @@ public class VideoResource extends BaseResource {
 	return doGET(new ResponseData(v).setSuccess(v != null)).build();
     }
 
-//    @Path("/add/{cn}/{vids}")
-//    @GET
-//    @UnitOfWork
-//    public List<Video> addVideos(@PathParam("cn") String collectionName, @PathParam("vids") String... vids) {
-//	
-//	return videoDAO.findByIds(vids);
-//    }
-    
-//    @Path("/add")
-//    @POST
-//    @UnitOfWork
-//    public Response addYTVideo(Video video) {
-//	video.setUserId(1L);
-//	
-//	String vid = videoDAO.addVideoYTVideo(video);
-//	URI location = UriBuilder.fromUri("/video/" + vid).build();
-//	return Response
-//		.status(Response.Status.CREATED)
-//		.header("Location", location)
-//		.entity(ImmutableMap.<String, Object> builder()
-//            		.put("id", vid)
-//            		.put("uri", location)
-//            		.build()
-//            	 )
-//	.build();
-//    }
-//    
-    @Path("/{vid}")
+    @Path("/{vid}/genre")
     @PATCH
     @UnitOfWork
     @RolesAllowed({Role.Names.GUARDIAN_ROLE, Role.Names.CONTENT_MODERATOR_ROLE}) 
     public Response addGenre(@PathParam("vid") String vid, Long[] genreIds, @Auth User user) {
-	
+
 	ResponseData dat = new ResponseData();
 
 	try {
 	    Video video = videoDAO.findById(vid).orElse(null);
 
 	    if (video == null) {
-
 		dat.setStatus(Response.Status.NOT_FOUND);
-	    
 	    }
 	    else {
 		VideoGenre vg = new VideoGenre(video, user, genreIds[0], genreIds[1]);
@@ -193,13 +158,6 @@ public class VideoResource extends BaseResource {
 	return doDELETE(dat.setSuccess(video != null).setEntity(isMinimalRequest() ? null : video)).build();
     }
 
-//  
-//  @POST
-//  @UnitOfWork
-//  public Video createVideo(Video video) {
-//	return videoDAO.create(video);
-//  }
-
     @POST
     @UnitOfWork
     @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.CONTENT_MODERATOR_ROLE}) 
@@ -207,6 +165,8 @@ public class VideoResource extends BaseResource {
 
 	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());
 	Map<String, String> paramMap = ImmutableMap.of("part", "contentDetails,snippet", "id" ,vids);
+	
+	// Pull video detail from youtube
 	YouTubeVideoDetailResponse detailResp = ytProxyClient.runVideoDetail(paramMap);
 	List<String>ids = new ArrayList<String>();
 	
@@ -224,17 +184,7 @@ public class VideoResource extends BaseResource {
 //	    neo4jGraphDAO.insert(video);
 	}
 	
-	ResponseData dat = new ResponseData(ids).setSuccess(true);
-        return doPOST(dat).build();
-//	URI location = UriBuilder.fromUri("/video").build();
-//	return Response
-//		.status(Response.Status.CREATED)
-//		.header("Location", location)
-//		.entity(ImmutableMap.<String, Object> builder()
-//			.put("id", ids)
-//			.put("uri", location)
-//			.build()
-//		).build();
+        return doPOST(new ResponseData(ids).setSuccess(true)).build();
     }
     
 

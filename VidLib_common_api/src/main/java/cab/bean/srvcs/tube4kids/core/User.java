@@ -33,7 +33,7 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ToString(exclude= {"playlists"})
 @EqualsAndHashCode(exclude= {
-	"email","password", "roles", "activated", "lastLogin", "resetPasswordCode", "activatedAt",
+	"password", "roles", "activated", "lastLogin", "resetPasswordCode", "activatedAt",
 	"createdAt", "updatedAt", "activationCode", "children", "playlists"
 })
 @Data
@@ -51,32 +51,32 @@ public class User implements Principal {
     private long id;
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Playlist> playlists;
+    private Set<Playlist> playlists = new HashSet<Playlist>();
     
-    @OneToMany(mappedBy="parent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<Child> children;
+    @OneToMany(mappedBy="guardian", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Child> children = new HashSet<Child>();
 
     @JsonIgnore
     @Transient
     @OneToOne(mappedBy="user")
     private Token token;
 
-    @Column(name = "email", nullable = false)
+    @Column(nullable = false)
     private String email;
 
     @Column(name = "email_verified", nullable = false)
     private Boolean emailVerified;
 
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "activated", nullable = false)
+    @Column(nullable = false)
     private Boolean activated;
 
-    @Column(name = "firstname", nullable = false)
+    @Column(nullable = false)
     private String firstname;
 
-    @Column(name = "lastname", nullable = false)
+    @Column(nullable = false)
     private String lastname;
 
     @Column(name = "last_login", nullable = true)
@@ -97,8 +97,7 @@ public class User implements Principal {
     @Column(name = "activation_code", nullable = true)
     private String activationCode;
 
-    public User() {
-    }
+    public User() { }
 
     public User(String name) {
 	this();
@@ -112,23 +111,18 @@ public class User implements Principal {
 
     public String getName() {
 	return this.email;
-	// return this.firstname + " " + this.lastname;
     }
 
-//    
-//    public Set<Role> getRoles() {
-//	return roles;
-//    }
-//
-//    public void setRoles(Set<Role> roles) {
-//	this.roles = roles;
-//    }
+    public String getFullName() {
+	return this.getFirstname() + " " + this.getLastname();
+    }
+
     public boolean addRole(Role role) {
 	return roles.add(role);
     }
     
     public boolean hasAnyRole(String... rolenames) {
-	final List<String> needles = Arrays.asList(rolenames);
+	 List<String> needles = Arrays.asList(rolenames);
 	return (this.roles.stream().filter(straw -> needles.contains(straw.getName())).count() > 0 );
     }
     
@@ -137,7 +131,21 @@ public class User implements Principal {
     }
 
     public boolean isMyPlaylist(Long pidVal) {
-	return this.playlists.stream().filter(plitem -> plitem.getId().equals(pidVal)).count() > 0;
+	return this.playlists.stream().filter(playlist -> pidVal.equals(playlist.getId())).count() > 0;
+    }
+
+    public boolean isMyPlaylist(Playlist needls) {
+	return needls.getUser().getId() == this.getId(); 
+//	return this.playlists.contains(needls);
+    }
+    
+    public boolean isMyChild(Long cid) {
+	return this.children.stream().filter(child -> cid.equals(child.getId())).count() > 0;
+    }
+    
+    public boolean isMyChild(Child needls) {
+	return needls.getGuardian().getId() == this.getId(); 
+//	return this.children.contains(needls);
     }
 }
 
