@@ -130,14 +130,16 @@ class NavMenu extends Component {
             <input type="submit" value={intl.messages[messages.search.submit]} />
           </form>
         </div>
-
-        <div className={styles.menusctn}>
-          {this.renderOffspringForm(authby, onNavigateChildList, userchildren, changeRoute)}
-        </div>
-
-        <div className={styles.menusctn}>
-          {this.renderCreateChildButton(authby)}
-        </div>
+        {userchildren.size > 0 &&
+          <div className={styles.menusctn}>
+            {this.renderOffspringForm(authby, onNavigateChildList, userchildren, changeRoute)}
+          </div>
+        }
+        {authby &&
+          <div className={styles.menusctn}>
+            {this.renderCreateChildButton(authby)}
+          </div>
+        }
         <BeanModal height="170px" isOpen={modal}>
           <button onClick={this.closeChildDialog}>close</button>
           <div>

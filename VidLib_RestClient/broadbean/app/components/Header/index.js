@@ -26,7 +26,7 @@ export function Header(props) {
   const { changeRoute, setAuthorized } = props
 
   const responseGoogle = (response) => {
-    console.log('responseGoogle', response)
+
   }
 
   return (
