@@ -51,6 +51,11 @@ class OffspringPage extends Component {
     this.createNewPlaylist = this.createNewPlaylist.bind(this)
   }
 
+  // this is primarily for navigating to this route from another route within the app
+  componentDidMount() {
+    this.props.dispatch(retrievePlaylists(this.props.params.id))
+  }
+
   componentWillReceiveProps(nextprops) {
     const paramid = this.props.params.id
     const nextid = nextprops.params.id

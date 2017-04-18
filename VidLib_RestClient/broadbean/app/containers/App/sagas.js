@@ -21,14 +21,13 @@ import {
   setUserChildren,
 } from './actions'
 
-import { get, reduce } from 'lodash'
+import { get } from 'lodash'
 
 /*
   These authentication calls represents calls that should be made to the server.
   We cannot use the mock json-server because of required calculations.
 */
 import {
-  ADD_VIDEO,
   CREATE_CHILD,
   RETRIEVE_AGEGROUP,
   SET_AUTHORIZED_BY,
@@ -44,7 +43,7 @@ import {
 
 import request, {
   httpOptions as head,
-  authToken,
+  authTokenHeader,
   mergeInToken,
 } from 'utils/request'
 
@@ -54,45 +53,11 @@ import {
   selectPath,
   selectAuthorizedBy,
   selectNewChild,
-  selectAddVideo,
 } from './selectors'
-
-import R from 'ramda'
 
 import { browserHistory } from 'react-router'
 
-import { selectYTBeanResults } from 'containers/SearchPage/selectors'
-import { selectChildId } from 'containers/OffspringPage/selectors'
 import { playlistsLoaded } from 'containers/OffspringPage/actions'
-
-function * generateSeriesCalls(targets, stem, body) {
-  yield* targets.map((ea) => call(request, `${stem}/${ea}`, { body: JSON.stringify(body), ...head.patch }))
-}
-
-// TODOS: NEEDS TO BE REFACTORED TO SEARCH SAGA
-export function * addVideosToPlaylist() {
-  while (yield take(ADD_VIDEO)) {
-    const { videoobj, playlists } = yield select(selectAddVideo())
-    const vidids = videoobj.map(ea => ea.videoId)
-    const searchdata = yield select(selectYTBeanResults())
-    const addVids = reduce(searchdata.videos, (result, val) => {
-      const indx = result.indexOf(val.videoId)
-      if (indx >= 0) {
-        // result[result.indexOf(val.videoId)] = val
-        result.splice(indx, 1, val)
-      }
-      return result
-    }, vidids)
-
-    const addToPlaylistUrl = `${playlist.endpoint}/video`
-
-    const callGenerator = generateSeriesCalls(playlists, addToPlaylistUrl, addVids)
-    const resvals = []
-    for (const value of callGenerator) {
-      resvals.push(yield value)
-    }
-  }
-}
 
 export function * handleExternalAuthenticators() {
   while (yield take(SET_AUTHORIZED_BY)) {
@@ -105,13 +70,13 @@ export function * handleExternalAuthenticators() {
       const formData = new URLSearchParams()
       formData.append('id_token', authuser.id_token)
       const authResult = yield call(request, auth.endpoint, { body: formData, ...head.auth })
-      const beantoken = beanToken(authResult.data)
+      beanToken(authResult.data)
 
       const childrenURL = userchildren.endpoint
-      const childrenResults = yield call(request, childrenURL, { headers: authToken() })
+      const childrenResults = yield call(request, childrenURL, { headers: authTokenHeader() })
 
       const agegroupURL = agegroup.endpoint
-      const agegroupResults = yield call(request, agegroupURL, { headers: authToken() })
+      const agegroupResults = yield call(request, agegroupURL, { headers: authTokenHeader() })
 
       if (!childrenResults.err && !agegroupResults.err) {
         yield put(setUserChildren(childrenResults.data))
@@ -123,7 +88,7 @@ export function * handleExternalAuthenticators() {
       if (path.includes('offspring/')) {
         const childid = path.match(/offspring\/(.*)$/)[1]
         const requestURL = `${userchildren.endpoint}/${childid}`
-        const results = yield call(request, requestURL, { headers: authToken() })
+        const results = yield call(request, requestURL, { headers: authTokenHeader() })
 
         if (!results.err) {
           yield put(playlistsLoaded(results.data))
@@ -161,7 +126,7 @@ export function * sendCreateChild() {
     // get updated children's list
     if (!childCreated.err & !playlistCreated.err) {
       const listChildrenURL = userchildren.endpoint
-      const results = yield call(request, listChildrenURL, { headers: authToken() })
+      const results = yield call(request, listChildrenURL, { headers: authTokenHeader() })
 
       if (!results.err) {
         yield put(setUserChildren(results.data))
@@ -194,5 +159,4 @@ export default function * root() {
   yield fork(handleExternalAuthenticators)
   yield fork(fetchAgeGroups)
   yield fork(sendCreateChild)
-  yield fork(addVideosToPlaylist)
 }

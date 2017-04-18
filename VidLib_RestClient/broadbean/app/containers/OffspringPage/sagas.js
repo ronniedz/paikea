@@ -5,6 +5,8 @@
 * @Last modified time: 2016-12-09T01:05:17-08:00
 */
 
+/* eslint-disable no-unused-vars */
+
 import {
   take,
   takeLatest,
@@ -14,10 +16,6 @@ import {
   cancel,
   fork,
 } from 'redux-saga/effects'
-
-import {
- List,
-} from 'immutable'
 
 import {
   playlistsLoaded,
@@ -40,7 +38,7 @@ import {
 } from './constants'
 
 import request, {
-  authToken,
+  authTokenHeader,
   mergeInToken,
   httpOptions as head,
 } from 'utils/request'
@@ -58,8 +56,6 @@ import {
   selectPlaylists,
 } from './selectors'
 
-import { browserHistory } from 'react-router'
-
 import { LOCATION_CHANGE } from 'react-router-redux'
 
 function * createPlaylist() {
@@ -75,7 +71,7 @@ function * createPlaylist() {
 
   // const action = yield take(RETRIEVE_PLAYLISTS)
   requestURL = `${userchildren.endpoint}/${childid}`
-  const results = yield call(request, requestURL, { headers: authToken() })
+  const results = yield call(request, requestURL, { headers: authTokenHeader() })
 
   if (!results.err) {
     yield put(playlistsLoaded(results.data))
@@ -95,22 +91,31 @@ function * createPlaylist() {
 function * deleteVideoFromPlaylist() {
   const { playlistid, videoid } = yield select(selectDeleteVideoFromPlaylist())
   const requestURL = playlist.endpoint
-  const updatedPlaylist = yield call(request, `${requestURL}/${playlistid}/v/${videoid}`, { ...head.delete })
+  const updatedPlaylist = yield call(request, `${requestURL}/${playlistid}/v/${videoid}`, mergeInToken(head.delete))
   const existingList = yield select(selectPlaylists())
   const updatedIndex = existingList.toJS().findIndex(ea => ea.id === updatedPlaylist.data.id)
   yield put(updateOffspringPlaylist(existingList.set(updatedIndex, updatedPlaylist.data)))
 }
 
 function * fetchBeanPlaylistsFlow() {
-  const childid = yield select(selectChildId())
-  const requestURL = `${userchildren.endpoint}/${childid}`
-  const results = yield call(request, requestURL, { headers: authToken() })
+  /*
+    This is a bit of a workaround. In order to load the offspring page when landing on it, we load the offspring playlist in app/saga.
+    But to newly navigate to this sub-route from another route, we need it to load in componentDidMount().
+    However, componentDidMount will also get triggered when landing on this page, and no token has yet been retrieved from bean. Hence, the token conditional.
+    This can certainly be improved. Maybe in SearchPage/saga.js and HomePage/saga.js, where it's possible to append new videos to offspring playlists.
+   */
+  const token = authTokenHeader()
+  if (token) {
+    const childid = yield select(selectChildId())
+    const requestURL = `${userchildren.endpoint}/${childid}`
+    const results = yield call(request, requestURL, { headers: authTokenHeader() })
 
-  if (!results.err) {
-    yield put(playlistsLoaded(results.data))
-  } else {
-    throw new Error(results.err)
-    // browserHistory.push('/')
+    if (!results.err) {
+      yield put(playlistsLoaded(results.data))
+    } else {
+      throw new Error(results.err)
+      // browserHistory.push('/')
+    }
   }
 }
 

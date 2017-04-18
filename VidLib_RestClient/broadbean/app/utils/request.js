@@ -30,9 +30,9 @@ function checkStatus(response) {
   throw error
 }
 
-export const authToken = () => {
+export const authTokenHeader = () => {
   const beantoken = beanToken()
-  return { Authorization: `${beantoken.token_type} ${beantoken.access_token}` }
+  return beantoken ? { Authorization: `${beantoken.token_type} ${beantoken.access_token}` } : false
 }
 
 const defaults = {
@@ -64,7 +64,7 @@ export const httpOptions = R.map(e => R.mergeWith((a, b) => R.merge(a, b), defau
   }
 )
 
-export const mergeInToken = (option) => R.set(R.lensProp('headers'), R.merge(authToken(), option.headers))(option)
+export const mergeInToken = (option) => R.set(R.lensProp('headers'), R.merge(authTokenHeader(), option.headers))(option)
 
 /**
  * Requests a URL, returning a promise

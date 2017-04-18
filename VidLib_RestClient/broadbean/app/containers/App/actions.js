@@ -23,7 +23,6 @@
  */
 
 import {
-  ADD_VIDEO,
   CHANGE_MAIN_SEARCH,
   CLEAR_ERROR,
   CREATE_CHILD,
@@ -37,14 +36,6 @@ import {
   SET_USER_CHILDREN,
   SET_VID_DIMENSIONS,
 } from './constants'
-
-export function addToPlaylist(set, playlists) {
-  return {
-    type: ADD_VIDEO,
-    set,
-    playlists,
-  }
-}
 
 /**
  * Changes the input field of the form

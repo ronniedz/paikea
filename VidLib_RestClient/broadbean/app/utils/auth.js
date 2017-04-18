@@ -17,9 +17,6 @@ function prepareAuthRequest(token, cb) {
 
 
 function sendAuthRequest(url, options) {
-  // const request = require('./request')
-  console.log('options', options)
-
   request(url, options)
     .then((res) => console.log('res', res))
 }

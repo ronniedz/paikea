@@ -8,8 +8,6 @@
 
 const domain = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : ''
 
-console.log('process.env.NODE_ENV', process.env.NODE_ENV)
-
 export const gapicid = '16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com'
 
 export const videoassets = {
@@ -39,7 +37,7 @@ export const videoassets = {
 }
 
 export const search = {
-  endpoint: `${domain}/ytapi/v1/search`,
+  endpoint: `${domain}/api/ytapi/v1/search`,
 
   queryprepend: 'children%2C',
 

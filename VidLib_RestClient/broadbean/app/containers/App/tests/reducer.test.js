@@ -25,7 +25,6 @@ describe('appReducer', () => {
     state = fromJS({
       agegroup: [],
       authorizedby: false,
-      // TODOS: NEEDS REFACTORING
       associateVideo: {
         videoobj: {},
         options: {
@@ -41,7 +40,7 @@ describe('appReducer', () => {
       },
       path: '/',
       searchval: '',
-      token: {},
+      token: false,
       session: {},
       user: {},
       userchildren: [],

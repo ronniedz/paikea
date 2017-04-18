@@ -54,7 +54,7 @@ const initialState = fromJS({
 function normlizeSearchResults(key, res) {
   return {
     description: 'search results',
-    videos: res.videos.map((listitem) => ({
+    videos: res.items.map((listitem) => ({
       videoId: listitem.videoId,
       title: listitem.title,
       defaultThumbnail: listitem.defaultThumbnail,
@@ -102,7 +102,7 @@ const searchReducer = (state = initialState, action) => {
         .set('loadComplete', true)
 
       // wrapping searchHistory in an array so it has capabilities to grow later or
-      if (action.results.videos.length > 0) {
+      if (action.results.items.length > 0) {
         const spliceindex = state.get('navToken').listindex ? parseInt(state.get('navToken').listindex, 10) : null
 
         const searchterm = state.get('searchHistory') && spliceindex ? state.get('searchHistory').get(spliceindex).title : action.searchval

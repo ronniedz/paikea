@@ -131,7 +131,7 @@ class GoogleSignIn extends Component {
       fontWeight: 'bold',
       fontFamily: 'Roboto',
     }
-    const { cssClass, children } = this.props
+    const { cssClass } = this.props
     const { signedIn } = this.state
     return (
       <div style={{ display: 'inline-block' }}>
@@ -160,7 +160,6 @@ class GoogleSignIn extends Component {
 
 GoogleSignIn.propTypes = {
   callback: PropTypes.func.isRequired,
-  children: PropTypes.node,
   clientId: PropTypes.string.isRequired,
   cookiePolicy: PropTypes.string,
   cssClass: PropTypes.string,

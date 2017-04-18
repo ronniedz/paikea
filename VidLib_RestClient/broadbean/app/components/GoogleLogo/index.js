@@ -9,9 +9,9 @@
  * A link to a certain page, an anchor tag
  */
 
-import React, { PropTypes } from 'react'
+import React from 'react'
 
-function GoogleLogo(props) {
+function GoogleLogo() {
   return (
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" >
       <g>
