@@ -78,8 +78,13 @@ export function * handleExternalAuthenticators() {
       const agegroupURL = agegroup.endpoint
       const agegroupResults = yield call(request, agegroupURL, { headers: authTokenHeader() })
 
-      if (!childrenResults.err && !agegroupResults.err) {
+      if (!childrenResults.err) {
         yield put(setUserChildren(childrenResults.data))
+      } else {
+        yield put(loadError(childrenResults.err))
+      }
+
+      if (!agegroupResults.err) {
         yield put(ageGroupLoaded(agegroupResults.data))
       } else {
         yield put(loadError(childrenResults.err))

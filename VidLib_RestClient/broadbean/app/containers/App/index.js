@@ -79,6 +79,10 @@ class App extends React.Component {
 
   render() {
     const { children, viddim, setAuthorized, location, ...others } = this.props
+    console.log('--------------')
+    console.log('this.props.location', this.props.location)
+    console.log('this.props.location.pathname', this.props.location.pathname)
+    console.log('this.props.location.state', this.props.location.state)
     return (
       <div>
         <div className={styles.mainwrap}>
