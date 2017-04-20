@@ -86,6 +86,9 @@ public class AuthNVerityResource extends BaseResource {
 
     private static final int preOffset = 1; // minute
 
+    
+    // TODO Move to Application layer or to AppConfiguration. Should be shared by all.
+    
     private final JsonFactory jsonFactory = new JacksonFactory();
 //    private String clientId = null;
 //    private String jwtTokenSecret = null;

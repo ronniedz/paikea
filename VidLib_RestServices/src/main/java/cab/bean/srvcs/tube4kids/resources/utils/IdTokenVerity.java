@@ -34,21 +34,25 @@ public class IdTokenVerity {
 	.setAudience(Collections.singletonList(clientId)).build();
     }
 
+    
     /**
-     * Parses the given ID token string and returns the parsed {@link GoogleIdToken}.
+     * Parses the given ID token string and returns an  {@link GoogleIdToken}.
      *
      * @param jsonFactory JSON factory
      * @param idTokenString ID token string
      * @return parsed Google ID token
      */
-    public GoogleIdToken parse(String idTokenString)
-        throws IOException {
-      JsonWebSignature jws =
-          JsonWebSignature.parser(jsonFactory).setPayloadClass(Payload.class).parse(idTokenString);
-      return new GoogleIdToken(jws.getHeader(), (Payload) jws.getPayload(), jws.getSignatureBytes(),
-          jws.getSignedContentBytes());
+    public GoogleIdToken parse(String idTokenString) throws IOException {
+	JsonWebSignature jws = JsonWebSignature.parser(jsonFactory).setPayloadClass(Payload.class).parse(idTokenString);
+
+	return
+		new GoogleIdToken(
+			jws.getHeader(), 
+			(Payload) jws.getPayload(),
+			jws.getSignatureBytes(),
+			jws.getSignedContentBytes());
     }
-     
+
     public UserValue verifyToken(String idTokenString) throws GeneralSecurityException, IOException {
 	UserValue m = null;
 

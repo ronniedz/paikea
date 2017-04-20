@@ -4,6 +4,7 @@ package cab.bean.srvcs.tube4kids;
 import static java.util.Collections.singletonMap;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
+import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.Authorizer;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
@@ -19,14 +20,21 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Priority;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.PreMatching;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.server.ServerProperties;
@@ -67,8 +75,6 @@ import cab.bean.srvcs.tube4kids.resources.YouTubeVideoResource;
 import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
-//import cab.bean.srvcs.tube4kids.resources.PeopleResource;
-//import cab.bean.srvcs.tube4kids.resources.PersonResource;
 
 
 public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
@@ -179,10 +185,19 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 //        jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
         jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
+        jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
         jerseyConf.register(RolesAllowedDynamicFeature.class);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
    }
-
+    
+    @PreMatching
+    @Priority(Priorities.AUTHENTICATION)
+    public class CustomAuthFilter extends AuthFilter {
+      @Override
+      public void filter(ContainerRequestContext requestContext) throws IOException {
+        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+      }
+    }
     private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) {
 
 	return

@@ -19,12 +19,12 @@ public class JWTConfiguration {
     private String keyId = "beancab.com_rsapublic";
     private String realmName = "Children's Video Library";
     private String signatureAlgorithm = org.jose4j.jws.AlgorithmIdentifiers.HMAC_SHA256; //	"HS256"
-    private Key verificationKey = null;
     private boolean secure = false;
     private boolean httpOnly = false;
     private int clockSkew = 30; // in seconds
     private int maxAge = 3600;
     private int tokenExpiration = 1440; // in minutes
+    private Key verificationKey ;
 
     /**
      * @return the audienceId

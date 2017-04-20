@@ -138,8 +138,9 @@ neo4jConf:
   password: mango
 
 googleAPIClientConfiguration:
-  clientId: "16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com"
-  secret: "5aLltV9mfyeteSV9ihPo77Yt"
+  appClientId: "16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com"
+  certificatesURL: "https://www.googleapis.com/oauth2/v3/certs"
+#  aecret: "5aLltV9mfyeteSV9ihPo77Yt"
   
 ##  verificationUri: "/api/auth/gallback"
 
