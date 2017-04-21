@@ -185,21 +185,21 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 //        jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
         jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
-        jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
         jerseyConf.register(RolesAllowedDynamicFeature.class);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
    }
-    
-    @PreMatching
-    @Priority(Priorities.AUTHENTICATION)
-    public class CustomAuthFilter extends AuthFilter {
-      @Override
-      public void filter(ContainerRequestContext requestContext) throws IOException {
-        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-      }
-    }
+//    
+//    @PreMatching
+//    @Priority(Priorities.AUTHENTICATION)
+//    public class CustomAuthFilter extends AuthFilter {
+//      @Override
+//      public void filter(ContainerRequestContext requestContext) throws IOException {
+//        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+//      }
+//    }
     private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) {
 
+	LOGGER.debug("The jwtConf: " + jwtConf);
 	return
             new JwtAuthFilter.Builder<User>()
             .setCookieName(jwtConf.getCookieName())

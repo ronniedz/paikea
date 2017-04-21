@@ -16,6 +16,7 @@
 
 package cab.bean.srvcs.tube4kids.resources.utils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jose4j.jwt.JwtClaims;
@@ -29,23 +30,22 @@ import org.jose4j.jwt.consumer.JwtContext;
  */
 public abstract class aTokenService
 {
-    
-    interface SubjectData {
-	String getSubject();
-	Map<String, Object> getClaims();
-    }
-
-    public final JwtConsumer jwtRrelaxedConsumer;
+    public final static JwtConsumer jwtRrelaxedConsumer = new JwtConsumerBuilder()
+    .setSkipAllValidators()
+    .setDisableRequireSignature()
+    .setSkipSignatureVerification()
+    .build();;
    
     public aTokenService() {
-	this.jwtRrelaxedConsumer = new JwtConsumerBuilder()
-	    .setSkipAllValidators()
-	    .setDisableRequireSignature()
-	    .setSkipSignatureVerification()
-	    .build();
     }
     
-    public abstract JwtClaims parse(String tokenString) throws InvalidJwtException;
+    public static JwtClaims parse(String tokenString) throws InvalidJwtException{
+	return jwtRrelaxedConsumer.processToClaims(tokenString);
+    }
+    
+    public static SubjectData parseToData(String tokenString) throws InvalidJwtException{
+	return new SubjectData(jwtRrelaxedConsumer.processToClaims(tokenString).getClaimsMap());
+    }
     
     public abstract JwtContext verify(String tokenString, FederationConfig conf) throws InvalidJwtException;
 
@@ -58,6 +58,7 @@ public abstract class aTokenService
 //    public abstract  Map<String, Object> extractValues(String tokenString) throws InvalidJwtException;
 
 //    public abstract JwtContext refresh(String tokenString, FederationConfig conf);
+    
     
 }
 

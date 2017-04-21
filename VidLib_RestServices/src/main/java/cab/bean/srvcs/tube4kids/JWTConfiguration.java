@@ -3,11 +3,13 @@ package cab.bean.srvcs.tube4kids;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 
+import lombok.ToString;
+
 import org.jose4j.keys.HmacKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+@ToString
 public class JWTConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTConfiguration.class);

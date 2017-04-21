@@ -1,6 +1,9 @@
 package cab.bean.srvcs.tube4kids.resources.utils;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
@@ -11,20 +14,14 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.lang.JoseException;
 
+import cab.bean.srvcs.tube4kids.resources.utils.IdTokenVerity.UserValue;
+import cab.bean.srvcs.tube4kids.resources.utils.SubjectData;
+
 import com.google.common.base.Throwables;
 
 public class TokenServiceBase extends aTokenService {
 
-    
     public TokenServiceBase() { }
-    
-    @Override
-    public JwtClaims parse(String jwtString) throws InvalidJwtException {
-        //The first JwtConsumer is basically just used to parse the JWT into a JwtContext object.
-	//return jwtContext.getJwtClaims().flattenClaims();
-	return jwtRrelaxedConsumer.processToClaims(jwtString);
-	
-    }
 
     @Override
     public JwtContext verify(String jwtString, FederationConfig conf) throws InvalidJwtException {
@@ -46,10 +43,34 @@ public class TokenServiceBase extends aTokenService {
 //	JwtClaims claims = jwtConsumer.processToClaims(jwtString);
     }
     
+    public SubjectData verifyToData(String jwtString, FederationConfig conf) throws InvalidJwtException {
+	JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+	.setRequireSubject()
+	.setExpectedIssuer(conf.getIssuer())
+	.setRequireExpirationTime()
+	.setEvaluationTime(NumericDate.fromSeconds(1436388930))
+	.setVerificationKey(conf.getVerificationKey())
+	.setAllowedClockSkewInSeconds(30)
+	.setExpectedAudience(conf.getAudience())
+	.setJwsAlgorithmConstraints(conf.getAlgorithmConstraints())
+	.setVerificationKeyResolver(conf.getVerificationKeyResolver()) // pretend to use Google's jwks endpoint to find the key for signature checks
+	.build();
+	
+//	SubjectData userValues = new SubjectData();
+//	
+//	jwtConsumer.processToClaims(jwtString).flattenClaims().entrySet().forEach(
+//		entry -> {
+//		    userValues.put(entry.getKey(),
+//			    (entry.getValue().size() == 1) ? entry.getValue()
+//				    .get(0) : entry.getValue());
+//		}
+//	);	    
+   
+	return  new SubjectData(  jwtConsumer.processToClaims(jwtString).getClaimsMap() );
+    }
+    
 //    @Override
 //    public JwtContext verify(JwtConsumer jwtConsumer, String jwtString) throws InvalidJwtException {
-//	// Finally using the second JwtConsumer to actually validate the JWT. This operates on
-//	// the JwtContext from the first processing pass, which avoids redundant parsing/processing.
 //	return  jwtConsumer.process(jwtString);
 //    }
     

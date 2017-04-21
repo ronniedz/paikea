@@ -46,7 +46,7 @@ import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
  */
 @Path("/playlist")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.ADMIN_ROLE, Names.CONTENT_MODERATOR_ROLE,
+@RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.ADMIN_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.CONTENT_MODERATOR_ROLE,
     Names.SUDO_ROLE}) 
 public class PlaylistResource extends BaseResource {
 
@@ -87,7 +87,7 @@ public class PlaylistResource extends BaseResource {
 //  @UnitOfWork
 //  public Response updatePlaylist(@PathParam("pid") Long pid, Playlist objectData) {
 
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
     @PATCH
     @UnitOfWork
     public Response updatePlaylist(Playlist objectData, @Auth User user) {
@@ -184,7 +184,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/liberate/{pid: [0-9]+}")
     @PUT
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
     public Playlist liberatePlaylist(@PathParam("pid") Long pid, @Auth User user) {
 	
 	Playlist org = playlistDAO.retrieve(pid);
@@ -228,7 +228,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/my")
     @GET
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
     public Response listOwnPlaylists(@Auth User user) {
 	return doGET(new ResponseData( playlistDAO.loadUserPlaylists(user)).setSuccess(true)).build();
     }
@@ -296,7 +296,7 @@ public class PlaylistResource extends BaseResource {
     @Path("{pidVal: [0-9]+}/v/{videoIds}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.PLAYLIST_MANAGER_ROLE})
+    @RolesAllowed({Names.GUARDIAN_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE})
     public Response dropVideos(@PathParam("pidVal") Long pidVal, @PathParam("videoIds") String videoIds, @Auth User user) {
 	ResponseData dat = new ResponseData().setSuccess(false);
 
