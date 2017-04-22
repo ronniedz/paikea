@@ -193,6 +193,8 @@ public class AuthNVerityResource extends BaseResource {
 		}
 		// False when revoked.
 		beanToken.setActive(true);
+		beanToken.setSubject(subject);
+		
 		// Remove prior value
 		userValues.removeIssuer();
 		updateUser(user, userValues, beanToken);
