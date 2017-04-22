@@ -48,37 +48,3 @@ export const stateprops = {
   userchildren: selectUserChildren(),
   viddim: selectVideoDimensions(),
 }
-
-export const httpHeaders = {
-  delete: {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-  post: {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-  patch: {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-  patchmin: {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Prefer: 'return=minimal',
-    },
-  },
-  auth: {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  },
-}

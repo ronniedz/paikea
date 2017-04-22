@@ -78,14 +78,9 @@ export const selectVideoDimensions = () => createSelector(
   (globalState) => globalState.get('pagedimensions').toJS()
 )
 
-export const selectAddVideo = () => createSelector(
+export const selectPath = () => createSelector(
   selectGlobal(),
-  (globalState) => (
-    {
-      videoobj: globalState.getIn(['associateVideo', 'videoobj']),
-      playlists: globalState.getIn(['associateVideo', 'options', 'playlists']),
-    }
-  )
+  (globalState) => globalState.get('path')
 )
 
 export const selectLocationState = () => {

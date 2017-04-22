@@ -22,7 +22,6 @@ import {
   ytSearchLoaded,
 } from './actions'
 
-import request from 'utils/request'
 import { selectMainSearchVal } from 'containers/App/selectors'
 import {
   selectNavToken,
@@ -38,15 +37,19 @@ import {
 
 import {
   putIt,
-  httpHeaders as head,
 } from '../shared'
+
+import request, {
+  mergeInToken,
+  httpOptions as head,
+} from 'utils/request'
 
 /**
  * YouTube-bean search request/response handler
  */
 
 function * generateSeriesCalls(targets, stem, body) {
-  yield* targets.map((ea) => call(request, `${stem}/${ea}`, { body: JSON.stringify(body), ...head.patch }))
+  yield* targets.map((ea) => call(request, `${stem}/${ea}`, { body: JSON.stringify(body), ...mergeInToken(head.patch) }))
 }
 
 // TODOS: NEEDS TO BE REFACTORED TO SEARCH SAGA
@@ -70,7 +73,7 @@ export function* addSearchResultsToPlaylist() {
     const addVideoToLibraryUrl = video.endpoint
     const videoAdded = yield call(request, addVideoToLibraryUrl, {
       body: JSON.stringify(addVids),
-      ...head.post,
+      ...mergeInToken(head.post),
     })
     const addToPlaylistUrl = `${playlist.endpoint}/video`
 

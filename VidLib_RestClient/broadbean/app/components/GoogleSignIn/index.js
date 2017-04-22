@@ -28,7 +28,6 @@ class GoogleSignIn extends Component {
 
   onLoginClick() {
     const { auth2 } = this.state
-    console.log('auth2', auth2)
     const { offline, redirectUri, callback } = this.props
     if (offline) {
       const options = {
@@ -41,7 +40,6 @@ class GoogleSignIn extends Component {
     } else {
       auth2.signIn()
         .then((response) => {
-          console.log('response', response)
           callback(response)
         })
     }
@@ -92,11 +90,6 @@ class GoogleSignIn extends Component {
             auth.currentUser.get().grant({ scope })
           }
 
-          console.log('!!!!!!!!!!!')
-          console.log('user', user)
-          console.log(user.getBasicProfile())
-          console.log(user.getAuthResponse())
-
           if (loggedin) {
             setAuthorized({
               authorizer: 'google',
@@ -138,7 +131,7 @@ class GoogleSignIn extends Component {
       fontWeight: 'bold',
       fontFamily: 'Roboto',
     }
-    const { cssClass, children } = this.props
+    const { cssClass } = this.props
     const { signedIn } = this.state
     return (
       <div style={{ display: 'inline-block' }}>
@@ -167,7 +160,6 @@ class GoogleSignIn extends Component {
 
 GoogleSignIn.propTypes = {
   callback: PropTypes.func.isRequired,
-  children: PropTypes.node,
   clientId: PropTypes.string.isRequired,
   cookiePolicy: PropTypes.string,
   cssClass: PropTypes.string,

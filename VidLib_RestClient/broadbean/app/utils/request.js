@@ -1,4 +1,6 @@
 import 'whatwg-fetch'
+import { beanToken } from './auth'
+import R from 'ramda'
 
 /**
  * Parses the JSON returned by a network request
@@ -27,6 +29,42 @@ function checkStatus(response) {
   error.response = response
   throw error
 }
+
+export const authTokenHeader = () => {
+  const beantoken = beanToken()
+  return beantoken ? { Authorization: `${beantoken.token_type} ${beantoken.access_token}` } : false
+}
+
+const defaults = {
+  headers: { 'Content-Type': 'application/json' },
+}
+export const httpOptions = R.map(e => R.mergeWith((a, b) => R.merge(a, b), defaults, e),
+  {
+    delete: {
+      method: 'DELETE',
+    },
+    post: {
+      method: 'POST',
+    },
+    patch: {
+      method: 'PATCH',
+    },
+    patchmin: {
+      method: 'PATCH',
+      headers: {
+        Prefer: 'return=minimal',
+      },
+    },
+    auth: {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    },
+  }
+)
+
+export const mergeInToken = (option) => R.set(R.lensProp('headers'), R.merge(authTokenHeader(), option.headers))(option)
 
 /**
  * Requests a URL, returning a promise

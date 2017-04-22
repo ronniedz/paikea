@@ -22,7 +22,6 @@
  */
 
 import {
-  ADD_VIDEO,
   CHANGE_MAIN_SEARCH,
   CLEAR_ERROR,
   CREATE_CHILD,
@@ -44,7 +43,6 @@ const defaultviddim = vidconfig.dimensions[0]
 const initialState = fromJS({
   agegroup: [],
   authorizedby: false,
-  // TODOS: NEEDS REFACTORING
   associateVideo: {
     videoobj: {},
     options: {
@@ -58,8 +56,9 @@ const initialState = fromJS({
     name: '',
     agegroupid: '',
   },
+  path: '/',
   searchval: '',
-  token: {},
+  token: false,
   session: {},
   user: {},
   userchildren: [],
@@ -69,13 +68,8 @@ const initialState = fromJS({
     thumbwidth: defaultviddim.thumbwidth,
   },
 })
-
 const appReducer = (state = initialState, action) => {
   switch (action.type) {
-    case ADD_VIDEO:
-      return state
-      .setIn(['associateVideo', 'videoobj'], action.set)
-      .setIn(['associateVideo', 'options', 'playlists'], action.playlists)
     case CHANGE_MAIN_SEARCH:
       return state
         .set('searchval', action.searchval)
@@ -106,6 +100,7 @@ const appReducer = (state = initialState, action) => {
     case SET_AUTHORIZED_BY:
       return state
         .set('authorizedby', action.authorized)
+        .set('path', action.path)
     case SET_VID_DIMENSIONS: {
       return state
         .setIn(['pagedimensions', 'height'], action.dimensions.height)

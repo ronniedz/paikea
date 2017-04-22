@@ -22,5 +22,4 @@ describe('<VideoPlayback />', () => {
 
   expect(renderedComponent.name()).toEqual('div')
   expect(renderedComponent.children().at(0).prop('id')).toEqual('player')
-  // console.log('renderedComponent.debug()', renderedComponent.debug())
 })

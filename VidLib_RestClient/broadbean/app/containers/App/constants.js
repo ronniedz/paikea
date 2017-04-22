@@ -7,7 +7,6 @@
 
 export const DEFAULT_LOCALE = 'en'
 
-export const ADD_VIDEO = 'bean/App/ADD_VIDEO'
 export const CHANGE_MAIN_SEARCH = 'bean/App/CHANGE_MAIN_SEARCH'
 export const CLEAR_ERROR = 'bean/App/CLEAR_ERROR'
 export const CREATE_CHILD = 'bean/App/CREATE_CHILD'
