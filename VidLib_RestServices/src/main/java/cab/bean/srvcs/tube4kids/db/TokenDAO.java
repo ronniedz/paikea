@@ -9,10 +9,9 @@ import org.hibernate.criterion.Restrictions;
 
 import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
-import cab.bean.srvcs.tube4kids.resources.utils.SubjectData;
 
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class TokenDAO extends AbstractDAO<Token> {
 
@@ -55,12 +54,13 @@ public class TokenDAO extends AbstractDAO<Token> {
 	return t.isPresent() ? t.get().getUser() : null; 
     }
 
-    public Optional<Token> locateSubject(SubjectData userValues) {
+    public Optional<Token> locateSubject(Map<String, Object> userValues) {
 	Criteria criteria = criteria().createAlias("user", "user");
-	Criterion r1 = Restrictions.eq("subject", userValues.getSubject());
-	Criterion r2 = Restrictions.eq("user.email", userValues.getEmail());
-	Criterion r3 = Restrictions.and(Restrictions.eq("user.firstname", userValues.getFirstname()) , Restrictions.eq("user.lastname", userValues.getLastname()));
+	Criterion r1 = Restrictions.eq("subject", userValues.get("ubject"));
+	Criterion r2 = Restrictions.eq("user.email", userValues.get("email"));
+	Criterion r3 = Restrictions.and(Restrictions.eq("user.firstname", userValues.get("firstname")) , Restrictions.eq("user.lastname", userValues.get("lastname")));
 	return Optional.ofNullable(uniqueResult(criteria.add(Restrictions.or( r1, r2, r3 ))));
     }
 
+    
 }

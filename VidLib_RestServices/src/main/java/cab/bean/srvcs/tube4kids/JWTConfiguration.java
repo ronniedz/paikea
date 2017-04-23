@@ -5,6 +5,8 @@ import java.security.Key;
 
 import lombok.ToString;
 
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,6 +226,19 @@ public class JWTConfiguration {
      */
     public void setTokenExpiration(int tokenExpiration) {
         this.tokenExpiration = tokenExpiration;
+    }
+
+    public JwtConsumer getConsumer(String string) {
+	return 
+  	      new JwtConsumerBuilder()
+      	.setExpectedAudience(getAudienceId())
+  	        .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
+  	        .setRequireExpirationTime() // the JWT must have an expiration time
+  	        .setRequireSubject() // the JWT must have a subject claim
+  	        .setVerificationKey(getVerificationKey()) // verify the signature with the public key
+  	        .setRelaxVerificationKeyValidation() // relaxes key length requirement
+  	        .build()
+  	    ;
     }
     
     

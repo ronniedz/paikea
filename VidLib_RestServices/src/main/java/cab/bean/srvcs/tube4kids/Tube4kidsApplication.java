@@ -99,27 +99,22 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     
     @Override
     public void run(Tube4kidsConfiguration configuration, Environment environment) {
+	LOGGER.debug("Application context path: {} ", environment.getApplicationContext().getContextPath() );
 	
 	this.jwtConf = configuration.getJwtConfiguration();
 	this.googleAPIConf = configuration.getGoogleAPIClientConfiguration();
-	
-	LOGGER.debug("Application context path: {} ", environment.getApplicationContext().getContextPath() );
+	this.jsonProvider.setMapper(new JodaMapper());
 
-	environment.jersey().getResourceConfig().addProperties(
-	   singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false)
-	);
-
+	environment.jersey().getResourceConfig().addProperties(singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false));
 	environment.healthChecks().register("template", new TemplateHealthCheck(configuration.buildTemplate()));
-	environment.jersey().register(DateRequiredFeature.class);
-
-	jsonProvider.setMapper(new JodaMapper());
+//	environment.jersey().register(DateRequiredFeature.class);
 
 	environment.jersey().register(jsonProvider);
+	
 	// Contain this REST service to a sub-directory (<code>/api/</code>)
 	environment.jersey().setUrlPattern(configuration.getAppContextUri());
 
-	buildResources(configuration, environment);
-
+	buildResources(configuration, environment.jersey());
 	setupCORS(environment);
     }
 
@@ -129,7 +124,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         bootstrap.setConfigurationSourceProvider(
                 new SubstitutingSourceProvider(
                         bootstrap.getConfigurationSourceProvider(),
-                        new EnvironmentVariableSubstitutor(false)
+                        new EnvironmentVariableSubstitutor(true)
                 )
         );
 
@@ -154,17 +149,14 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
     }
 
-    private void buildResources(Tube4kidsConfiguration configuration, Environment environment) {
+    private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
 
-	final JerseyEnvironment jerseyConf = environment.jersey();
-	
 	final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
 	final YouTubeAPIProxy ytProxyClient = new YouTubeAPIProxy(configuration.getProxySearchUrl());
 
 	final UserDAO userDAO = new UserDAO(hibernateBundle.getSessionFactory());
 	final RoleDAO roleDAO = new RoleDAO(hibernateBundle.getSessionFactory());
         final TokenDAO tokenDAO = new TokenDAO(hibernateBundle.getSessionFactory());
-
         final VideoDAO videoDAO = new VideoDAO(hibernateBundle.getSessionFactory());
         final GenreDAO genreDAO = new GenreDAO(hibernateBundle.getSessionFactory());
         final PlaylistDAO playlistDAO = new PlaylistDAO(hibernateBundle.getSessionFactory());
@@ -178,15 +170,12 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new ChildResource(childDAO, userDAO, playlistDAO, roleDAO));
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
-        
-        
         jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, googleAPIConf, jwtConf));
-        
-//        jerseyConf.register(new ViewResource());
         jerseyConf.register(new ProtectedResource());
         jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
         jerseyConf.register(RolesAllowedDynamicFeature.class);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
+//        jerseyConf.register(new ViewResource());
    }
 //    
 //    @PreMatching
@@ -200,19 +189,9 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) {
 
 	LOGGER.debug("The jwtConf: " + jwtConf);
-	return
-            new JwtAuthFilter.Builder<User>()
+	return new JwtAuthFilter.Builder<User>()
             .setCookieName(jwtConf.getCookieName())
-            .setJwtConsumer(
-        	      new JwtConsumerBuilder()
-            	.setExpectedAudience(jwtConf.getAudienceId())
-        	        .setAllowedClockSkewInSeconds(30) // allow some leeway in validating time based claims to account for clock skew
-        	        .setRequireExpirationTime() // the JWT must have an expiration time
-        	        .setRequireSubject() // the JWT must have a subject claim
-        	        .setVerificationKey(jwtConf.getVerificationKey()) // verify the signature with the public key
-        	        .setRelaxVerificationKeyValidation() // relaxes key length requirement
-        	        .build()
-        	    )
+            .setJwtConsumer(jwtConf.getConsumer("home"))
             .setRealm(jwtConf.getRealmName())
             .setPrefix(jwtConf.getAuthHeaderPrefix())
             .setAuthenticator(
