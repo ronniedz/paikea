@@ -1,5 +1,6 @@
 package cab.bean.srvcs.tube4kids.resources.utils;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,22 +20,25 @@ import cab.bean.srvcs.tube4kids.resources.utils.SubjectData;
 
 import com.google.common.base.Throwables;
 
-public class TokenServiceBase extends aTokenService {
-
+public class TokenServiceBase {
+    FederationConfig conf;
+    
     public TokenServiceBase() { }
+    public TokenServiceBase(FederationConfig conf) {
+	this.conf = conf;
+    }
 
-    @Override
-    public JwtContext verify(String jwtString, FederationConfig conf) throws InvalidJwtException {
+    public JwtContext verify(String jwtString, FederationConfig conf) throws InvalidJwtException, JoseException, IOException {
 	JwtConsumer jwtConsumer = new JwtConsumerBuilder()
 	.setRequireSubject()
-	.setExpectedIssuer(conf.getIssuer())
+	.setExpectedIssuers(true, conf.getIssuer())
 	.setRequireExpirationTime()
 	.setEvaluationTime(NumericDate.fromSeconds(1436388930))
 	.setVerificationKey(conf.getVerificationKey())
 	.setAllowedClockSkewInSeconds(30)
 	.setExpectedAudience(conf.getAudience())
 	.setJwsAlgorithmConstraints(conf.getAlgorithmConstraints())
-	.setVerificationKeyResolver(conf.getVerificationKeyResolver()) // pretend to use Google's jwks endpoint to find the key for signature checks
+	.setVerificationKeyResolver(conf.getSignatureVerificationKeyResolver()) // pretend to use Google's jwks endpoint to find the key for signature checks
 	.build();
 
 	    // Finally using the second JwtConsumer to actually validate the JWT. This operates on
@@ -43,17 +47,17 @@ public class TokenServiceBase extends aTokenService {
 //	JwtClaims claims = jwtConsumer.processToClaims(jwtString);
     }
     
-    public SubjectData verifyToData(String jwtString, FederationConfig conf) throws InvalidJwtException {
+    public SubjectData verifyToData(String jwtString, FederationConfig conf) throws InvalidJwtException, JoseException, IOException {
 	JwtConsumer jwtConsumer = new JwtConsumerBuilder()
 	.setRequireSubject()
-	.setExpectedIssuer(conf.getIssuer())
+	.setExpectedIssuers(true, conf.getIssuer())
 	.setRequireExpirationTime()
-	.setEvaluationTime(NumericDate.fromSeconds(1436388930))
+	//.setEvaluationTime(NumericDate.fromSeconds(1436388930))
 	.setVerificationKey(conf.getVerificationKey())
 	.setAllowedClockSkewInSeconds(30)
-	.setExpectedAudience(conf.getAudience())
+	.setExpectedAudience(true, conf.getAudience())
 	.setJwsAlgorithmConstraints(conf.getAlgorithmConstraints())
-	.setVerificationKeyResolver(conf.getVerificationKeyResolver()) // pretend to use Google's jwks endpoint to find the key for signature checks
+	.setVerificationKeyResolver(conf.getSignatureVerificationKeyResolver()) // pretend to use Google's jwks endpoint to find the key for signature checks
 	.build();
 	
 //	SubjectData userValues = new SubjectData();
@@ -74,15 +78,14 @@ public class TokenServiceBase extends aTokenService {
 //	return  jwtConsumer.process(jwtString);
 //    }
     
-    @Override
-    public String generate(SubjectData data, FederationConfig conf) {
+    public String generate(SubjectData data) {
 
 		// Create the Claims, which will be the content of the JWT
 	        final JwtClaims claims = new JwtClaims();
-	        claims.setIssuer(conf.getIssuer());  // who creates the token and signs it
+	        claims.setIssuer(conf.getIssuer()[0]);  // who creates the token and signs it
 	        claims.setSubject(data.getSubject());
-	        claims.setAudience(conf.getAudience()); // to whom the token is intended to be sent
-	        claims.setExpirationTimeMinutesInTheFuture(conf.getTTL()); // time when the token will expire
+	        claims.setAudience(conf.getAudience()[0]); // to whom the token is intended to be sent
+	        claims.setExpirationTimeMinutesInTheFuture(conf.getTokenExpiration()); // time when the token will expire
 //	        claims.setGeneratedJwtId(); // a unique identifier for the token
 	        claims.setIssuedAtToNow();  // when the token was issued/created (now)
 	        claims.setNotBeforeMinutesInThePast(2); // time before which the token is not yet valid (2 minutes ago)
@@ -110,11 +113,11 @@ public class TokenServiceBase extends aTokenService {
 	        // We only have one key in this example but a using a Key ID helps
 	        // facilitate a smooth key rollover process
 //	        jws.setKeyIdHeaderValue(rsaJsonWebKey.getKeyId());
-	        jws.setKeyIdHeaderValue(conf.getKeyId());
+	        jws.setKeyIdHeaderValue(conf.getJwtIdPrefix());
 
 	        // Set the signature algorithm on the JWT/JWS that will integrity protect the claims
 //	        jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
-	        jws.setAlgorithmHeaderValue(conf.getSignatureAlgorithm());
+	        jws.setAlgorithmHeaderValue(conf.getAlgorithmIdentifier());
 
 	        // Sign the JWS and produce the compact serialization or the complete JWT/JWS
 	        // representation, which is a string consisting of three dot ('.') separated

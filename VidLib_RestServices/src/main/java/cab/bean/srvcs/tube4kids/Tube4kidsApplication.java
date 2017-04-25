@@ -42,6 +42,7 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
+import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,7 @@ import cab.bean.srvcs.tube4kids.db.RoleDAO;
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
+import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
 import cab.bean.srvcs.tube4kids.filter.DateRequiredFeature;
 import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
@@ -98,7 +100,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     }
     
     @Override
-    public void run(Tube4kidsConfiguration configuration, Environment environment) {
+    public void run(Tube4kidsConfiguration configuration, Environment environment) throws Exception {
 	LOGGER.debug("Application context path: {} ", environment.getApplicationContext().getContextPath() );
 	
 	this.jwtConf = configuration.getJwtConfiguration();
@@ -172,7 +174,12 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
         jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, googleAPIConf, jwtConf));
         jerseyConf.register(new ProtectedResource());
-        jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
+        try {
+	    jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
+	} catch (JoseException | IOException | ConfigurationException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
         jerseyConf.register(RolesAllowedDynamicFeature.class);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
 //        jerseyConf.register(new ViewResource());
@@ -186,14 +193,14 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 //        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
 //      }
 //    }
-    private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) {
+    private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) throws JoseException, IOException, ConfigurationException {
 
-	LOGGER.debug("The jwtConf: " + jwtConf);
+//	LOGGER.debug("The jwtConf: " + jwtConf);
 	return new JwtAuthFilter.Builder<User>()
             .setCookieName(jwtConf.getCookieName())
-            .setJwtConsumer(jwtConf.getConsumer("home"))
+            .setJwtConsumer(jwtConf.getConsumer().build())
             .setRealm(jwtConf.getRealmName())
-            .setPrefix(jwtConf.getAuthHeaderPrefix())
+            .setPrefix(jwtConf.getTokenType())
             .setAuthenticator(
         	    	new UnitOfWorkAwareProxyFactory(hibernateBundle)
         	    	.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO})

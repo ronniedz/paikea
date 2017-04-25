@@ -16,6 +16,7 @@
 
 package cab.bean.srvcs.tube4kids.resources.utils;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
+import org.jose4j.lang.JoseException;
 
 /**
  *
@@ -47,7 +49,7 @@ public abstract class aTokenService
 	return new SubjectData(jwtRrelaxedConsumer.processToClaims(tokenString).getClaimsMap());
     }
     
-    public abstract JwtContext verify(String tokenString, FederationConfig conf) throws InvalidJwtException;
+    public abstract JwtContext verify(String tokenString, FederationConfig conf) throws InvalidJwtException, JoseException, IOException;
 
     public abstract String generate(SubjectData data, FederationConfig conf);
     

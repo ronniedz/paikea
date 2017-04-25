@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
@@ -36,6 +37,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 //import javax.ws.rs.client.ClientBuilder;
 //import javax.ws.rs.client.WebTarget;
+
+
+
+
+
 
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -75,6 +81,7 @@ import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.RoleDAO;
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
+import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
 import cab.bean.srvcs.tube4kids.resources.utils.FederationConfig;
 import cab.bean.srvcs.tube4kids.resources.utils.IdTokenVerity;
 import cab.bean.srvcs.tube4kids.resources.utils.SubjectData;
@@ -91,6 +98,7 @@ import com.google.common.collect.ImmutableMap;
 
 import     javax.ws.rs.core.HttpHeaders;
 
+import org.jose4j.jwk.HttpsJwks;
 import org.jose4j.jwk.JsonWebKeySet;
 
 
@@ -138,54 +146,44 @@ public class AuthNVerityResource extends BaseResource {
     @Path("gcallback")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response googleCallback(@FormParam("id_token") String idTokenString, @Context HttpServletRequest request) {
+    public Response googleCallback(@FormParam("id_token") String idTokenString,@Context HttpServletRequest request) {
 
-	LOGGER.debug("got idTokenString");
+	ResponseData dat = (new ResponseData()).setSuccess(false).setStatus(Status.UNAUTHORIZED);
 
-	ResponseData dat = (new ResponseData())
-		.setSuccess(false).setStatus(Status.UNAUTHORIZED);
-
-	URI redirUri = null;
 	String jwt = null;
-	
-	try {
-		
-	    SubjectData userValues =  TokenService.parseToData(idTokenString);
-	    LOGGER.debug("userValues in: '{}'", userValues);
-	
-	    final String subject = userValues.getSubject();
-	    LOGGER.debug("subject in: '{}'", subject);
 
-	    TokenService tks = new TokenService( getConfig(userValues.getIssuer()));
-	    
-	    userValues = tks.verifyToData(idTokenString);
+	try {
+
+//	    final SubjectData userValues = extractFromToken(idTokenString, request.getServerName());
+	    final SubjectData userValues = extractFromToken(idTokenString, jwtConf.getIssuer()[0]);
+	    final String subject = userValues.getSubject();
 
 	    if (userValues != null) {
 		Token beanToken = null;
-		User user =  null;
-		
-//		Optional<Token> t = tokenDAO.findBySubjectAndIssuer(subject, userValues.getIssuer());
+		User user = null;
+
 		Optional<Token> t = tokenDAO.locateSubject(userValues);
 
-		if ( t.isPresent() )  {
-		    
+		if (t.isPresent()) {
+		    LOGGER.debug("t.isPresent beanToken:\n'{}'", beanToken);
+
 		    beanToken = t.get();
 		    user = beanToken.getUser();
-		    
+
 		    dat.setStatus(Status.OK);
 
-		    LOGGER.debug("t.isPresent beanToken:\n'{}'", beanToken);
 		} else {
 
 		    user = createUser(userValues);
 		    beanToken = new Token(user, subject);
-		    beanToken.setAudience(jwtConf.getAudienceId());
-		    
+		    beanToken.setAudience(jwtConf.getAudience()[0]);
+
 		    // Original issuer now saved as IdProvider
 		    beanToken.setIdp(userValues.getIssuer());
-		    
+
 		    // Make this server the issuer of the token
-		    beanToken.setIssuer(request.getServerName());
+//		    beanToken.setIssuer(request.getServerName());
+		    beanToken.setIssuer(jwtConf.getIssuer()[0]);
 
 		    dat.setStatus(Status.CREATED);
 
@@ -194,28 +192,25 @@ public class AuthNVerityResource extends BaseResource {
 		// False when revoked.
 		beanToken.setActive(true);
 		beanToken.setSubject(subject);
-		
+
 		// Remove prior value
 		userValues.removeIssuer();
 		updateUser(user, userValues, beanToken);
-		
-		int ttl_mins =  jwtConf.getTokenExpiration();
-		
-		jwt = makeJwt(userValues, beanToken, ttl_mins);
-		redirUri = getRedirect(user);
-//		dat.setLocation(redirUri);
 
-		dat.setEntity(
-	            ImmutableMap.of(
-	            	"access_token", jwt,
-	                	"expires_in", (ttl_mins - preOffset) * 60,
-	                	"token_type", "Bearer"
-	            )
-		);
+		int ttl_mins = jwtConf.getTokenExpiration();
+
+		jwt = makeJwt(userValues, beanToken, ttl_mins);
+		URI redirUri = getRedirect(user);
+		dat.setLocation(redirUri);
+
+		dat.setEntity(ImmutableMap.of("access_token", jwt,
+			"expires_in", (ttl_mins - preOffset) * 60,
+			"token_type", "Bearer"));
 	    }
-	} catch (InvalidJwtException e) {
+	} catch (InvalidJwtException | JoseException | IOException | ConfigurationException e) {
 	    e.printStackTrace();
-	    dat.setSuccess(false).setErrorMessage(e.getMessage()).setEntity(e.getCause());
+	    dat.setSuccess(false).setErrorMessage(e.getMessage())
+		    .setEntity(e.getCause());
 	}
 	ResponseBuilder rb = doPOST(dat);
 	if (jwt != null) {
@@ -224,48 +219,28 @@ public class AuthNVerityResource extends BaseResource {
 	    // Expire cookie before token
 	    c.add(Calendar.MINUTE, jwtConf.getTokenExpiration() - preOffset);
 	    final Date expiry = c.getTime();
-	    final int maxAge = jwtConf.getMaxAge();
+	    final int maxAge = jwtConf.getCookieMaxAge();
 	    rb.cookie(genCookie(jwt, jwtConf, request, maxAge, expiry));
 	}
 	return rb.build();
     }
 
-    private FederationConfig getConfig(String string) {
-	return 	new  FederationConfig() {
+    private SubjectData extractFromToken(String idTokenString, String currentHost) throws InvalidJwtException, JoseException, IOException, ConfigurationException {
+	FederationConfig cfg = getConfig(TokenService.parseToData(idTokenString).getIssuer());
+	return new TokenService(
+		cfg.setIssuer(new String[] { currentHost, cfg.getIssuer()[0] })
+	).verifyToData(idTokenString);
+    }
 
-	    @Override
-	    public String getIssuer() {
-		return googleAPIConf.getIssuerAliases().get(0);
-	    }
-
-	    @Override
-	    public String getAudience() {
-		return googleAPIConf.getAppClientId();
-	    }
-
-	    @Override
-	    public float getTTL() {
-		return 30;
-	    }
-
-	    @Override
-	    public VerificationKeyResolver getVerificationKeyResolver() {
-		    try {
-			javax.ws.rs.client.Client client = JerseyClientBuilder.newClient().register(jsonFactory); //.register(mapper); 
-			WebTarget target = client.target("https://www.googleapis.com").path("/oauth2/v3/certs");
-
-			    Response response = target.request(MediaType.APPLICATION_JSON).get();
-			    String certs = response.readEntity(String.class);
-
-			JsonWebKeySet jwks = new JsonWebKeySet(certs);
-
-			return new JwksVerificationKeyResolver(jwks.getJsonWebKeys());
-		    } catch (JoseException e) {
-			e.printStackTrace();
-		    }
-		return null;
-	    }
-	};
+    private FederationConfig getConfig(String issuer) {
+	
+	if (issuer.contains("google")) {
+	    return googleAPIConf;
+	}
+	else if (issuer.contains("facebook")) {
+	    
+	}
+	return googleAPIConf;
     }
 
     @Path("logout")
@@ -282,33 +257,16 @@ public class AuthNVerityResource extends BaseResource {
 	if (idTokenStringOpt.isPresent()) {
 	    String idTokenString = idTokenStringOpt.get();
 
-	    IdTokenVerity itv = new IdTokenVerity(googleAPIConf.getAppClientId(), jsonFactory);
-
-	    GoogleIdToken googleToken;
 	    try {
-		googleToken = itv.parse(idTokenString);
+		SubjectData userValues =  TokenService.parseToData(idTokenString);
 
+		final String subject = userValues.getSubject();
 
-		final Payload payload = googleToken.getPayload();
-		final String subject = payload.getSubject();
-
-		Token beanToken = null;
-
-		// Optional<Token> t = tokenDAO.findBySubjectAndIssuer(subject,
-		Optional<Token> t = tokenDAO.findBySubject(subject);
-
-		if (t.isPresent()) {
-
-		    beanToken = t.get();
-
-		    // Invalidate the token
-		    beanToken.setActive(false);
-		    tokenDAO.create(beanToken);
-		    
+		
+		if (deactivateToken(subject)) {
 		    dat.setStatus(Status.OK);
-		    LOGGER.debug("t.isPresent beanToken:\n'{}'", beanToken);
 		}
-	    } catch (IOException e) {
+	    } catch (InvalidJwtException e) {
 		throw new javax.ws.rs.BadRequestException(e.getCause());
 	    }
 	}
@@ -325,58 +283,55 @@ public class AuthNVerityResource extends BaseResource {
     }
 
 
+    private boolean deactivateToken(String subject) {
+	// Optional<Token> t = tokenDAO.findBySubjectAndIssuer(subject,
+	Optional<Token> t = tokenDAO.findBySubject(subject);
+	if (t.isPresent()) {
+	    Token beanToken = t.get();
+
+	    // Invalidate the token
+	    beanToken.setActive(false);
+	    tokenDAO.create(beanToken);
+
+	    LOGGER.debug("t.isPresent beanToken:\n'{}'", beanToken);
+	    return true;
+	}
+	return false;
+
+    }
+
     @Path("revoke")
     @POST
     @UnitOfWork
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE}) 
-    public Response revoke(@FormParam("id_token") String idTokenString, @Context HttpServletRequest request) {
-	
-	LOGGER.debug("deleting token {}" , idTokenString);
+    public Response revoke(@FormParam("id_token") String idTokenString,
+	    @Context HttpServletRequest request) {
+
+	LOGGER.debug("deleting token {}", idTokenString);
 	ResponseData dat = (new ResponseData()).setSuccess(false);
-	
-	    IdTokenVerity itv = new IdTokenVerity(googleAPIConf.getAppClientId(), jsonFactory);
-	    
-	    GoogleIdToken googleToken;
-	    try {
-		googleToken = itv.parse(idTokenString);
-		
-		final Payload payload = googleToken.getPayload();
-		final String subject = payload.getSubject();
-		
-		Token beanToken = null;
-		User user =  null;
-		
-		LOGGER.debug("subject in: '{}'", subject);
-		
-		Optional<Token> t = tokenDAO.findBySubject(subject);
-		
-		if ( t.isPresent() )  {
-		    
-		    beanToken = t.get();
-		    
-		    beanToken.setActive(false);
-		    tokenDAO.create(beanToken);
-		    dat.setStatus(Status.OK);
-		    LOGGER.debug("t.isPresent beanToken:\n'{}'", beanToken);
-		} 
-	    } catch (IOException e) {
-		e.printStackTrace();
-		throw  new javax.ws.rs.BadRequestException(e.getCause());
+
+	try {
+	    SubjectData userValues = TokenService.parseToData(idTokenString);
+
+	    final String subject = userValues.getSubject();
+
+	    if (deactivateToken(subject)) {
+		dat.setStatus(Status.OK);
 	    }
-	    
-	
+	} catch (InvalidJwtException e) {
+	    throw new javax.ws.rs.BadRequestException(e.getCause());
+	}
+
 	Calendar c = Calendar.getInstance();
 	c.add(Calendar.MINUTE, 1);
 	// Zero, to retire cookie
 	final int maxAge = 0;
 	// dat.setSuccess(true);
-	return  doPOST(dat).cookie(
-		genCookie("", jwtConf, request, maxAge,  c.getTime())
-	).build();
-    }
-    
+	return doPOST(dat).cookie(
+		genCookie("", jwtConf, request, maxAge, c.getTime())).build();
+    }    
 
     private URI getRedirect(User user) {
 	URI uri = null;
@@ -412,7 +367,7 @@ public class AuthNVerityResource extends BaseResource {
             int space = header.indexOf(' ');
             if (space > 0) {
                 final String method = header.substring(0, space);
-                if (jwtConf.getAuthHeaderPrefix().equalsIgnoreCase(method)) {
+                if (jwtConf.getTokenType().equalsIgnoreCase(method)) {
                     final String rawToken = header.substring(space + 1);
                     return Optional.of(rawToken);
                 }
@@ -439,8 +394,8 @@ public class AuthNVerityResource extends BaseResource {
         final String path = request.getServletContext().getContextPath() + "/";
         final String domain = request.getServerName();
         final String comment = "Access Token";
-	final boolean secure = conf.isSecure();
-	boolean httpOnly = conf.isHttpOnly();
+	final boolean secure = conf.isCookieSecure();
+	boolean httpOnly = conf.isCookieHttpOnly();
 	
 
 	LOGGER.debug("name {},  path: {} , domain {} ,  maxAge: {} , expiry: {} , secure: {} , httpOnly: {} ",
@@ -519,6 +474,7 @@ public class AuthNVerityResource extends BaseResource {
         claims.setAudience(beanToken.getAudience()); // to whom the token is intended to be sent
         claims.setExpirationTimeMinutesInTheFuture(token_ttl); // time when the token will expire
 //        claims.setGeneratedJwtId(); // a unique identifier for the token
+        claims.setJwtId(UUID.randomUUID().toString()); 
         claims.setIssuedAtToNow();  // when the token was issued/created (now)
         claims.setNotBeforeMinutesInThePast(2); // time before which the token is not yet valid (2 minutes ago)
 
@@ -545,11 +501,11 @@ public class AuthNVerityResource extends BaseResource {
         // We only have one key in this example but a using a Key ID helps
         // facilitate a smooth key rollover process
 //        jws.setKeyIdHeaderValue(rsaJsonWebKey.getKeyId());
-        jws.setKeyIdHeaderValue(jwtConf.getKeyId());
+        jws.setKeyIdHeaderValue(jwtConf.getJwtIdPrefix());
 
         // Set the signature algorithm on the JWT/JWS that will integrity protect the claims
 //        jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
-        jws.setAlgorithmHeaderValue(jwtConf.getSignatureAlgorithm());
+        jws.setAlgorithmHeaderValue(jwtConf.getAlgorithmIdentifier());
 
         // Sign the JWS and produce the compact serialization or the complete JWT/JWS
         // representation, which is a string consisting of three dot ('.') separated

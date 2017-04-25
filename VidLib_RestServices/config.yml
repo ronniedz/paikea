@@ -137,27 +137,39 @@ neo4jConf:
   username: neo4j
   password: mango
 
+
+
+
 googleAPIClientConfiguration:
-  appClientId: "16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com"
-  certificatesURL: "https://www.googleapis.com/oauth2/v3/certs"
-  issuerAliases:
+  audience:
+    - 16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com
+  issuer:
     - accounts.google.com
     - https://accounts.google.com
-#  aecret: "5aLltV9mfyeteSV9ihPo77Yt"
+  signatureKeyURL: https://www.googleapis.com/oauth2/v3/certs
+  allowedSkew: 30 # in seconds
   
-##  verificationUri: "/api/auth/gallback"
 
 jwtConfiguration:
+  issuer:
+    - api.beancab.com
+    - https://api.beancab.com
+  audience:
+    - client.beancabfamilyuser.com
+    
   verificationKey: "5aLltV9mfyeteSV9ihPo77YtVkLXNpZ25vbi5zeXN0ZW0uZ3NlcnZpY2VhY2NvdW50LmNvbTAe"
-  audienceId: "client.apps.beancabfamilyuser.com"
-  issuer: "apps.beancab.com"
-  cookieName: beancab
-  realmName: "Children's Video Library"
-  authHeaderPrefix: Bearer
-  keyId: "beancab.com_rsapublic"
-  secure: false
-  httpOnly: false
-  clockSkew: 30 # in seconds
-  maxAge: 3600
+  algorithmIdentifier : HS256
+  tokenType: Bearer
+  jwtIdPrefix: bcA11n
   tokenExpiration: 1440 # in minutes
+  jwtIdPrefix: "beancab.a11n"
+  allowedSkew: 30 # in seconds
+  realmName: "Children's Video Library"
+  cookieName: beancab
+  cookieSecure: false
+  cookieHttpOnly: false
+  cookieMaxAge: 3600
+
+
+
 
