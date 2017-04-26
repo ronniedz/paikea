@@ -154,8 +154,7 @@ public class AuthNVerityResource extends BaseResource {
 
 	try {
 
-//	    final SubjectData userValues = extractFromToken(idTokenString, request.getServerName());
-	    final SubjectData userValues = extractFromToken(idTokenString, jwtConf.getIssuer()[0]);
+	    final SubjectData userValues = new TokenService(googleAPIConf).verifyToData(idTokenString);;
 	    final String subject = userValues.getSubject();
 
 	    if (userValues != null) {
@@ -225,23 +224,6 @@ public class AuthNVerityResource extends BaseResource {
 	return rb.build();
     }
 
-    private SubjectData extractFromToken(String idTokenString, String currentHost) throws InvalidJwtException, JoseException, IOException, ConfigurationException {
-	FederationConfig cfg = getConfig(TokenService.parseToData(idTokenString).getIssuer());
-	return new TokenService(
-		cfg.setIssuer(new String[] { currentHost, cfg.getIssuer()[0] })
-	).verifyToData(idTokenString);
-    }
-
-    private FederationConfig getConfig(String issuer) {
-	
-	if (issuer.contains("google")) {
-	    return googleAPIConf;
-	}
-	else if (issuer.contains("facebook")) {
-	    
-	}
-	return googleAPIConf;
-    }
 
     @Path("logout")
     @GET
@@ -306,8 +288,7 @@ public class AuthNVerityResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE}) 
-    public Response revoke(@FormParam("id_token") String idTokenString,
-	    @Context HttpServletRequest request) {
+    public Response revoke(@FormParam("id_token") String idTokenString, @Context HttpServletRequest request) {
 
 	LOGGER.debug("deleting token {}", idTokenString);
 	ResponseData dat = (new ResponseData()).setSuccess(false);

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
@@ -43,13 +42,12 @@ public class TokenService {
     public JwtContext verify(String jwtString) throws InvalidJwtException, JoseException, IOException, ConfigurationException {
 //	.setRequireExpirationTime()
 //	.setEvaluationTime(NumericDate.fromSeconds(1436388930))
-	return conf.getConsumer().setRelaxVerificationKeyValidation().build().process(jwtString);
+	return conf.getConsumer().build().process(jwtString);
     }
     
     public SubjectData verifyToData(String jwtString) throws InvalidJwtException, JoseException, IOException, ConfigurationException {
 	return new SubjectData(
 		conf.getConsumer()
-		.setRelaxVerificationKeyValidation()
 		.build().processToClaims(jwtString).getClaimsMap()
 	);
     }

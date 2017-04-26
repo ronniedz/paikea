@@ -44,6 +44,7 @@ public abstract class FederationConfig {
     protected String jwtIdPrefix;
     protected int allowedSkew;
     protected Key verificationKey;
+    protected Key publicKey;
     protected VerificationKeyResolver signatureVerificationKeyResolver;
     protected String signatureKeyURL;
     protected HttpsJwks httpsJWKS;
@@ -116,6 +117,23 @@ public abstract class FederationConfig {
 		    throw new ConfigurationException("On of either the verificationKey or signatureVerificationKeyResolver must be set");
 		}
 	return builder;
+    }
+
+    
+
+    /**
+     * @return the publicKey
+     */
+    public Key getPublicKey() {
+        return publicKey;
+    }
+
+    /**
+     * @param publicKey the publicKey to set
+     */
+    public FederationConfig setPublicKey(Key publicKey) {
+        this.publicKey = publicKey;
+	return this;
     }
 
     /**

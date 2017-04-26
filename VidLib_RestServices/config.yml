@@ -137,9 +137,6 @@ neo4jConf:
   username: neo4j
   password: mango
 
-
-
-
 googleAPIClientConfiguration:
   audience:
     - 16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com
@@ -148,7 +145,6 @@ googleAPIClientConfiguration:
     - https://accounts.google.com
   signatureKeyURL: https://www.googleapis.com/oauth2/v3/certs
   allowedSkew: 30 # in seconds
-  
 
 jwtConfiguration:
   issuer:
@@ -156,8 +152,42 @@ jwtConfiguration:
     - https://api.beancab.com
   audience:
     - client.beancabfamilyuser.com
-    
-  verificationKey: "5aLltV9mfyeteSV9ihPo77YtVkLXNpZ25vbi5zeXN0ZW0uZ3NlcnZpY2VhY2NvdW50LmNvbTAe"
+  verificationKey: "-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAsSMxwIxNBZoQvHuUiiFx7cLmj6NEsBe20t9Qj1f/49pRmiP0
+lo8mJau4pp3Ox6BYycYFM3lpk3jEr5AU+7jqnpnQgF0neh5QGgVzUi9uI+DFDdyC
+0OiDYw1vqcE4heGCvjMeldYk4Dgg2xcezisZIMm9f9YWkWkaK5jJxwbRHRr/VhA1
+5+fH1AUKNlxSVPOZ7cUnVl+yREwTFxLBHX4xbN0vjTl/vfM95OsQp3ATARSRvXYA
+qL09k6pPDoSIA6H/F8kzvoA9nipUf/BqXEdmghABK1oNLaNI2JVeBaQQjOgze2yb
+3JnrErPdRfmOU4d+mm6XCZX82qR4D7Yazj6f1wIDAQABAoIBAQCNoJUT3VlrxC3j
+dW9jLbB4qF9Nsv2lSaCcY352zaZD2HdsJZlWk6etcOoXFY+R3qt+0DuyVz3JckLY
+F/we809rdZHWQCTjJ79lvrvglxmZyAnltkxFmdIK7WA9OsbljFPLnPW0WV5sg5QJ
+eCfiMWVK6OIBhvvOUVliSCv0XIfvmyKScsrZ82QSWhuYndPiKZTXC/GTm0LFwzMi
+3WHjovuR6FrxkHm3je0XINNJgc2bFZuEkfKyvUFepEcqC1lOtdUptMALZWSQQIWw
+Vl5xpbkMv2QglcHAxvv7MFVghCdc1sCMh8K0IEJRtA6bY76Lce7NJZPvnlJ/x2NZ
+jbm1MqvpAoGBAO63R9IpJlIgcyz1GJsY8dHwGNmOt60Ehw76T/4Dgy3T86uY3Myk
+XBFETZJpxnn7ldQ5Z3gxDosZVeMCUFaNfrztSQGzvOikqNqEfVrpRq4L1K2jbJ/H
+OMn4qwLvt+4g0APR40p/f1SH9BdLUBT9INU04kIcP89hRo32hscsZlDTAoGBAL32
+hrOP8NhRfZ5ftZ2uzSdUgrWy1vHaaw2mEVfX2Y04Uw3/TIRkwc7GZBherInO7Ahq
+e7rFZJAN8xegxGtB+T42AHpFFwWz6j5M8NiGfZkC0Ts/7JhbP7LzBr5CSm1LP4Nm
+XihKhO41jWgDLkY+Osw0w4JaM3IF9wN28uBCZzJtAoGBAM2B8861pkvlq8H0bu53
+FxfJP1tsRiwpTaxTSjJAC9qUMZ50xwFWLfyfdLirXzb8pAxELxOGCCMv+ISqJUee
+IJG9JbDVb7hIqSUWEmUFlteXT8z8eDNFa1pVPcQVY58ZmHrxYl9sS84WDMlRCOxI
+zs8969tGPpjmAbuNlJI7YwoJAoGAXlzW3t2yyxH377MleZW6jT36zB1xjqRsJ1SG
+KverNu5yu3JFZULTz05XrI9i7/Xc4/VZTxb89F4pkmQnDgywrgmPRS2K2SddReNc
+hIKSY2611tPTSH+TbeYxRFOTuyT1AOXaAfO6gsYRX0itNPF2rbfMIrWB9rMl2A+/
+aE00DCUCgYA9W0JmXJId8tgu14InaT/IeJT6i00DqXaglsaAWcAH4tVqSpguQRn1
+/05kTVL1QkeGe+vCEv9KNm/EoqWyZu1QfScQ2xjqe/sMRBHgDAPGTqIavUHfOTTh
+3IZNI55n17JXcXIQY6fnet39p1NgoOH7GsZUfDfNmKn9LLv4Y/jNSA==
+-----END RSA PRIVATE KEY-----"
+  publicKey: "-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsSMxwIxNBZoQvHuUiiFx
+7cLmj6NEsBe20t9Qj1f/49pRmiP0lo8mJau4pp3Ox6BYycYFM3lpk3jEr5AU+7jq
+npnQgF0neh5QGgVzUi9uI+DFDdyC0OiDYw1vqcE4heGCvjMeldYk4Dgg2xcezisZ
+IMm9f9YWkWkaK5jJxwbRHRr/VhA15+fH1AUKNlxSVPOZ7cUnVl+yREwTFxLBHX4x
+bN0vjTl/vfM95OsQp3ATARSRvXYAqL09k6pPDoSIA6H/F8kzvoA9nipUf/BqXEdm
+ghABK1oNLaNI2JVeBaQQjOgze2yb3JnrErPdRfmOU4d+mm6XCZX82qR4D7Yazj6f
+1wIDAQAB
+-----END PUBLIC KEY-----"
   algorithmIdentifier : HS256
   tokenType: Bearer
   jwtIdPrefix: bcA11n

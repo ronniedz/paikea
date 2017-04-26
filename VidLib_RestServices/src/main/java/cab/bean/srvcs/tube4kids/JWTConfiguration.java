@@ -1,6 +1,7 @@
 package cab.bean.srvcs.tube4kids;
 
 import java.io.UnsupportedEncodingException;
+import java.security.Key;
 
 import org.jose4j.keys.HmacKey;
 import org.slf4j.Logger;
@@ -25,11 +26,12 @@ public class JWTConfiguration extends FederationConfig {
 
 
    /**
-    * @param signatureKeysUrl
-    *            the signatureKeysUrl to set
+    * @param publicKey the publicKey to set
     */
-   public JWTConfiguration setSignatureKeysUrl(String signatureKeyURL) {
-	this.signatureKeyURL = signatureKeyURL;
-	return this;
+   public FederationConfig setPublicKey(String keyValue)  throws UnsupportedEncodingException {
+       setPublicKey(new HmacKey(keyValue.getBytes("UTF-8")));
+       return this;
    }
+
 }
+
