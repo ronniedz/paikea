@@ -70,4 +70,10 @@ export const auth = {
   endpoint: `${domain}/api/auth/gcallback`,
 }
 
+export const staticpages = {
+  endpoint: 'http://localhost:4001/staticpages',
+  '/about': 'about static page content',
+  '/contact': 'contact static page content',
+}
+
 export const associateChildPlaylistUrl = (childId, playlistId) => `${domain}/api/child/${childId}/pl/${playlistId}`

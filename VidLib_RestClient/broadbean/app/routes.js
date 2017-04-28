@@ -13,6 +13,10 @@
 // about the code splitting business
 import { getHooks } from './utils/hooks'
 import auth from './utils/auth'
+import clientpaths from './clientpaths.json'
+import R from 'ramda'
+
+const [staticRoutes, dynamicRoutes] = R.partition(e => e.hasOwnProperty('file'))(clientpaths.routes)
 
 const errorLoading = (err) => {
   console.error('Dynamic page loading failed', err) // eslint-disable-line no-console
@@ -102,11 +106,36 @@ export default function createRoutes(store) {
     {
       path: '*',
 
-      name: 'notfound',
+      name: 'staticPages',
       getComponent(nextState, cb) {
-        System.import('containers/NotFoundPage')
-          .then(loadModule(cb))
-          .catch(errorLoading)
+        const pathname = nextState.location.pathname
+
+        const staticrouter = R.ifElse(
+          R.contains(pathname),
+          () => {
+            const importModules = Promise.all([
+              System.import('containers/StaticPages/reducer'),
+              System.import('containers/StaticPages/sagas'),
+              System.import('containers/StaticPages'),
+            ])
+
+            const renderRoute = loadModule(cb)
+
+            importModules.then(([reducer, sagas, component]) => {
+              injectReducer('staticPages', reducer.default)
+              injectSagas(sagas.default)
+              renderRoute(component)
+            })
+
+            importModules.catch(errorLoading)
+          },
+          () => System.import('containers/NotFoundPage')
+            .then(loadModule(cb))
+            .catch(errorLoading)
+        )
+
+        const staticpaths = R.values(R.map(e => e.path)(staticRoutes))
+        staticrouter(staticpaths)
       },
     },
   ]

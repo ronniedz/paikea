@@ -1,0 +1,18 @@
+{
+  "routes": {
+    "search": {
+      "path": "/search"
+    },
+    "offspring": {
+      "path": "/offspring"
+    },
+    "about": {
+      "path": "/about",
+      "file": "about.html"
+    },
+    "contact": {
+      "path": "/contact",
+      "file": "contact.html"
+    } 
+  }
+}
