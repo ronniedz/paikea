@@ -83,9 +83,9 @@ const searchReducer = (state = initialState, action) => {
       const playlistsindex = parseInt(action.listitemobj.playlists, 10)
       const itemsindex = parseInt(action.listitemobj.videos, 10)
       return state
-      .setIn(['currentIndexes', 'playlists'], parseInt(action.listitemobj.playlists, 10))
-      .setIn(['currentIndexes', 'videos'], parseInt(action.listitemobj.videos, 10))
-      .set('videoobj', state.get('searchHistory').toJS()[playlistsindex].videos[itemsindex])
+        .setIn(['currentIndexes', 'playlists'], playlistsindex)
+        .setIn(['currentIndexes', 'videos'], itemsindex)
+        .set('videoobj', state.get('searchHistory').toJS()[playlistsindex].videos[itemsindex])
     }
     case LOAD_YT_SEARCH:
       return state
@@ -96,6 +96,7 @@ const searchReducer = (state = initialState, action) => {
         .set('loading', true)
         .set('error', false)
     case LOAD_YT_SEARCH_SUCCESS: {
+      console.log('action', action)
       let modstate = state
         .set('searchval', action.searchval.trim())
         .set('loading', false)
