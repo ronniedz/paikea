@@ -61,6 +61,7 @@ import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
+import cab.bean.srvcs.tube4kids.filter.AdminOrOwnerDynamicFeature;
 import cab.bean.srvcs.tube4kids.filter.DateRequiredFeature;
 import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
@@ -181,6 +182,11 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	    e.printStackTrace();
 	}
         jerseyConf.register(RolesAllowedDynamicFeature.class);
+        
+        jerseyConf.register(
+        		new UnitOfWorkAwareProxyFactory(hibernateBundle)
+	    	.create(AdminOrOwnerDynamicFeature.class, new Class<?>[]{UserDAO.class}, new Object[]{userDAO})
+        	);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
 //        jerseyConf.register(new ViewResource());
    }

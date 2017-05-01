@@ -20,6 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import cab.bean.srvcs.tube4kids.auth.AdminOrOwner;
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
@@ -95,6 +96,10 @@ public class ChildResource extends BaseResource {
     @PATCH
     @UnitOfWork
     @RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE, Names.CHILD_EDIT_ROLE , Names.CHILD_ROLE})
+    @AdminOrOwner(
+	    admins={ Names.ADMIN_ROLE, Names.CHILD_EDIT_ROLE },
+	    member="children.id",
+	    bindParam="cid")
     public Response playlist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long platlistId) {
 
 	ResponseData dat = new ResponseData();
@@ -182,7 +187,7 @@ public class ChildResource extends BaseResource {
     @GET
     @UnitOfWork
     @RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE } )
-    public Response listChildren(@Auth User user) {
+     public Response listChildren(@Auth User user) {
         List<Child> list = childDAO.findAll();
 	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }

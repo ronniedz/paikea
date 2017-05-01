@@ -148,6 +148,7 @@ googleAPIClientConfiguration:
 
 jwtConfiguration:
   issuer:
+    - localhost
     - api.beancab.com
     - https://api.beancab.com
   audience:

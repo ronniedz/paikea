@@ -287,7 +287,7 @@ public class AuthNVerityResource extends BaseResource {
     @UnitOfWork
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE}) 
+    //@RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE}) 
     public Response revoke(@FormParam("id_token") String idTokenString, @Context HttpServletRequest request) {
 
 	LOGGER.debug("deleting token {}", idTokenString);
