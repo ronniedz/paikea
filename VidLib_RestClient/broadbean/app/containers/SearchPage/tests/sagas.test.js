@@ -76,7 +76,6 @@ describe('fetchYTBeanSearch Saga', () => {
   })
 })
 
-
 describe('getYTBeanWatcher Saga', () => {
   const getYTBeanWatcherGenerator = getYTBeanWatcher()
 

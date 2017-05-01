@@ -1,18 +1,31 @@
 import expect from 'expect'
-// import {
-//   defaultAction,
-// } from '../actions'
 import {
-  DEFAULT_ACTION,
+  requestHTML,
+  requestHTMLLoaded,
+} from '../actions'
+
+import {
+  LOAD_HTML,
+  LOAD_HTML_SUCCESS,
 } from '../constants'
 
 describe('StaticPages actions', () => {
-  describe('Default Action', () => {
+  describe('request html', () => {
     it('has a type of DEFAULT_ACTION', () => {
+      const fixture = 'foo'
       const expected = {
-        type: DEFAULT_ACTION,
+        type: LOAD_HTML,
+        pathname: fixture,
       }
-      // expect(defaultAction()).toEqual(expected)
+      expect(requestHTML(fixture)).toEqual(expected)
+    })
+    it('set load success', () => {
+      const fixture = '<h1>foo</h1>'
+      const expected = {
+        type: LOAD_HTML_SUCCESS,
+        content: fixture,
+      }
+      expect(requestHTMLLoaded(fixture)).toEqual(expected)
     })
   })
 })

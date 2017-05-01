@@ -13,6 +13,7 @@ import {
   RETRIEVE_RECOMMENDATIONS,
   RETRIEVE_RECOMMENDATIONS_SUCCESS,
   CHANGE_VIDEO,
+  IS_LOOPING,
 } from '../constants'
 
 
@@ -20,6 +21,7 @@ import {
   changeVideo,
   retrieveRecommendations,
   recommendationsLoaded,
+  toggleLooping,
 } from '../actions'
 
 // import {
@@ -55,5 +57,15 @@ describe('App - Global', () => {
     }
 
     expect(changeVideo(fixture)).toEqual(expectedResult)
+  })
+
+  it('should return looping type', () => {
+    const fixture = false
+    const expectedResult = {
+      type: IS_LOOPING,
+      isLooping: fixture,
+    }
+
+    expect(toggleLooping(fixture)).toEqual(expectedResult)
   })
 })
