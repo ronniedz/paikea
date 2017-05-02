@@ -15,6 +15,5 @@ import java.lang.annotation.Target;
 @Target({TYPE, METHOD})
 public @interface AdminOrOwner {
     String[] admins() default "";
-    String function();
-    String bindParam();
+    String[] grants();
 }

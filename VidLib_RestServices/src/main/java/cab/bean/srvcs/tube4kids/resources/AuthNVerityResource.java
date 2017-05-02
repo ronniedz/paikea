@@ -299,7 +299,6 @@ public class AuthNVerityResource extends BaseResource {
 	    final String subject = userValues.getSubject();
 
 	    deactivateToken(subject);
-	    
 	    dat.setStatus(Status.OK);
 	} catch (InvalidJwtException e) {
 	    e.printStackTrace();

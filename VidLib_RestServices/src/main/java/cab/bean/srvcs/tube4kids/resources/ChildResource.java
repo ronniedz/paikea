@@ -97,12 +97,10 @@ public class ChildResource extends BaseResource {
     @UnitOfWork
     @AdminOrOwner(
 	    admins={ Names.ADMIN_ROLE, Names.CHILD_EDIT_ROLE},
-	    function="isMyChild",
-	    bindParam="cid")
+	    grants= { "isMyChild:cid", "isMyPlaylist:pid"} )
     public Response playlist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long platlistId) {
 
 	ResponseData dat = new ResponseData();
-
 
 	    Child child = childDAO.findByIdLoadPlaylists(childId)
 		    .orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));

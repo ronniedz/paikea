@@ -185,7 +185,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
         jerseyConf.register(
         		new UnitOfWorkAwareProxyFactory(hibernateBundle)
-	    	.create(AdminOrOwnerDynamicFeature.class, new Class<?>[]{UserDAO.class}, new Object[]{userDAO})
+	    	.create(AdminOrOwnerDynamicFeature.class, UserDAO.class, userDAO)
         	);
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
 //        jerseyConf.register(new ViewResource());

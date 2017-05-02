@@ -25,7 +25,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.glassfish.jersey.server.internal.LocalizationMessages;
@@ -47,6 +52,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
     }
 
     @Override
+    @UnitOfWork
     public void configure(final ResourceInfo resourceInfo, final FeatureContext configuration) {
 	
 	final Method method = resourceInfo.getResourceMethod();
@@ -58,99 +64,93 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
         if (aclAnnotation != null) {
 
             LOGGER.debug("method.getName() {} " , method.getName());
-
+            
+            final ImmutableMap.Builder<String, ConditionsCheck> builder = ImmutableMap.builder();
+//            for (Map.Entry<String, Map<String, String>> entry : viewRendererConfiguration.entrySet()) {
+//                builder.put(entry.getKey(), ImmutableMap.copyOf(entry.getValue()));
+//            }
+            
+            Arrays.asList(aclAnnotation.grants()).forEach(x -> {
+        		String[] parts = x.split(":");
+        		builder.put(parts[1], new ConditionsCheck(parts[1], parts[0]));
+            });
+            
+            final Map<String, ConditionsCheck> conditionsMap = builder.build();
+            ConditionsCheck temp = null;
+            int countdown = aclAnnotation.grants().length;
+            
             for ( Parameter mp : method.getParameters() ) {
 
                 PathParam param = mp.getAnnotation(PathParam.class);
-
-                if ( param != null  && param.value().equals(aclAnnotation.bindParam())) {
-
-        		    LOGGER.debug("mp.getName {} " , mp.getName());
+                
+                if ( param != null  && (temp = conditionsMap.get(param.value())) != null ) {
+                    temp.bindClass = mp.getType();
+                    countdown--;
         		    LOGGER.debug("mp.getType {} " , mp.getType());
         		    LOGGER.debug("param {} " , param.value());
-        		    LOGGER.debug("annotationType {} " , param.annotationType());
-        		    LOGGER.debug("getClass {} " , param.getClass());
-        		    LOGGER.debug("true {} " , param.value().equals(aclAnnotation.bindParam()));
-        		    configuration.register(new AdminOrOwnerRequestFilter( aclAnnotation.admins(), aclAnnotation.function(), aclAnnotation.bindParam(), mp.getType()));
-        		    return;
         		}
             }
     
+            if (countdown == 0) {
+            	configuration.register(new AdminOrOwnerRequestFilter( aclAnnotation.admins(), conditionsMap, userDAO));
+            	return;
+            }
            	    
         }
     }
-    class Struct {
-	final String oProp;
-	final String oValParam;
-	final String member;
-	final Class<?> oClass;
-	
-	public Struct(String oProp, String oValParam, Class<?> oClass, String member) {
-	    this.oProp = oProp;
-	    this.oValParam = oValParam;
-	    this.oClass = oClass;
-	    this.member = member;
-	}
+    
+    private static class ConditionsCheck {
+	final String methodName;
+	final String bindParam;
+        Class<?> bindClass;
+        
+        public ConditionsCheck(String bindParam, String methodName) {
+            this.methodName = methodName;
+            this.bindParam = bindParam;
+        }
     }
+
+//    class Struct {
+//	final String oProp;
+//	final String oValParam;
+//	final String member;
+//	final Class<?> oClass;
+//	
+//	public Struct(String oProp, String oValParam, Class<?> oClass, String member) {
+//	    this.oProp = oProp;
+//	    this.oValParam = oValParam;
+//	    this.oClass = oClass;
+//	    this.member = member;
+//	}
+//    }
 
     @Priority(Priorities.AUTHORIZATION) // authorization filter - should go after any authentication filters
     private static class AdminOrOwnerRequestFilter implements ContainerRequestFilter {
 
         private final String[] adminRoles;
-	private final String propName;
-	private final String member;
-	private final Class<?> clazz;
+	private final Map<String, ConditionsCheck> conditionsMap;
+	private final UserDAO userDAO;
 
-        AdminOrOwnerRequestFilter() {
-            this.adminRoles = null;
-            this.propName = null;
-            this.clazz = null;
-            this.member = null;
-        }
+//	@UnitOfWork
+//	private boolean evalCondition(User user, String val, String methodName, Class<?> bindClass) {
+//	    boolean resp = false;
+//	    Method meth;
+//	    try {
+//		meth = user.getClass().getMethod(methodName, bindClass);
+//		resp = (Boolean) meth.invoke(user, getTrueTypedVal(val, bindClass));
+//	    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+//		e.printStackTrace();
+//	    }
+//	    return resp;
+//	}
 
-        public AdminOrOwnerRequestFilter(final String[] adminRoles, final String function, final String bindParam, final Class<?> type) {
-            this.adminRoles = (adminRoles != null) ? adminRoles : new String[] {};
-            this.propName = bindParam;
-            this.member = function;
-            this.clazz = type;
-	}
 
-	//@UnitOfWork
-	@Override
-        public void filter(final ContainerRequestContext requestContext) throws IOException {
-
-            User user = (User) requestContext.getSecurityContext().getUserPrincipal();
-	    if (user != null) {
-		if (!user.hasAnyRole(adminRoles)) {
-		    MultivaluedMap<String, String> map = requestContext.getUriInfo().getPathParameters();
-		    LOGGER.debug("map: " + map);
-		    LOGGER.debug("map.propName: " + map.getFirst(propName));
-		    String val = map.getFirst(propName);
-		    try {
-			LOGGER.debug("clazz: " + clazz);
-			Method meth = user.getClass().getMethod( "isMyChild", Long.class);
-			Boolean ret =  (Boolean) meth.invoke(user, getTrueTypedVal(val, clazz));
-			if ( ! ret) {
-			    throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
-			}
-		    } catch (NoSuchMethodException | SecurityException
-			    | IllegalAccessException | IllegalArgumentException
-			    | InvocationTargetException e) {
-			e.printStackTrace();
-			throw new ForbiddenException(
-				LocalizationMessages.USER_NOT_AUTHORIZED());
-		    }
-		}
-	    }
-        }
-
-	private  <T> T getTrueTypedVal(final String val, Class<T> clazz) {
+	private <T> T getTrueTypedVal(final String val, final Class<T> clazz) {
 	    try {
-
 		if (clazz.equals(String.class)) {
 		    return clazz.cast(val);
 		}
-		Constructor<?> ctor = clazz.getConstructor(val.getClass());
+		final Constructor<?> ctor = clazz.getConstructor(val.getClass());
 		if ( ctor != null) {
 		    return clazz.cast(ctor.newInstance(val));
 		}
@@ -161,11 +161,50 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	    }
 	    return null;
 	}
+	
+        AdminOrOwnerRequestFilter(final String[] adminRoles, final Map<String, ConditionsCheck> conditionsMap, UserDAO userDAO) {
+            this.adminRoles = adminRoles;
+            this.conditionsMap = conditionsMap;
+            this.userDAO = userDAO;
+        }
 
-	private boolean isSameType(Object o, Class userObject2) {
-	    // TODO Auto-generated method stub
-	    return false;
-	}
+        @UnitOfWork
+	@Override
+        public void filter(final ContainerRequestContext requestContext) throws IOException {
+
+            User user = (User) requestContext.getSecurityContext().getUserPrincipal();
+	    if (user != null) {
+//		userDAO.loadAssets(user, new String[] {"roles", "children", "playlists" } );
+//		userDAO.loadRoles(user);
+//		userDAO.loadChildren(user);
+//		userDAO.loadPlaylists(user);
+//		user.getRoles();
+//		user.getPlaylists();
+//		user.getChildren();
+		
+		if (!user.hasAnyRole(this.adminRoles)) {
+		    MultivaluedMap<String, String> map = requestContext.getUriInfo().getPathParameters();
+		    LOGGER.debug("map: " + map);
+		    Function<Map.Entry<String,AdminOrOwnerDynamicFeature.ConditionsCheck>, Boolean> mapFunc =  (entry) -> {
+//			return evalCondition( user, map.getFirst(entry.getKey()), entry.getValue().methodName , entry.getValue().bindClass);
+			    boolean resp = false;
+			    Method meth;
+			    try {
+				meth = user.getClass().getMethod(entry.getValue().methodName, entry.getValue().bindClass);
+				resp = (Boolean) meth.invoke(user, getTrueTypedVal(map.getFirst(entry.getKey()), entry.getValue().bindClass));
+			    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				e.printStackTrace();
+			    }
+			    return resp;
+		    };
+		    if (!
+			    conditionsMap.entrySet().stream().map(mapFunc).reduce(true, (a, b) -> a && b)
+		    ) {
+			throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
+		    }
+		}
+	    }
+        }
 
     }
 }
