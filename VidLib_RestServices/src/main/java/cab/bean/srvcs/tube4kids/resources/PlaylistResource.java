@@ -33,7 +33,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
-import cab.bean.srvcs.tube4kids.core.Role.Names;
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
@@ -46,8 +46,8 @@ import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
  */
 @Path("/playlist")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.ADMIN_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.CONTENT_MODERATOR_ROLE,
-    Names.SUDO_ROLE}) 
+@RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.CONTENT_MODERATOR_ROLE,
+    RoleNames.SUDO_ROLE}) 
 public class PlaylistResource extends BaseResource {
 
     private final PlaylistDAO playlistDAO;
@@ -87,7 +87,7 @@ public class PlaylistResource extends BaseResource {
 //  @UnitOfWork
 //  public Response updatePlaylist(@PathParam("pid") Long pid, Playlist objectData) {
 
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
     @PATCH
     @UnitOfWork
     public Response updatePlaylist(Playlist objectData, @Auth User user) {
@@ -96,11 +96,11 @@ public class PlaylistResource extends BaseResource {
 
 	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
 	    // LOAD lazy collection of playlists
 	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(objectData.getId())).findFirst();
 	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
 	    subjectPlaylistOpt = playlistDAO.findById(objectData.getId());
 	}
 
@@ -130,11 +130,11 @@ public class PlaylistResource extends BaseResource {
 	ResponseData dat = new ResponseData().setSuccess(false);
 	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
 	    // LOAD lazy collection of playlists
 	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
 	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
 	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
 	}
 
@@ -184,7 +184,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/liberate/{pid: [0-9]+}")
     @PUT
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
     public Playlist liberatePlaylist(@PathParam("pid") Long pid, @Auth User user) {
 	
 	Playlist org = playlistDAO.retrieve(pid);
@@ -219,7 +219,7 @@ public class PlaylistResource extends BaseResource {
 //    @Path("/user/{userId: [0-9]+}")
 //    @GET
 //    @UnitOfWork
-//    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+//    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
 //    public Response listUserPlaylists(@PathParam("userId") LongParam userId, @Auth User user) {
 //	return doGET(new ResponseData( playlistDAO.findUserLists(user)).setSuccess(true)).build();
 //    }
@@ -228,7 +228,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/my")
     @GET
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
     public Response listOwnPlaylists(@Auth User user) {
 	return doGET(new ResponseData( playlistDAO.loadUserPlaylists(user)).setSuccess(true)).build();
     }
@@ -236,20 +236,20 @@ public class PlaylistResource extends BaseResource {
     @Path("/video/{pidVal: [0-9]+}")
     @PATCH
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.PLAYLIST_MANAGER_ROLE})
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE})
     public Response addVideos(@PathParam("pidVal") Long pidVal, Set<String> videoIds, @Auth User user) {
 	
 	ResponseData dat = new ResponseData().setSuccess(false);
 
 	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
 	    
 	    // LOAD lazy collection of playlists
 	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
 	    
 	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
 	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
 	}
 
@@ -296,19 +296,19 @@ public class PlaylistResource extends BaseResource {
     @Path("{pidVal: [0-9]+}/v/{videoIds}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE})
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE})
     public Response dropVideos(@PathParam("pidVal") Long pidVal, @PathParam("videoIds") String videoIds, @Auth User user) {
 	ResponseData dat = new ResponseData().setSuccess(false);
 
 	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
 	    
 	    // LOAD lazy collection of playlists
 	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
 	    
 	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
 	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
 	}
 

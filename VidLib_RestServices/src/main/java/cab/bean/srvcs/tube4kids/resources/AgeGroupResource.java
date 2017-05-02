@@ -18,10 +18,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.util.List;
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
 
 @Path("/age")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.CONTENT_MODERATOR_ROLE, Role.Names.UI_MANAGER_ROLE})
+@RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.CONTENT_MODERATOR_ROLE, RoleNames.UI_MANAGER_ROLE})
 public class AgeGroupResource {
 
     private final AgeGroupDAO ageGroupDAO;

@@ -6,6 +6,7 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.Authorizer;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -41,6 +42,7 @@ import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.keys.HmacKey;
 import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
@@ -175,45 +177,32 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
         jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, googleAPIConf, jwtConf));
         jerseyConf.register(new ProtectedResource());
-        try {
-	    jerseyConf.register(new AuthDynamicFeature(buildJwtAuthFilter( tokenDAO )));
-	} catch (JoseException | IOException | ConfigurationException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-        jerseyConf.register(RolesAllowedDynamicFeature.class);
-        
-        jerseyConf.register(
-        		new UnitOfWorkAwareProxyFactory(hibernateBundle)
-	    	.create(AdminOrOwnerDynamicFeature.class, UserDAO.class, userDAO)
-        	);
+
+        jerseyConf.register(new AuthDynamicFeature( buildJwtAuthFilter(tokenDAO) ));
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
+        jerseyConf.register(RolesAllowedDynamicFeature.class);
+        jerseyConf.register(AdminOrOwnerDynamicFeature.class);
 //        jerseyConf.register(new ViewResource());
    }
-//    
-//    @PreMatching
-//    @Priority(Priorities.AUTHENTICATION)
-//    public class CustomAuthFilter extends AuthFilter {
-//      @Override
-//      public void filter(ContainerRequestContext requestContext) throws IOException {
-//        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-//      }
-//    }
-    private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) throws JoseException, IOException, ConfigurationException {
 
-//	LOGGER.debug("The jwtConf: " + jwtConf);
-	return new JwtAuthFilter.Builder<User>()
-            .setCookieName(jwtConf.getCookieName())
-            .setJwtConsumer(jwtConf.getConsumer().build())
-            .setRealm(jwtConf.getRealmName())
-            .setPrefix(jwtConf.getTokenType())
-            .setAuthenticator(
-        	    	new UnitOfWorkAwareProxyFactory(hibernateBundle)
-        	    	.create(JWTAuthenticator.class, new Class<?>[]{TokenDAO.class}, new Object[]{tokenDAO})
-        	    )
-//          Add Authorizer
-        	    .setAuthorizer( (principal, role) -> principal.hasRole(role))
-            .buildAuthFilter();
+    private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) {
+	try {
+	    return new JwtAuthFilter.Builder<User>()
+	        .setCookieName(jwtConf.getCookieName())
+	        .setJwtConsumer(jwtConf.getConsumer().build())
+	        .setRealm(jwtConf.getRealmName())
+	        .setPrefix(jwtConf.getTokenType())
+	        .setAuthenticator(wrapAuthenticator(tokenDAO))
+	        	.setAuthorizer( (principal, role) -> principal.hasRole(role))
+	        .buildAuthFilter();
+	} catch (JoseException | IOException | ConfigurationException e) {
+	    e.printStackTrace();
+	}
+	return null;
+    }
+
+    private Authenticator<JwtContext, User> wrapAuthenticator(TokenDAO tokenDAO) {
+	return new UnitOfWorkAwareProxyFactory(hibernateBundle).create(JWTAuthenticator.class, TokenDAO.class, tokenDAO);
     }
 
     private void setupCORS(Environment environment) {

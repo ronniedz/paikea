@@ -5,6 +5,8 @@ import io.dropwizard.hibernate.UnitOfWork;
 
 import java.util.Optional;
 
+import org.hibernate.CacheMode;
+import org.hibernate.FlushMode;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.JwtContext;
 import org.slf4j.Logger;
@@ -24,7 +26,7 @@ public class JWTAuthenticator implements Authenticator<JwtContext, User> {
 	this.tokenDAO = tokenDAO;
     }
 
-    @UnitOfWork
+    @UnitOfWork(readOnly=true, flushMode=FlushMode.MANUAL, transactional=false)
     @Override
     public Optional<User> authenticate(JwtContext context) {
 	

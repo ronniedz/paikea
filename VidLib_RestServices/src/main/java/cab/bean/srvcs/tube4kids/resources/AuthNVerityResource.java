@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
 import cab.bean.srvcs.tube4kids.GoogleAPIClientConfiguration;
 import cab.bean.srvcs.tube4kids.JWTConfiguration;
 import cab.bean.srvcs.tube4kids.core.Role;
-import cab.bean.srvcs.tube4kids.core.Role.Names;
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.RoleDAO;
@@ -287,7 +287,7 @@ public class AuthNVerityResource extends BaseResource {
     @UnitOfWork
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    //@RolesAllowed({Role.Names.MEMBER_ROLE, Role.Names.ADMIN_ROLE}) 
+    //@RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.ADMIN_ROLE}) 
     public Response revoke(@FormParam("id_token") String idTokenString, @Context HttpServletRequest request) {
 
 	LOGGER.debug("deleting token {}", idTokenString);
@@ -437,7 +437,7 @@ public class AuthNVerityResource extends BaseResource {
 	u.setActivated(Boolean.TRUE);
 	u.setPassword(Long.toHexString(Double.doubleToLongBits(Math.random())));
     
-	for(String rname : Names.MEMBER) {
+	for(String rname : RoleNames.MEMBER) {
 	    u.addRole(roleDAO.findByName(rname).get());
 	}
 	return u;

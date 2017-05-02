@@ -24,7 +24,7 @@ import cab.bean.srvcs.tube4kids.auth.AdminOrOwner;
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
-import cab.bean.srvcs.tube4kids.core.Role.Names;
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.ChildDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
@@ -33,7 +33,7 @@ import cab.bean.srvcs.tube4kids.db.UserDAO;
 
 @Path("/child")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE, Names.CHILD_EDIT_ROLE })
+@RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE })
 public class ChildResource extends BaseResource {
 
 //    private final long fakeUserId = 1L;
@@ -51,14 +51,14 @@ public class ChildResource extends BaseResource {
 
     @POST
     @UnitOfWork
-    @RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE, Names.CHILD_EDIT_ROLE, Names.MEMBER_ROLE })
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE, RoleNames.MEMBER_ROLE })
     public Response createChild(List<Child> children, @Auth User user) {
 	final boolean ifMini = isMinimalRequest();
         final Timestamp created = new Timestamp(java.lang.System.currentTimeMillis());
 
         
-        if (user.getChildren().isEmpty() && ( ! user.getRoles().contains(new Role(Names.GUARDIAN_ROLE)) ) ) {
-	   user.addRole(roleDAO.findByName(Names.GUARDIAN_ROLE).get());
+        if (user.getChildren().isEmpty() && ( ! user.getRoles().contains(new Role(RoleNames.GUARDIAN_ROLE)) ) ) {
+	   user.addRole(roleDAO.findByName(RoleNames.GUARDIAN_ROLE).get());
 	   userDAO.create(user);
        }
         
@@ -76,12 +76,12 @@ public class ChildResource extends BaseResource {
     @Path("/{cid}")
     @GET
     @UnitOfWork
-    @RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE, Names.CHILD_EDIT_ROLE , Names.CHILD_ROLE})
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE , RoleNames.CHILD_ROLE})
     public Response viewChild(@Auth User user, @PathParam("cid") Long childId) {
 
 	ResponseData dat = new ResponseData();
 
-	if ( user.hasAnyRole(Names.SUDO) || ( user.hasRole(Names.GUARDIAN_ROLE) && user.isMyChild(childId) ) ) {
+	if ( user.hasAnyRole(RoleNames.SUDO) || ( user.hasRole(RoleNames.GUARDIAN_ROLE) && user.isMyChild(childId) ) ) {
 
 	    Child child = childDAO.findById(childId)
         		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
@@ -96,8 +96,8 @@ public class ChildResource extends BaseResource {
     @PATCH
     @UnitOfWork
     @AdminOrOwner(
-	    admins={ Names.ADMIN_ROLE, Names.CHILD_EDIT_ROLE},
-	    grants= { "isMyChild:cid", "isMyPlaylist:pid"} )
+	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
+	    provoPropria= { "isMyChild:cid", "isMyPlaylist:pid"} )
     public Response playlist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long platlistId) {
 
 	ResponseData dat = new ResponseData();
@@ -118,11 +118,11 @@ public class ChildResource extends BaseResource {
     @Path("/{cid}/pl/{pid}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE, Names.CHILD_EDIT_ROLE , Names.CHILD_ROLE})
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE , RoleNames.CHILD_ROLE})
     public Response dePlaylist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long playlistId) {
 	ResponseData dat = new ResponseData();
 
-	if ( user.hasAnyRole(Names.SUDO) || ( user.hasRole(Names.GUARDIAN_ROLE) && user.isMyChild(childId) ) ) {
+	if ( user.hasAnyRole(RoleNames.SUDO) || ( user.hasRole(RoleNames.GUARDIAN_ROLE) && user.isMyChild(childId) ) ) {
 
 	    Child child = childDAO.findByIdLoadPlaylists(childId)
 		    .orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
@@ -146,14 +146,14 @@ public class ChildResource extends BaseResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed( { Names.ADMIN_ROLE, Names.GUARDIAN_ROLE, Names.CHILD_EDIT_ROLE } )
+    @RolesAllowed( { RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE } )
     public Response deleteChild(@Auth User user, @PathParam("id") Long id) {
 
 	ResponseData resData = new ResponseData().setSuccess(false);
 	Optional<Child> subjectChildOpt = childDAO.findById(id);
 
 	if (subjectChildOpt.isPresent()) {
-	    if (  user.hasAnyRole(Names.ADMIN) || subjectChildOpt.get().getGuardian().getId() == user.getId()) {
+	    if (  user.hasAnyRole(RoleNames.ADMIN) || subjectChildOpt.get().getGuardian().getId() == user.getId()) {
 
 		Child child = childDAO.delete(subjectChildOpt.get());
 		resData
@@ -178,7 +178,7 @@ public class ChildResource extends BaseResource {
 
     @GET
     @UnitOfWork
-    @RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE } )
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE } )
      public Response listChildren(@Auth User user) {
         List<Child> list = childDAO.findAll();
 	return doGET(new ResponseData(list).setSuccess(list != null)).build();
