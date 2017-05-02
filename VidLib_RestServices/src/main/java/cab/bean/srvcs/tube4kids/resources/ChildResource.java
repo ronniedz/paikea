@@ -95,16 +95,14 @@ public class ChildResource extends BaseResource {
     @Path("/{cid}/pl/{pid}")
     @PATCH
     @UnitOfWork
-    @RolesAllowed({Names.ADMIN_ROLE, Names.GUARDIAN_ROLE, Names.CHILD_EDIT_ROLE , Names.CHILD_ROLE})
     @AdminOrOwner(
-	    admins={ Names.ADMIN_ROLE, Names.CHILD_EDIT_ROLE },
-	    member="children.id",
+	    admins={ Names.ADMIN_ROLE, Names.CHILD_EDIT_ROLE},
+	    function="isMyChild",
 	    bindParam="cid")
     public Response playlist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long platlistId) {
 
 	ResponseData dat = new ResponseData();
 
-	if ( user.hasAnyRole(Names.SUDO) || ( user.hasRole(Names.GUARDIAN_ROLE) && user.isMyChild(childId) ) ) {
 
 	    Child child = childDAO.findByIdLoadPlaylists(childId)
 		    .orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
@@ -115,11 +113,7 @@ public class ChildResource extends BaseResource {
 	    child.getPlaylists().add(playlist);
 	    child = childDAO.create(child); // Update the Child
 	    dat.setSuccess(true).setEntity(isMinimalRequest() ? playlist : child.getPlaylists());
-	}
-	else {
-	    throw new ForbiddenException(String.format("User '%s' has no access to child-[%d]'s records.", user.getFirstname()));
-	}
-        return doPATCH(dat).build();
+       return doPATCH(dat).build();
     }
     
     
