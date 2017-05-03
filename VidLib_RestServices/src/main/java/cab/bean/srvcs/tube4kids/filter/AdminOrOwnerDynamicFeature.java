@@ -33,6 +33,9 @@ import org.slf4j.LoggerFactory;
 import cab.bean.srvcs.tube4kids.auth.AdminOrOwner;
 import cab.bean.srvcs.tube4kids.core.User;
 
+/*     
+ * A {@link DynamicFeature} that registers an auth filter for resource methods annotated with the {@link AdminOrOwner} annotations.
+ */
 public class AdminOrOwnerDynamicFeature implements DynamicFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminOrOwnerDynamicFeature.class);
     
@@ -46,7 +49,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	
 	final Method method = resourceInfo.getResourceMethod();
         final AnnotatedMethod am = new AnnotatedMethod(method);
-        AdminOrOwner aclAnnotation = am.getAnnotation(AdminOrOwner.class);
+        final AdminOrOwner aclAnnotation = am.getAnnotation(AdminOrOwner.class);
 
         if (aclAnnotation != null) {
 

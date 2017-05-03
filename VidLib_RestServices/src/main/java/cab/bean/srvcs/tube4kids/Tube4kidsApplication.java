@@ -4,10 +4,8 @@ package cab.bean.srvcs.tube4kids;
 import static java.util.Collections.singletonMap;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
-import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.Authorizer;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -22,33 +20,20 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Priority;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
-import org.jose4j.jwt.consumer.JwtConsumer;
-import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
-import org.jose4j.keys.HmacKey;
 import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cab.bean.srvcs.tube4kids.auth.AccessAuthorizer;
 import cab.bean.srvcs.tube4kids.auth.JWTAuthenticator;
 import cab.bean.srvcs.tube4kids.cli.RenderCommand;
 import cab.bean.srvcs.tube4kids.core.User;
@@ -64,7 +49,6 @@ import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
 import cab.bean.srvcs.tube4kids.filter.AdminOrOwnerDynamicFeature;
-import cab.bean.srvcs.tube4kids.filter.DateRequiredFeature;
 import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
 import cab.bean.srvcs.tube4kids.resources.AgeGroupResource;
@@ -72,7 +56,6 @@ import cab.bean.srvcs.tube4kids.resources.AuthNVerityResource;
 import cab.bean.srvcs.tube4kids.resources.ChildResource;
 import cab.bean.srvcs.tube4kids.resources.GenreResource;
 import cab.bean.srvcs.tube4kids.resources.PlaylistResource;
-import cab.bean.srvcs.tube4kids.resources.ProtectedResource;
 import cab.bean.srvcs.tube4kids.resources.UserResource;
 import cab.bean.srvcs.tube4kids.resources.VideoResource;
 import cab.bean.srvcs.tube4kids.resources.YouTubeVideoResource;
@@ -112,11 +95,10 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
 	environment.jersey().getResourceConfig().addProperties(singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false));
 	environment.healthChecks().register("template", new TemplateHealthCheck(configuration.buildTemplate()));
-//	environment.jersey().register(DateRequiredFeature.class);
 
 	environment.jersey().register(jsonProvider);
 	
-	// Contain this REST service to a sub-directory (<code>/api/</code>)
+	// Contain this REST service to sub-directory (<code>/api/</code>)
 	environment.jersey().setUrlPattern(configuration.getAppContextUri());
 
 	buildResources(configuration, environment.jersey());
@@ -125,6 +107,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
     @Override
     public void initialize(Bootstrap<Tube4kidsConfiguration> bootstrap) {
+	
         // Enable variable substitution with environment variables
         bootstrap.setConfigurationSourceProvider(
                 new SubstitutingSourceProvider(
@@ -145,6 +128,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         
         bootstrap.addBundle(hibernateBundle);
         
+        // TODO use or remove
         bootstrap.addBundle(new ViewBundle<Tube4kidsConfiguration>() {
             @Override
             public Map<String, Map<String, String>> getViewConfiguration(Tube4kidsConfiguration configuration) {
@@ -176,7 +160,6 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
         jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, googleAPIConf, jwtConf));
-        jerseyConf.register(new ProtectedResource());
 
         jerseyConf.register(new AuthDynamicFeature( buildJwtAuthFilter(tokenDAO) ));
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));

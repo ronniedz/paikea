@@ -1,35 +1,25 @@
 package cab.bean.srvcs.tube4kids.resources;
 
-import static java.util.Collections.singletonMap;
-import static org.jose4j.jws.AlgorithmIdentifiers.HMAC_SHA256;
-import io.dropwizard.auth.Auth;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import io.dropwizard.hibernate.UnitOfWork;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -37,69 +27,37 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 //import javax.ws.rs.client.ClientBuilder;
 //import javax.ws.rs.client.WebTarget;
-
-
-
-
-
-
-
-import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-
 import org.apache.commons.beanutils.BeanUtils;
-import org.jose4j.json.JsonUtil;
-import org.jose4j.jwa.AlgorithmConstraints;
+import org.glassfish.jersey.server.internal.LocalizationMessages;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
-import org.jose4j.keys.HmacKey;
-import org.jose4j.keys.resolvers.JwksVerificationKeyResolver;
-import org.jose4j.keys.resolvers.VerificationKeyResolver;
 import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.GoogleAPIClientConfiguration;
 import cab.bean.srvcs.tube4kids.JWTConfiguration;
-import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.auth.RoleNames;
+import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.RoleDAO;
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
-import cab.bean.srvcs.tube4kids.resources.utils.FederationConfig;
-import cab.bean.srvcs.tube4kids.resources.utils.IdTokenVerity;
 import cab.bean.srvcs.tube4kids.resources.utils.SubjectData;
 import cab.bean.srvcs.tube4kids.resources.utils.TokenService;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-
-import     javax.ws.rs.core.HttpHeaders;
-
-import org.jose4j.jwk.HttpsJwks;
-import org.jose4j.jwk.JsonWebKeySet;
 
 
 /**
@@ -113,15 +71,14 @@ public class AuthNVerityResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthNVerityResource.class);
     private static final int preOffset = 1; // minute
     
-    // TODO Move to Application layer or to AppConfiguration. Should be shared by all.
-    private final JsonFactory jsonFactory = new JacksonFactory();
     
     private TokenDAO tokenDAO;
     private UserDAO userDAO;
     private RoleDAO roleDAO;
     private GoogleAPIClientConfiguration googleAPIConf;
-
     private JWTConfiguration jwtConf;
+
+    final TokenService tokenService;
 
     
     
@@ -132,6 +89,7 @@ public class AuthNVerityResource extends BaseResource {
 
 	this.googleAPIConf = googleAPIConf;
 	this.jwtConf = jwtConf;
+	this.tokenService = new TokenService(jwtConf);
 	
 	this.tokenDAO = tokenDAO;
 	this.userDAO = userDAO;
@@ -148,7 +106,7 @@ public class AuthNVerityResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response googleCallback(@FormParam("id_token") String idTokenString,@Context HttpServletRequest request) {
 
-	ResponseData dat = (new ResponseData()).setSuccess(false).setStatus(Status.UNAUTHORIZED);
+	final ResponseData dat = (new ResponseData()).setSuccess(false).setStatus(Status.UNAUTHORIZED);
 
 	String jwt = null;
 
@@ -196,20 +154,21 @@ public class AuthNVerityResource extends BaseResource {
 		userValues.removeIssuer();
 		updateUser(user, userValues, beanToken);
 
-		int ttl_mins = jwtConf.getTokenExpiration();
+		jwt = tokenService.generate(userValues);
+//		jwt = makeJwt(userValues, beanToken, ttl_mins);
 
-		jwt = makeJwt(userValues, beanToken, ttl_mins);
-		URI redirUri = getRedirect(user);
-		dat.setLocation(redirUri);
+		dat.setLocation(getRedirect(user));
 
 		dat.setEntity(ImmutableMap.of("access_token", jwt,
-			"expires_in", (ttl_mins - preOffset) * 60,
+			"expires_in", (jwtConf.getTokenExpiration() - preOffset) * 60,
 			"token_type", "Bearer"));
 	    }
 	} catch (InvalidJwtException | JoseException | IOException | ConfigurationException e) {
 	    e.printStackTrace();
 	    dat.setSuccess(false).setErrorMessage(e.getMessage())
 		    .setEntity(e.getCause());
+//		throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
+
 	}
 	ResponseBuilder rb = doPOST(dat);
 	if (jwt != null) {
