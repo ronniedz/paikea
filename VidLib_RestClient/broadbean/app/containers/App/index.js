@@ -47,16 +47,22 @@ import {
   find,
   curry,
 } from 'lodash'
+import R from 'ramda'
+import { routes } from 'clientpaths.json'
 
 class App extends React.Component {
   componentDidMount() {
-    const { setVidDim } = this.props
+    const { setVidDim, location } = this.props
 
     // remap the horizontal thresholds for window resize
     this.hthresholds = new Map(vidconfig.dimensions.map((ea) => [ea.upperthreshold, ea]))
 
-    this.resizeApp = this.resizeApp.bind(this)
-    window.onresize = this.resizeApp
+    const staticRoutes = R.pickBy((v, k) => v.hasOwnProperty('file'))(routes)
+    const staticpaths = R.values(R.map(e => e.path)(staticRoutes))
+    if (R.keys(staticRoutes).includes(location.pathname)) {
+      this.resizeApp = this.resizeApp.bind(this)
+      window.onresize = this.resizeApp
+    }
 
     const defaultdim = find(vidconfig.dimensions, (ea) => ea.upperthreshold > window.innerWidth)
 
@@ -79,10 +85,6 @@ class App extends React.Component {
 
   render() {
     const { children, viddim, setAuthorized, location, ...others } = this.props
-    console.log('--------------')
-    console.log('this.props.location', this.props.location)
-    console.log('this.props.location.pathname', this.props.location.pathname)
-    console.log('this.props.location.state', this.props.location.state)
     return (
       <div>
         <div className={styles.mainwrap}>
@@ -137,5 +139,4 @@ App.propTypes = {
   viddim: PropTypes.object,
 }
 
-// export default App
 export default connect(mapStateToProps, mapDispatchToProps)(App)

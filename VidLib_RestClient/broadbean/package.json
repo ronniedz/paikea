@@ -22,6 +22,7 @@
     "build:watch": "cross-env NODE_ENV=production webpack --config internals/webpack/webpack.prod.babel.js --color -p -w",
     "build:clean": "rimraf '../../assets/!(goog_signin.html|sample.html)'",
     "build:dll": "node ./internals/scripts/dependencies.js",
+    "dev": "npm start",
     "start": "json-server -p 4001 --routes server/mock/routes.json --watch server/mock/endpoint.json & cross-env NODE_ENV=development node server",
     "start:production": "npm run build && npm run start:prod",
     "start:prod": "json-server -p 4001 --watch server/mock/endpoint.json & cross-env NODE_ENV=production node server",
