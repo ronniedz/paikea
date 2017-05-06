@@ -86,7 +86,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
 	final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
 	jsonProvider.setMapper(new JodaMapper());
-	
+	jsonProvider.readFrom(null, getClass(), null, null, null, null);
 	environment.jersey().getResourceConfig().addProperties(singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false));
 	environment.healthChecks().register("template", new TemplateHealthCheck(configuration.buildTemplate()));
 	environment.jersey().register(jsonProvider);
