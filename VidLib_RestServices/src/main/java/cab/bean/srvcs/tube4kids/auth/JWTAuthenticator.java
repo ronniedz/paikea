@@ -5,14 +5,12 @@ import io.dropwizard.hibernate.UnitOfWork;
 
 import java.util.Optional;
 
-import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.JwtContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 
@@ -20,7 +18,7 @@ import cab.bean.srvcs.tube4kids.db.TokenDAO;
 public class JWTAuthenticator implements Authenticator<JwtContext, User> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthenticator.class);
 
-    private TokenDAO tokenDAO;
+    private final TokenDAO tokenDAO;
 
     public JWTAuthenticator(TokenDAO tokenDAO) {
 	this.tokenDAO = tokenDAO;

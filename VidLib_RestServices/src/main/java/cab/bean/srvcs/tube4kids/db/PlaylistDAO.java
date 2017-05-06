@@ -83,10 +83,8 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
 
     public Playlist update(Playlist objectData) {
 	Session session = currentSession();
-	Playlist o = get(objectData.getId());
-	if ( o != null ) {
-	    o = (Playlist) session.merge(objectData);
-	}
+	Playlist o = (Playlist) session.merge(objectData);
+	session.saveOrUpdate(o);
 	return o;
     }
 

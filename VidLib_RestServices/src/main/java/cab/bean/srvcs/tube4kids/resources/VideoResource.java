@@ -56,16 +56,16 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 public class VideoResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoResource.class);
 
-    private final VideoDAO videoDAO;
 //    private final Neo4JGraphDAO neo4jGraphDAO;
+    private final VideoDAO videoDAO;
     private final YouTubeAPIProxy ytProxyClient;
 
 
-    public VideoResource(VideoDAO videoDAO, GenreDAO genreDAO, UserDAO userDAO, Neo4JGraphDAO neo4jGraphDAO, final YouTubeAPIProxy ytProxyClient) {
+    public VideoResource(VideoDAO videoDAO, Neo4JGraphDAO neo4jGraphDAO, final YouTubeAPIProxy ytProxyClient) {
 	super();
 	this.videoDAO = videoDAO;
-//	this.neo4jGraphDAO = neo4jGraphDAO;
         this.ytProxyClient = ytProxyClient;
+//	this.neo4jGraphDAO = neo4jGraphDAO;
     }
 
     @GET

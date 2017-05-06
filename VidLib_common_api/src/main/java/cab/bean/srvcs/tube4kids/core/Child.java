@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.ToString;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,6 +26,7 @@ import lombok.EqualsAndHashCode;
     )
 })
 @EqualsAndHashCode(exclude= {"playlists", "guardian"} )
+@ToString(of= {"id"})
 @Data
 public class Child {
 
@@ -50,7 +52,7 @@ public class Child {
     public Map<String, Object> getParentInfo() {
 	Map<String, Object> guardianInfo = new HashMap<String, Object>();
 	if (this.guardian != null) {
-	    guardianInfo.put("guardiant_id", guardian.getId());
+	    guardianInfo.put("guardian_id", guardian.getId());
 	    guardianInfo.put("guardian_name",  guardian.getFullName());
 	}
 	return guardianInfo; 

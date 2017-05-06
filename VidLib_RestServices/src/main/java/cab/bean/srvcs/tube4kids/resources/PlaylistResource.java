@@ -33,6 +33,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
+import cab.bean.srvcs.tube4kids.auth.AdminOrOwner;
 import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.Video;
@@ -61,9 +62,8 @@ public class PlaylistResource extends BaseResource {
     @POST
     @UnitOfWork
     public Response createPlaylist(Playlist playlist, @Auth User user) { 
-	
-	playlist.setUser(user);
 
+	playlist.setUser(user);
 	Playlist p = playlistDAO.create(playlist);
 	
 	boolean respBody =  (p != null);
@@ -86,37 +86,30 @@ public class PlaylistResource extends BaseResource {
 //  @PATCH
 //  @UnitOfWork
 //  public Response updatePlaylist(@PathParam("pid") Long pid, Playlist objectData) {
+//    @AdminOrOwner(
+//	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE},
+//	    provoPropria= { "isMyChild:cid", "isMyPlaylist:pid"} )
 
-    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
-    @PATCH
     @UnitOfWork
+    @PATCH
+    @AdminOrOwner(
+	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE},
+	    provoPropria= { "isMyPlaylist:arg0"} )
     public Response updatePlaylist(Playlist objectData, @Auth User user) {
 	
-	ResponseData dat = new ResponseData().setSuccess(false);
+	final ResponseData dat = new ResponseData().setSuccess(false);
 
-	Optional<Playlist> subjectPlaylistOpt = null;
-	
-	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
-	    // LOAD lazy collection of playlists
-	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(objectData.getId())).findFirst();
-	}
-	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
-	    subjectPlaylistOpt = playlistDAO.findById(objectData.getId());
-	}
-
-	if (subjectPlaylistOpt != null  ) {
-	    if (subjectPlaylistOpt.isPresent()) {
-		Playlist o = playlistDAO.update(subjectPlaylistOpt.get());
+	Playlist o = playlistDAO.update(objectData);
 		dat.setSuccess(true).setEntity(isMinimalRequest() ? null : o );
 		dat.setLocation( UriBuilder.fromResource(this.getClass()).path(o.getId().toString()).build() );
-	    }
-	    else {
-		dat.setStatus(Response.Status.NOT_FOUND).setErrorMessage("No such playlist");
-	    }
-	}
-	else {
-	    dat.setStatus(Response.Status.FORBIDDEN);
-	}
+//	    }
+//	    else {
+//		dat.setStatus(Response.Status.NOT_FOUND).setErrorMessage("No such playlist");
+//	    }
+//	}
+//	else {
+//	    dat.setStatus(Response.Status.FORBIDDEN);
+//	}
 
 	return doPATCH(dat).build();
   }
@@ -154,14 +147,15 @@ public class PlaylistResource extends BaseResource {
     public Response pickPlaylist(@PathParam("pid") Long pid, Playlist destPlaylist, @Auth User user) {
 	// TODO In the future won't need to liberate() as only decoupled playlists will be findable 
 	Playlist org = liberatePlaylist(pid, user);
+
 	if ( destPlaylist.getTitle().isEmpty()) {
 	    destPlaylist.setTitle(org.getTitle() + " (picked)");
 	}
-//	destPlaylist.setUser(user);
 	destPlaylist = playlistDAO.create(destPlaylist);
-	destPlaylist.setVideos(org.getVideos().stream().map(orgVid -> { 
-	    return videoDAO.findById(orgVid.getVideoId()).get();
-	}).collect(Collectors.toSet()));
+	destPlaylist
+		.setVideos(org.getVideos().stream()
+            	.map(orgVid -> {  return videoDAO.findById(orgVid.getVideoId()).get(); })
+            	.collect(Collectors.toSet()));
 
 	playlistDAO.create(destPlaylist);
 	ResponseData dat = new ResponseData(destPlaylist).setSuccess(destPlaylist != null);

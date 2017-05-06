@@ -67,48 +67,54 @@ public class Token {
         return id;
     }
 
-    public void setId(long id) {
+    public Token setId(long id) {
         this.id = id;
+        return this;
     }
 
     public String getSubject() {
         return subject;
     }
 
-    public void setSubject(String subject) {
+    public Token setSubject(String subject) {
         this.subject = subject;
+        return this;
     }
 
     public String getIssuer() {
         return issuer;
     }
 
-    public void setIssuer(String issuer) {
+    public Token setIssuer(String issuer) {
         this.issuer = issuer;
+        return this;
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public Token setUser(User user) {
         this.user = user;
+        return this;
     }
 
     public String getAudience() {
         return audience;
     }
 
-    public void setAudience(String audience) {
+    public Token setAudience(String audience) {
         this.audience = audience;
+        return this;
     }
 
     public String getIdp() {
         return idp;
     }
 
-    public void setIdp(String idp) {
+    public Token setIdp(String idp) {
         this.idp = idp;
+        return this;
     }
 
     /**
@@ -121,8 +127,9 @@ public class Token {
     /**
      * @param active the active to set
      */
-    public void setActive(boolean active) {
+    public Token setActive(boolean active) {
         this.active = active;
+        return this;
     }
 
     

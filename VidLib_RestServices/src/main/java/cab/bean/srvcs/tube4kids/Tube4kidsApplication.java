@@ -68,11 +68,7 @@ import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Tube4kidsApplication.class);
 
-    private GoogleAPIClientConfiguration googleAPIConf;
-    private JWTConfiguration jwtConf;
     
-    public final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
-
     private final HibernateBundle<Tube4kidsConfiguration> hibernateBundle = 
 	new ScanningHibernateBundle<Tube4kidsConfiguration>("cab.bean.srvcs.tube4kids.core") {
         @Override
@@ -87,23 +83,19 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     
     @Override
     public void run(Tube4kidsConfiguration configuration, Environment environment) throws Exception {
-	LOGGER.debug("Application context path: {} ", environment.getApplicationContext().getContextPath() );
-	
-	this.jwtConf = configuration.getJwtConfiguration();
-	this.googleAPIConf = configuration.getGoogleAPIClientConfiguration();
-	this.jsonProvider.setMapper(new JodaMapper());
 
+	final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
+	jsonProvider.setMapper(new JodaMapper());
+	
 	environment.jersey().getResourceConfig().addProperties(singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false));
 	environment.healthChecks().register("template", new TemplateHealthCheck(configuration.buildTemplate()));
-
 	environment.jersey().register(jsonProvider);
-	
 	// Contain this REST service to sub-directory (<code>/api/</code>)
 	environment.jersey().setUrlPattern(configuration.getAppContextUri());
-
 	buildResources(configuration, environment.jersey());
 	setupCORS(environment);
     }
+
 
     @Override
     public void initialize(Bootstrap<Tube4kidsConfiguration> bootstrap) {
@@ -135,7 +127,6 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
                 return configuration.getViewRendererConfiguration();
             }
         });
-        
     }
 
     private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
@@ -158,17 +149,17 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new AgeGroupResource(ageGroupDAO));
         jerseyConf.register(new ChildResource(childDAO, userDAO, playlistDAO, roleDAO));
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
-        jerseyConf.register(new VideoResource(videoDAO, genreDAO, userDAO, neo4JGraphDAO, ytProxyClient));
-        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, googleAPIConf, jwtConf));
-
-        jerseyConf.register(new AuthDynamicFeature( buildJwtAuthFilter(tokenDAO) ));
+        jerseyConf.register(new VideoResource(videoDAO, neo4JGraphDAO, ytProxyClient));
+        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, configuration.getGoogleAPIClientConfiguration(), configuration.getJwtConfiguration()));
+        jerseyConf.register(new AuthDynamicFeature( buildJwtAuthFilter(tokenDAO, configuration.getJwtConfiguration()) ));
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
+
         jerseyConf.register(RolesAllowedDynamicFeature.class);
         jerseyConf.register(AdminOrOwnerDynamicFeature.class);
 //        jerseyConf.register(new ViewResource());
    }
 
-    private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO) {
+    private JwtAuthFilter<User> buildJwtAuthFilter(TokenDAO tokenDAO, JWTConfiguration jwtConf) {
 	try {
 	    return new JwtAuthFilter.Builder<User>()
 	        .setCookieName(jwtConf.getCookieName())
@@ -191,23 +182,20 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     private void setupCORS(Environment environment) {
 
 	final FilterRegistration.Dynamic cors =  environment.servlets().addFilter("CORS", CrossOriginFilter.class);
-
         // Configure CORS parameters:
         cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "*");
 //      cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
-
         cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_TIMING_ORIGINS_PARAM, "54000");
-
         cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_METHODS_HEADER, "OPTIONS,GET,PUT,POST,DELETE,HEAD,PATCH");
         cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_REQUEST_METHOD_HEADER, "OPTIONS,GET,PUT,POST,DELETE,HEAD,PATCH");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "OPTIONS,GET,PUT,POST,DELETE,HEAD,PATCH");
         cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
-
-        // Add URL mapping
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, "true");
         cors.setInitParameter(CrossOriginFilter.PREFLIGHT_MAX_AGE_PARAM, "54000");
+
+        // Add URL mapping
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
     }
         

@@ -73,6 +73,18 @@ public class ChildResource extends BaseResource {
         	).build();
     }
     
+    @Path("/u")
+    @PATCH
+    @UnitOfWork
+    @AdminOrOwner(
+	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
+	    provoPropria= { "isMyChild:arg0"} )
+    public Response updateChild(Child aChild, @Auth User user) {
+	return
+	    doPOST(new ResponseData().setSuccess(true).setEntity( childDAO.update(aChild)))
+	    .build();
+    }
+    
     @Path("/{cid}")
     @GET
     @UnitOfWork

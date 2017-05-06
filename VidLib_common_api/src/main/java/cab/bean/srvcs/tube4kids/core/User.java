@@ -135,8 +135,9 @@ public class User implements Principal {
     }
 
     public boolean isMyPlaylist(Playlist needls) {
-	return needls.getUser().getId() == this.getId(); 
+//	return needls.getUser().getId() == this.getId(); 
 //	return this.playlists.contains(needls);
+	return isMyPlaylist(needls.getId());
     }
     
     public boolean isMyChild(Long cid) {
@@ -144,8 +145,9 @@ public class User implements Principal {
     }
     
     public boolean isMyChild(Child needls) {
-	return needls.getGuardian().getId() == this.getId(); 
+//	return needls.getGuardian().getId() == this.getId(); 
 //	return this.children.contains(needls);
+	return isMyChild(needls.getId());
     }
 }
 
