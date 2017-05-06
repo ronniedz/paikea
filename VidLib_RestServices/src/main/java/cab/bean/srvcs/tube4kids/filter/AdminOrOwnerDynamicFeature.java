@@ -13,7 +13,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -43,7 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.cj.api.x.Collection;
 
 import cab.bean.srvcs.tube4kids.auth.AdminOrOwner;
 import cab.bean.srvcs.tube4kids.core.Child;
@@ -160,76 +162,31 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
             Parameter[] methodArgs = method.getParameters();
             
             OwnerTest ot = null;
-            for (String testString : aclAnnotation.provoPropria() ) {
-        		ot = new OwnerTest(testString);
+	    for (String testString : aclAnnotation.provoPropria()) {
+		ot = new OwnerTest(testString);
 
-        		switch (ot.dSrc) {
-        			case ARG_INDEX : {
-        			    Parameter p = methodArgs[ot.argN ];
-        			    ot.bindClass = p.getType();
-        			    listBuilder.add(ot);
-        			    break;
-        			}
-        			case PATH_PARAM : {
-        		            for ( Parameter mp : methodArgs ) {
-            		        	PathParam param = mp.getAnnotation(PathParam.class);
-		                if ( param != null  && param.value().equals(ot.subject) ) {
-		                    ot.bindClass = mp.getType();
-		                    listBuilder.add(ot);
-		                    break;
-		        		}
-        		            }
-        			    break;
-        			}
-//        			case ENTITY : {
-//        			    try {
-//        				getTrueTypedVal(ot.subject , Class.forName(ot.subject));
-//        				Class t = Class.forName(ot.subject);
-//        				t.newInstance()
-//				    } catch (ClassNotFoundException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				    }
-//        			    Parameter p = methodArgs[ot.argN ];
-//        			    ot.bindClass = p.getType();
-//        			    break;
-//        			}
-//        			default: 
-        		}
-            }
+		switch (ot.dSrc) {
+		    case ARG_INDEX: {
+			Parameter p = methodArgs[ot.argN];
+			ot.bindClass = p.getType();
+			listBuilder.add(ot);
+			break;
+		    }
+		    case PATH_PARAM: {
+			for (Parameter mp : methodArgs) {
+			    PathParam param = mp.getAnnotation(PathParam.class);
+			    if (param != null && param.value().equals(ot.subject)) {
+				ot.bindClass = mp.getType();
+				listBuilder.add(ot);
+				break;
+			    }
+			}
+			break;
+		    }
+		}
+	    }
             
-//            Arrays.asList(aclAnnotation.provoPropria()).forEach(x -> {
-//        	
-//        		builder.put(parts[1], new OwnerTest(parts[1], parts[0]));
-//
-//        		String[] parts = x.split(":");
-//        		if (parts[1].matches("^\\d+$") ) {
-//        		    Parameter p = methodArgs[ Integer.parseInt( parts[1]) ];
-//        		    p.getType();
-//        		}
-//        		else if (parts[1].startsWith("$") ) {
-//        		    
-//        		    builder.put(parts[1], new OwnerTest(parts[1], parts[0]));
-//            
-//        		}
-//        		builder.put(parts[1], new OwnerTest(parts[1], parts[0]));
-//            });
-            
-//            final Map<String, OwnerTest> conditionsMap = builder.build();
-//            OwnerTest temp = null;
-//            int countdown = aclAnnotation.provoPropria().length;
-//            listBuilder.build()
-//            for ( Parameter mp : method.getParameters() ) {
-//                PathParam param = mp.getAnnotation(PathParam.class);
-//                if ( param != null  && (temp = conditionsMap.get(param.value())) != null ) {
-//                    temp.bindClass = mp.getType();
-//                    countdown--;
-//        		}
-//                else {
-//                    
-//                }
-//            }
-            final List<OwnerTest> conditionsList = listBuilder.build();
+           final List<OwnerTest> conditionsList = listBuilder.build();
 
             if (conditionsList.size() == aclAnnotation.provoPropria().length) {
             	configuration.register(new AdminOrOwnerRequestFilter( aclAnnotation.adminRoles(), conditionsList));
@@ -250,14 +207,14 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	private final List<OwnerTest> conditionsList;
 
 	protected static <T> T getTrueTypedVal(final String val, final Class<T> clazz) {
-		LOGGER.debug("val: " + val);
-		LOGGER.debug("clazz: " + clazz);
 
 	    try {
 		final Constructor<?> ctor = clazz.getConstructor(val.getClass());
 		if ( ctor != null) {
 		    if (Collection.class.isAssignableFrom(clazz)) {
-			
+			Collection c =  (List.class.isAssignableFrom(clazz)) ? new LinkedList() : new HashSet();
+			c.add(val);
+			return clazz.cast(ctor.newInstance(c));
 		    }
 		    return clazz.cast(ctor.newInstance(val));
 		} else {
@@ -278,60 +235,33 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 
 	@Override
         public void filter(final ContainerRequestContext requestContext) throws IOException {
-            User user = (User) requestContext.getSecurityContext().getUserPrincipal();
+            final User user = (User) requestContext.getSecurityContext().getUserPrincipal();
 
-	    if (user != null) {
-
-		if (! user.hasAnyRole(this.adminRoles)) {
-
-		    Boolean resp = true;
-		    final MultivaluedMap<String, String> map = requestContext.getUriInfo().getPathParameters();
-
-		    LOGGER.debug("! user.hasAnyRole(this.adminRoles)");
-
+	    if (user == null) {
+		throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
+	    }
+	    
+	    if (! user.hasAnyRole(this.adminRoles)) {
+		
+		final MultivaluedMap<String, String> map = requestContext.getUriInfo().getPathParameters();
+		
+		final Function<AdminOrOwnerDynamicFeature.OwnerTest, Boolean> mapFunc =  (criteria) -> {
 		    try {
-            		    for (OwnerTest criteria : conditionsList ) {
-        				Method meth = user.getClass().getMethod(criteria.methodName, criteria.bindClass);
-        				LOGGER.debug("criteria.subject: " + criteria.subject);
-        				LOGGER.debug("criteria.bindClass: " + criteria.bindClass);
-        				if ( isSimpleType(criteria.bindClass) ) {
-        				    LOGGER.debug("isSimpleType");
-        				    resp = resp && (Boolean) meth.invoke(user, AdminOrOwnerRequestFilter.getTrueTypedVal(map.getFirst(criteria.subject), criteria.bindClass));
-        				}
-        				else {
-        				    LOGGER.debug("NOT SimpleType");
-        				    LOGGER.debug("criteria.bindClass: " + criteria.bindClass);
-        				    resp = resp &&  (Boolean) meth.invoke(user, getEntity(requestContext, criteria.bindClass));
-        				}
-            		    }
+			return ( isSimpleType(criteria.bindClass) )
+				? (Boolean) user.getClass().getMethod(criteria.methodName, criteria.bindClass)
+					.invoke(user, AdminOrOwnerRequestFilter.getTrueTypedVal(map.getFirst(criteria.subject), criteria.bindClass))
+					
+					: (Boolean) user.getClass().getMethod(criteria.methodName, criteria.bindClass)
+					.invoke(user, getEntity(requestContext, criteria.bindClass));
+					
 		    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
+			return false;
 		    }
-
-//		    final Function<AdminOrOwnerDynamicFeature.OwnerTest, Boolean> mapFunc =  (criteria) -> {
-//			    try {
-//				Method meth = user.getClass().getMethod(criteria.methodName, criteria.bindClass);
-//				if ( isSimpleType(criteria.bindClass) ) {
-//				    LOGGER.debug("criteria.subject: " + criteria.subject);
-//				    LOGGER.debug("criteria.bindClass: " + criteria.bindClass);
-//				    return (Boolean) meth.invoke(user, AdminOrOwnerRequestFilter.getTrueTypedVal(map.getFirst(criteria.subject), criteria.bindClass));
-//				}
-//				else {
-//				   return  (Boolean) meth.invoke(user, getEntity(requestContext, criteria.bindClass));
-//				}
-//			    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-//				e.printStackTrace();
-//				return false;
-//			    }
-//		    };
-//
-//		    if (  !  conditionsList.stream().map(mapFunc).reduce(true, (a, b) -> a && b) ) {
-//			throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
-//		    }
-		    
-		    if (  !  resp ) {
-			throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
-		    }
+		};
+		
+		if (  !  conditionsList.stream().map(mapFunc).reduce(true, (a, b) -> a && b) ) {
+		    throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
 		}
 	    }
         }
