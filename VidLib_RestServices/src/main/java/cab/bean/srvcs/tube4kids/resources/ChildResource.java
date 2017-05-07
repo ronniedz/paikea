@@ -56,23 +56,22 @@ public class ChildResource extends BaseResource {
 	final boolean ifMini = isMinimalRequest();
         final Timestamp created = new Timestamp(java.lang.System.currentTimeMillis());
 
-        
         if (user.getChildren().isEmpty() && ( ! user.getRoles().contains(new Role(RoleNames.GUARDIAN_ROLE)) ) ) {
 	   user.addRole(roleDAO.findByName(RoleNames.GUARDIAN_ROLE).get());
 	   userDAO.create(user);
        }
-        
+
         List<?> outp = children.stream().map( aChild -> {
-            	aChild.setGuardian(user); 
+            	aChild.setGuardian(user);
 		aChild.setCreated(created);
             	return childDAO.create(aChild, ifMini);
     	}).collect(Collectors.toList());
-        
+
         return doPOST(
         		new ResponseData().setSuccess(outp != null).setEntity(outp)
         	).build();
     }
-    
+
     @Path("/u")
     @PATCH
     @UnitOfWork
@@ -84,26 +83,20 @@ public class ChildResource extends BaseResource {
 	    doPOST(new ResponseData().setSuccess(true).setEntity( childDAO.update(aChild)))
 	    .build();
     }
-    
+
     @Path("/{cid}")
     @GET
     @UnitOfWork
     @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE , RoleNames.CHILD_ROLE})
+    @AdminOrOwner(
+	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
+	    provoPropria= { "isMyChild:cid"} )
     public Response viewChild(@Auth User user, @PathParam("cid") Long childId) {
-
-	ResponseData dat = new ResponseData();
-
-	if ( user.hasAnyRole(RoleNames.SUDO) || ( user.hasRole(RoleNames.GUARDIAN_ROLE) && user.isMyChild(childId) ) ) {
-
 	    Child child = childDAO.findById(childId)
         		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
-	
-	    dat = new ResponseData().setSuccess(child != null).setEntity(child);
-	}
-	return doGET(dat).build();
+	return doGET(new ResponseData().setSuccess(child != null).setEntity(child)).build();
     }
-    
-    
+
     @Path("/{cid}/pl/{pid}")
     @PATCH
     @UnitOfWork
@@ -112,81 +105,51 @@ public class ChildResource extends BaseResource {
 	    provoPropria= { "isMyChild:cid", "isMyPlaylist:pid"} )
     public Response playlist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long platlistId) {
 
-	ResponseData dat = new ResponseData();
+	Child child = childDAO.findByIdLoadPlaylists(childId)
+		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
 
-	    Child child = childDAO.findByIdLoadPlaylists(childId)
-		    .orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
-	
-	    Playlist playlist = playlistDAO.findById(platlistId)
-		    .orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Playlist with id [%d] not found", platlistId)));
+	Playlist playlist = playlistDAO.findById(platlistId)
+		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Playlist with id [%d] not found", platlistId)));
 
-	    child.getPlaylists().add(playlist);
-	    child = childDAO.create(child); // Update the Child
-	    dat.setSuccess(true).setEntity(isMinimalRequest() ? playlist : child.getPlaylists());
-       return doPATCH(dat).build();
+	child.getPlaylists().add(playlist);
+	child = childDAO.create(child); // Update the Child
+	return doPATCH(new ResponseData()
+	    .setSuccess(true).setEntity(isMinimalRequest() ? playlist : child.getPlaylists())
+	).build();
     }
-    
-    
+
     @Path("/{cid}/pl/{pid}")
     @DELETE
     @UnitOfWork
     @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE , RoleNames.CHILD_ROLE})
+    @AdminOrOwner(
+	adminRoles={ RoleNames.SUDO_ROLE, RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
+	provoPropria= { "isMyChild:cid", "isMyPlaylist:pid"} )
     public Response dePlaylist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long playlistId) {
-	ResponseData dat = new ResponseData();
 
-	if ( user.hasAnyRole(RoleNames.SUDO) || ( user.hasRole(RoleNames.GUARDIAN_ROLE) && user.isMyChild(childId) ) ) {
+	Child child = childDAO.findByIdLoadPlaylists(childId)
+		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
+	Playlist playlist = playlistDAO.findById(playlistId)
+		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Playlist with id [%d] not found", playlistId)));
 
-	    Child child = childDAO.findByIdLoadPlaylists(childId)
-		    .orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
-	
-	    Playlist playlist = playlistDAO.findById(playlistId)
-		    .orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Playlist with id [%d] not found", playlistId)));
-	    
-	    boolean flagSuccess = child.getPlaylists().remove(playlist);
-	    // Update the Child
-	    child = childDAO.create(child);
-	    
-	    dat.setSuccess(flagSuccess).setEntity(isMinimalRequest() ? null : child.getPlaylists());
-	}
-	else {
-	    throw new ForbiddenException(String.format("User '%s' has no access to child-[%d]'s records.", user.getFirstname()));
-	}
-	return doPATCH(dat).build();
+	boolean flagSuccess = child.getPlaylists().remove(playlist);
+	// Update the Child
+	child = childDAO.create(child);
+	return doPATCH(new ResponseData().setSuccess(flagSuccess).setEntity(isMinimalRequest() ? null : child.getPlaylists())).build();
     }
-    
-    
+
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed( { RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE } )
+    @AdminOrOwner(adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE}, provoPropria={ "isMyChild:id"} )
     public Response deleteChild(@Auth User user, @PathParam("id") Long id) {
-
 	ResponseData resData = new ResponseData().setSuccess(false);
-	Optional<Child> subjectChildOpt = childDAO.findById(id);
-
-	if (subjectChildOpt.isPresent()) {
-	    if (  user.hasAnyRole(RoleNames.ADMIN) || subjectChildOpt.get().getGuardian().getId() == user.getId()) {
-
-		Child child = childDAO.delete(subjectChildOpt.get());
-		resData
-		  	.setSuccess(true)
-		  	.setEntity(isMinimalRequest() ? null : child);
-	    }
-	    else {
-		    resData.setStatus(Response.Status.FORBIDDEN);
-	    }
-	}
-	else {
-		resData.setStatus(Response.Status.NOT_FOUND);
-	}
+	Child child = childDAO.findById(id)
+		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", id)));
+	childDAO.delete(child);
+	resData.setSuccess(true).setEntity(isMinimalRequest() ? null : child);
 	return doDELETE(resData).build();
     }
-    
-//    @POST
-//    @UnitOfWork
-//    public Child createChild(Child child) {
-//        return childDAO.create(child);
-//    }
 
     @GET
     @UnitOfWork

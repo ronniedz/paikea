@@ -28,8 +28,11 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
@@ -50,7 +53,8 @@ import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.CONTENT_MODERATOR_ROLE,
     RoleNames.SUDO_ROLE}) 
 public class PlaylistResource extends BaseResource {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlaylistResource.class);
+	    
     private final PlaylistDAO playlistDAO;
     private final VideoDAO videoDAO;
     
@@ -81,15 +85,6 @@ public class PlaylistResource extends BaseResource {
 	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }
 
-
-//  @Path("/pid: [0-9]+}")
-//  @PATCH
-//  @UnitOfWork
-//  public Response updatePlaylist(@PathParam("pid") Long pid, Playlist objectData) {
-//    @AdminOrOwner(
-//	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE},
-//	    provoPropria= { "isMyChild:cid", "isMyPlaylist:pid"} )
-
     @UnitOfWork
     @PATCH
     @AdminOrOwner(
@@ -118,27 +113,30 @@ public class PlaylistResource extends BaseResource {
   @Path("/{id: [0-9]+}")
   @DELETE
   @UnitOfWork
+  @AdminOrOwner(
+	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE},
+	    provoPropria= { "isMyPlaylist:arg0"} )
   public Response deletePlaylist(@PathParam("id") Long pidVal, @Auth User user) {
 	
-	ResponseData dat = new ResponseData().setSuccess(false);
-	Optional<Playlist> subjectPlaylistOpt = null;
+	Playlist o = null;
 	
-	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
-	    // LOAD lazy collection of playlists
-	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
+	if (user.hasAnyRole(RoleNames.PLAYLIST_MANAGER)) {
+	    o = (playlistDAO.findById(pidVal).orElseThrow(() -> new javax.ws.rs.NotFoundException()));
+	    LOGGER.debug("Found {} " , o.getTitle());
+	    o = playlistDAO.delete(o.getId());
 	}
-	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
-	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
+	else {
+	    // LOAD lazy collection of playlists
+	    o = playlistDAO.loadUserPlaylists(user).stream()
+		    .filter(plitem -> plitem.getId().equals(pidVal))
+		    .findFirst()
+		    .orElseThrow(() -> new javax.ws.rs.NotFoundException());
+	    
+	    LOGGER.debug("Found {} " , o.getTitle());
+	    o = playlistDAO.delete(o.getId());
 	}
 
-	if (subjectPlaylistOpt != null  ) {
-	    if (subjectPlaylistOpt.isPresent()) {
-		Playlist o = playlistDAO.delete(pidVal);
-		dat.setSuccess(o != null)
-		.setEntity(isMinimalRequest() ? null : o );
-	    }
-	}
-	return doDELETE(dat).build();
+	return doDELETE(new ResponseData().setSuccess(o != null).setEntity(isMinimalRequest() ? null : o )).build();
   }
     
     @Path("/pick/{pid: [0-9]+}")

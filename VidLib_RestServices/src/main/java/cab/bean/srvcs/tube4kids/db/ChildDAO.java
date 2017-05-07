@@ -13,11 +13,15 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
+import cab.bean.srvcs.tube4kids.core.User;
 
 public class ChildDAO extends AbstractDAO<Child> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChildDAO.class);
 
     public ChildDAO(SessionFactory factory) {
 	super(factory);
@@ -58,13 +62,35 @@ public class ChildDAO extends AbstractDAO<Child> {
     }
     
     public Child delete(Child o) {
-	currentSession().delete(o);
+	delete(o.getId());
 	return o;
     }
     
     public Child delete(Long id) {
+	LOGGER.debug("GOT ID: {}", id);
+	
 	Child o = get(id);
-	return delete(o);
+	LOGGER.debug("GOT Child: {}", o);
+
+	if (o != null) {
+	    Session sess = currentSession();
+	    User u = o.getGuardian();
+
+	    if (u != null) {
+		LOGGER.debug("GOT User: {}", u.getName());
+		LOGGER.debug("getChildren: {}", u.getChildren());
+		u.getChildren().remove(o);
+		LOGGER.debug("getChildren: {}", u.getChildren());
+		sess.update(u);
+	    }
+
+	    try {
+		sess.delete(o);
+	    } catch (org.hibernate.ObjectDeletedException oe) {
+		System.err.println("DeletedException Message: " + oe.getMessage());
+	    }
+	}
+	return o;
     }
 
     public List<Child> findAll() {

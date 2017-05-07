@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2016-2018 Bean.cab USA
+ * All rights reserved.
+ */
 package cab.bean.srvcs.tube4kids.filter;
 
 
@@ -40,14 +44,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A {@link DynamicFeature} that registers an authorization filter for resource methods
- * annotated with the {@link AdminOrOwner} annotation.
- * 
- * @author Ronald Dennison (ronniedz@gmail.com)
+ * annotated with the {@link &#64;AdminOrOwner} annotation.
+ * The general authorization rules are:
+ * <ul>
+ * <li>If principal is not found, a 401 response is returned.
+ * <li>If the user is not in one of the declared <i>admin</i> roles, a 403 response is returned. 
+ * <li>If the <i>ownership</i> tests from the annotation (Eg: <code> provoPropria= { "isMyChild:arg0"} ) </code>)  return false, a 403 response is returned. 
+ * </ul>
+ * <p/>
+ * @author Ronald B. Dennison (ronniedz@gmail.com)
  */
 public class AdminOrOwnerDynamicFeature implements DynamicFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminOrOwnerDynamicFeature.class);
     
-    public AdminOrOwnerDynamicFeature()	{	super();	}
+    public AdminOrOwnerDynamicFeature() { super(); }
     
     @Override
     public void configure(final ResourceInfo resourceInfo, final FeatureContext configuration) {
@@ -87,15 +97,19 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	}
 	return ot;
     }
-    
+
     private static boolean isSimpleType(Class<?> type) {
-	return (type == String.class || type == Long.class 
-		|| type == Integer.class || type == Boolean.class 
+	return (type == String.class || type == Long.class
+		|| type == Integer.class || type == Boolean.class
 		|| type == Float.class || type == Double.class
-		|| type == Short.class || type == Byte.class 
+		|| type == Short.class || type == Byte.class
 		|| type == Character.class);
     }
 
+    /**
+     * RequestFilter. Throws ForbiddenException if user is not an administrator or if the <i>test methods</i> 
+     * (from the AdminOrOwner annotation) return false;
+     */
     @Priority(Priorities.AUTHORIZATION)
     private static class AdminOrOwnerRequestFilter implements ContainerRequestFilter {
         private final String[] adminRoles;
@@ -117,6 +131,9 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	    if (! user.hasAnyRole(this.adminRoles)) {
 		final MultivaluedMap<String, String> map = requestContext.getUriInfo().getPathParameters();
 		
+		/*
+		 * Execute the Ownership tests.
+		 */
 		final Function<AdminOrOwnerDynamicFeature.OwnerTest, Boolean> mapFunc =  (criteria) -> {
 		    try {
 			return ( isSimpleType(criteria.bindClass) )
@@ -140,7 +157,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 
 	/**
 	 * Return  <code>val</code> as an object of type <code>clazz</code>.
-	 * 
+	 *
 	 * @param val
 	 * @param clazz
 	 * @return
@@ -163,9 +180,9 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 
 	/**
 	 * Read <code>type</code> from the Request Body.
-	 * 
+	 *
 	 * TODO Replace with registered JsonProvider.getEntity [or similar]
-	 *  
+	 *
 	 * @param requestContext
 	 * @param type of the object in the request body 
 	 * @return the Object read from the request body.
