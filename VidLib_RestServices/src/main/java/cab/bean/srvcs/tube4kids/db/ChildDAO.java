@@ -33,27 +33,39 @@ public class ChildDAO extends AbstractDAO<Child> {
 
     public Child update(Child objectData) {
 	Child o = get(objectData.getId());
-	 try {
-	     currentSession().saveOrUpdate(update(objectData, o));
-	} catch (IllegalAccessException | InvocationTargetException
-		| NoSuchMethodException e) {
-	    e.printStackTrace();
+	if (o != null) {
+	    try {
+		currentSession().saveOrUpdate(update(objectData, o));
+	    } catch (IllegalAccessException | InvocationTargetException
+		    | NoSuchMethodException e) {
+		e.printStackTrace();
+	    }
 	}
+
 	return o;
     }
-    
-    public Child update(Child objectData, Child o) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-	    BeanUtils.describe(objectData).entrySet().stream().filter(( entry ) -> {
-	        return ! (entry.getValue() == null || entry.getValue().trim().equals(""));
-	    } )
-	    .forEach(entry -> {
-	       try {
-		BeanUtils.setProperty(o, entry.getKey(), entry.getValue());
-	    } catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    } 
-	    });
+     
+    public Child update(Child objectData, Child o)
+	    throws IllegalAccessException, InvocationTargetException,
+	    NoSuchMethodException {
+	BeanUtils
+		.describe(objectData)
+		.entrySet()
+		.stream()
+		.filter((entry) -> {
+		    return !(entry.getValue() == null || entry.getValue()
+			    .trim().equals(""));
+		})
+		.forEach(
+			entry -> {
+			    try {
+				BeanUtils.setProperty(o, entry.getKey(),
+					entry.getValue());
+			    } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			    }
+			});
 	return o;
     }
     

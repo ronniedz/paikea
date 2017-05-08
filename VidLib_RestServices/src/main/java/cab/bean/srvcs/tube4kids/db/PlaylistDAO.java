@@ -2,12 +2,14 @@ package cab.bean.srvcs.tube4kids.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -82,9 +84,40 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
     }
 
     public Playlist update(Playlist objectData) {
-	Session session = currentSession();
-	Playlist o = (Playlist) session.merge(objectData);
-	session.saveOrUpdate(o);
+	Playlist o = get(objectData.getId());
+	if (o != null) {
+	    try {
+		currentSession().saveOrUpdate(update(objectData, o));
+	    } catch (IllegalAccessException | InvocationTargetException
+		    | NoSuchMethodException e) {
+		e.printStackTrace();
+	    }
+	}
+
+	return o;
+    }
+     
+    public Playlist update(Playlist objectData, Playlist o)
+	    throws IllegalAccessException, InvocationTargetException,
+	    NoSuchMethodException {
+	BeanUtils
+		.describe(objectData)
+		.entrySet()
+		.stream()
+		.filter((entry) -> {
+		    return !(entry.getValue() == null || entry.getValue()
+			    .trim().equals(""));
+		})
+		.forEach(
+			entry -> {
+			    try {
+				BeanUtils.setProperty(o, entry.getKey(),
+					entry.getValue());
+			    } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			    }
+			});
 	return o;
     }
 
