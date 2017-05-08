@@ -67,28 +67,15 @@ public class ChildDAO extends AbstractDAO<Child> {
     }
     
     public Child delete(Long id) {
-	LOGGER.debug("GOT ID: {}", id);
-	
 	Child o = get(id);
-	LOGGER.debug("GOT Child: {}", o);
-
 	if (o != null) {
 	    Session sess = currentSession();
 	    User u = o.getGuardian();
-
 	    if (u != null) {
-		LOGGER.debug("GOT User: {}", u.getName());
-		LOGGER.debug("getChildren: {}", u.getChildren());
 		u.getChildren().remove(o);
-		LOGGER.debug("getChildren: {}", u.getChildren());
 		sess.update(u);
 	    }
-
-	    try {
-		sess.delete(o);
-	    } catch (org.hibernate.ObjectDeletedException oe) {
-		System.err.println("DeletedException Message: " + oe.getMessage());
-	    }
+	    sess.delete(o);
 	}
 	return o;
     }
