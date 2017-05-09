@@ -51,11 +51,11 @@ _____
  	- For recommendations, user interaction feedback, as an alternative to RDBMS join traversals. This will support the rating/voting type queries.
 
  + Nginx - Serves the client. Requests to [domain]/api/ are proxied to the Rest Server
-	- see [Config](VidLib_RestServices/httpd_conf/nginx)
+	- see [Config](httpd_conf/nginx.conf)
 	- Port `81` (as of writing)
 
 ------
- + Camel. An internal service queue. More [details here](VidLib_Youtube_pipes/README.md)
+ + Camel. An internal service queue. More [info here](VidLib_Youtube_pipes/README.md)
 	- Port `7070` - internal Rest server
 	- **Postponed ...**
 		- ActiveMQ - no throttling needed (yet)
@@ -78,7 +78,7 @@ git clone git@bitbucket.org:dietary_builders/youtube-rider.git [destination]
 
 1. Complete configuration of [config.yml](VidLib_RestServices/config.yml)
 2. Serving the client-side application. Configure nginx (or other)
-  -  A file such as the following should be **Include**ed in nginx.conf [Config](VidLib_RestServices/httpd_conf/nginx.conf)
+  -  A file such as the following should be **Include**d in `/etc/nginx.conf` [Config](httpd_conf/nginx.conf)
 3. Web Client Integration 
      - The client code is compiled into `assets/`, the docroot in `nginx.conf`
      - [Rest Client README](VidLib_RestClient/README.md) for dependencies
