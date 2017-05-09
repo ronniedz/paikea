@@ -1,4 +1,4 @@
-# Paikea 
+# Project Paikea 
 
 An application to make it easier for parents and guardians to use youtube for their kids.
 
