@@ -28,12 +28,16 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Genre;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
-import cab.bean.srvcs.tube4kids.core.Role.Names;
+import cab.bean.srvcs.tube4kids.auth.AdminOrOwner;
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
@@ -46,10 +50,11 @@ import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
  */
 @Path("/playlist")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.ADMIN_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.CONTENT_MODERATOR_ROLE,
-    Names.SUDO_ROLE}) 
+@RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.CONTENT_MODERATOR_ROLE,
+    RoleNames.SUDO_ROLE}) 
 public class PlaylistResource extends BaseResource {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlaylistResource.class);
+	    
     private final PlaylistDAO playlistDAO;
     private final VideoDAO videoDAO;
     
@@ -61,9 +66,8 @@ public class PlaylistResource extends BaseResource {
     @POST
     @UnitOfWork
     public Response createPlaylist(Playlist playlist, @Auth User user) { 
-	
-	playlist.setUser(user);
 
+	playlist.setUser(user);
 	Playlist p = playlistDAO.create(playlist);
 	
 	boolean respBody =  (p != null);
@@ -81,42 +85,26 @@ public class PlaylistResource extends BaseResource {
 	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }
 
-
-//  @Path("/pid: [0-9]+}")
-//  @PATCH
-//  @UnitOfWork
-//  public Response updatePlaylist(@PathParam("pid") Long pid, Playlist objectData) {
-
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
-    @PATCH
     @UnitOfWork
+    @PATCH
+    @AdminOrOwner(
+	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE},
+	    provoPropria= { "isMyPlaylist:arg0"} )
     public Response updatePlaylist(Playlist objectData, @Auth User user) {
 	
-	ResponseData dat = new ResponseData().setSuccess(false);
+	final ResponseData dat = new ResponseData().setSuccess(false);
 
-	Optional<Playlist> subjectPlaylistOpt = null;
-	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
-	    // LOAD lazy collection of playlists
-	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(objectData.getId())).findFirst();
-	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
-	    subjectPlaylistOpt = playlistDAO.findById(objectData.getId());
-	}
-
-	if (subjectPlaylistOpt != null  ) {
-	    if (subjectPlaylistOpt.isPresent()) {
-		Playlist o = playlistDAO.update(subjectPlaylistOpt.get());
+	Playlist o = playlistDAO.update(objectData);
 		dat.setSuccess(true).setEntity(isMinimalRequest() ? null : o );
 		dat.setLocation( UriBuilder.fromResource(this.getClass()).path(o.getId().toString()).build() );
-	    }
-	    else {
-		dat.setStatus(Response.Status.NOT_FOUND).setErrorMessage("No such playlist");
-	    }
-	}
-	else {
-	    dat.setStatus(Response.Status.FORBIDDEN);
-	}
+//	    }
+//	    else {
+//		dat.setStatus(Response.Status.NOT_FOUND).setErrorMessage("No such playlist");
+//	    }
+//	}
+//	else {
+//	    dat.setStatus(Response.Status.FORBIDDEN);
+//	}
 
 	return doPATCH(dat).build();
   }
@@ -125,27 +113,30 @@ public class PlaylistResource extends BaseResource {
   @Path("/{id: [0-9]+}")
   @DELETE
   @UnitOfWork
+  @AdminOrOwner(
+	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE},
+	    provoPropria= { "isMyPlaylist:arg0"} )
   public Response deletePlaylist(@PathParam("id") Long pidVal, @Auth User user) {
 	
-	ResponseData dat = new ResponseData().setSuccess(false);
-	Optional<Playlist> subjectPlaylistOpt = null;
+	Playlist o = null;
 	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
-	    // LOAD lazy collection of playlists
-	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
+	if (user.hasAnyRole(RoleNames.PLAYLIST_MANAGER)) {
+	    o = (playlistDAO.findById(pidVal).orElseThrow(() -> new javax.ws.rs.NotFoundException()));
+	    LOGGER.debug("Found {} " , o.getTitle());
+	    o = playlistDAO.delete(o.getId());
 	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
-	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
+	else {
+	    // LOAD lazy collection of playlists
+	    o = playlistDAO.loadUserPlaylists(user).stream()
+		    .filter(plitem -> plitem.getId().equals(pidVal))
+		    .findFirst()
+		    .orElseThrow(() -> new javax.ws.rs.NotFoundException());
+	    
+	    LOGGER.debug("Found {} " , o.getTitle());
+	    o = playlistDAO.delete(o.getId());
 	}
 
-	if (subjectPlaylistOpt != null  ) {
-	    if (subjectPlaylistOpt.isPresent()) {
-		Playlist o = playlistDAO.delete(pidVal);
-		dat.setSuccess(o != null)
-		.setEntity(isMinimalRequest() ? null : o );
-	    }
-	}
-	return doDELETE(dat).build();
+	return doDELETE(new ResponseData().setSuccess(o != null).setEntity(isMinimalRequest() ? null : o )).build();
   }
     
     @Path("/pick/{pid: [0-9]+}")
@@ -154,14 +145,15 @@ public class PlaylistResource extends BaseResource {
     public Response pickPlaylist(@PathParam("pid") Long pid, Playlist destPlaylist, @Auth User user) {
 	// TODO In the future won't need to liberate() as only decoupled playlists will be findable 
 	Playlist org = liberatePlaylist(pid, user);
+
 	if ( destPlaylist.getTitle().isEmpty()) {
 	    destPlaylist.setTitle(org.getTitle() + " (picked)");
 	}
-//	destPlaylist.setUser(user);
 	destPlaylist = playlistDAO.create(destPlaylist);
-	destPlaylist.setVideos(org.getVideos().stream().map(orgVid -> { 
-	    return videoDAO.findById(orgVid.getVideoId()).get();
-	}).collect(Collectors.toSet()));
+	destPlaylist
+		.setVideos(org.getVideos().stream()
+            	.map(orgVid -> {  return videoDAO.findById(orgVid.getVideoId()).get(); })
+            	.collect(Collectors.toSet()));
 
 	playlistDAO.create(destPlaylist);
 	ResponseData dat = new ResponseData(destPlaylist).setSuccess(destPlaylist != null);
@@ -184,7 +176,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/liberate/{pid: [0-9]+}")
     @PUT
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
     public Playlist liberatePlaylist(@PathParam("pid") Long pid, @Auth User user) {
 	
 	Playlist org = playlistDAO.retrieve(pid);
@@ -219,7 +211,7 @@ public class PlaylistResource extends BaseResource {
 //    @Path("/user/{userId: [0-9]+}")
 //    @GET
 //    @UnitOfWork
-//    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+//    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
 //    public Response listUserPlaylists(@PathParam("userId") LongParam userId, @Auth User user) {
 //	return doGET(new ResponseData( playlistDAO.findUserLists(user)).setSuccess(true)).build();
 //    }
@@ -228,7 +220,7 @@ public class PlaylistResource extends BaseResource {
     @Path("/my")
     @GET
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.MEMBER_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE}) 
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE}) 
     public Response listOwnPlaylists(@Auth User user) {
 	return doGET(new ResponseData( playlistDAO.loadUserPlaylists(user)).setSuccess(true)).build();
     }
@@ -236,20 +228,20 @@ public class PlaylistResource extends BaseResource {
     @Path("/video/{pidVal: [0-9]+}")
     @PATCH
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.PLAYLIST_MANAGER_ROLE})
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE})
     public Response addVideos(@PathParam("pidVal") Long pidVal, Set<String> videoIds, @Auth User user) {
 	
 	ResponseData dat = new ResponseData().setSuccess(false);
 
 	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
 	    
 	    // LOAD lazy collection of playlists
 	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
 	    
 	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
 	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
 	}
 
@@ -296,19 +288,19 @@ public class PlaylistResource extends BaseResource {
     @Path("{pidVal: [0-9]+}/v/{videoIds}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed({Names.GUARDIAN_ROLE, Names.PLAYLIST_EDIT_ROLE, Names.PLAYLIST_MANAGER_ROLE})
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE})
     public Response dropVideos(@PathParam("pidVal") Long pidVal, @PathParam("videoIds") String videoIds, @Auth User user) {
 	ResponseData dat = new ResponseData().setSuccess(false);
 
 	Optional<Playlist> subjectPlaylistOpt = null;
 	
-	if (  user.hasRole(Names.GUARDIAN_ROLE) ) {
+	if (  user.hasRole(RoleNames.GUARDIAN_ROLE) ) {
 	    
 	    // LOAD lazy collection of playlists
 	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream().filter(plitem -> plitem.getId().equals(pidVal)).findFirst();
 	    
 	}
-	else if ( user.hasAnyRole(Names.PLAYLIST_MANAGER )) {
+	else if ( user.hasAnyRole(RoleNames.PLAYLIST_MANAGER )) {
 	    subjectPlaylistOpt = playlistDAO.findById(pidVal);
 	}
 

@@ -39,8 +39,18 @@ public class TokenDAO extends AbstractDAO<Token> {
 	Criteria criteria = criteria()
 		.add(Restrictions.eq("active", true))
 		.add(Restrictions.eq("subject", subject));
+
 	Token token = uniqueResult(criteria);
-	return Optional.ofNullable(token != null ? token.getUser() : null);
+	User user = null;
+	if (token != null ) {
+	    user = token.getUser();
+	    if (user != null) {
+		user.getRoles().size();
+		user.getPlaylists().size();
+		user.getChildren().size();
+	    }
+	}
+	return Optional.ofNullable(user);
     }
 
 

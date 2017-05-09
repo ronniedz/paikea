@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.ToString;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,6 +26,7 @@ import lombok.EqualsAndHashCode;
     )
 })
 @EqualsAndHashCode(exclude= {"playlists", "guardian"} )
+@ToString(of= {"id"})
 @Data
 public class Child {
 
@@ -32,7 +34,7 @@ public class Child {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Playlist.class, cascade= CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Playlist.class)
     @JoinTable(
 	name = "child_playlist",
 	joinColumns = @JoinColumn(name = "child_id", referencedColumnName = "id"),
@@ -50,14 +52,14 @@ public class Child {
     public Map<String, Object> getParentInfo() {
 	Map<String, Object> guardianInfo = new HashMap<String, Object>();
 	if (this.guardian != null) {
-	    guardianInfo.put("guardiant_id", guardian.getId());
+	    guardianInfo.put("guardian_id", guardian.getId());
 	    guardianInfo.put("guardian_name",  guardian.getFullName());
 	}
 	return guardianInfo; 
     }
     
     @JsonIgnore
-    @ManyToOne(optional=false, cascade= {CascadeType.ALL}, fetch=FetchType.LAZY)
+    @ManyToOne(optional=false, fetch=FetchType.LAZY)
     private User guardian;
 
     @Column(name = "created", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

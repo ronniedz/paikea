@@ -2,16 +2,26 @@ package cab.bean.srvcs.tube4kids.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
+import cab.bean.srvcs.tube4kids.core.User;
 
 public class ChildDAO extends AbstractDAO<Child> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChildDAO.class);
 
     public ChildDAO(SessionFactory factory) {
 	super(factory);
@@ -21,18 +31,65 @@ public class ChildDAO extends AbstractDAO<Child> {
 	return persist(child);
     }
 
+    public Child update(Child objectData) {
+	Child o = get(objectData.getId());
+	if (o != null) {
+	    try {
+		currentSession().saveOrUpdate(update(objectData, o));
+	    } catch (IllegalAccessException | InvocationTargetException
+		    | NoSuchMethodException e) {
+		e.printStackTrace();
+	    }
+	}
+
+	return o;
+    }
+     
+    public Child update(Child objectData, Child o)
+	    throws IllegalAccessException, InvocationTargetException,
+	    NoSuchMethodException {
+	BeanUtils
+		.describe(objectData)
+		.entrySet()
+		.stream()
+		.filter((entry) -> {
+		    return !(entry.getValue() == null || entry.getValue()
+			    .trim().equals(""));
+		})
+		.forEach(
+			entry -> {
+			    try {
+				BeanUtils.setProperty(o, entry.getKey(),
+					entry.getValue());
+			    } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			    }
+			});
+	return o;
+    }
+    
     public Long quickCreate(Child child) {
 	return (Long) currentSession().save(child);
     }
     
     public Child delete(Child o) {
-	currentSession().delete(o);
+	delete(o.getId());
 	return o;
     }
     
     public Child delete(Long id) {
 	Child o = get(id);
-	return delete(o);
+	if (o != null) {
+	    Session sess = currentSession();
+	    User u = o.getGuardian();
+	    if (u != null) {
+		u.getChildren().remove(o);
+		sess.update(u);
+	    }
+	    sess.delete(o);
+	}
+	return o;
     }
 
     public List<Child> findAll() {

@@ -3,7 +3,6 @@ package cab.bean.srvcs.tube4kids.resources;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
 
-import java.net.URI;
 import java.util.List;
 
 import javax.annotation.security.PermitAll;
@@ -16,17 +15,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.Genre;
-import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.db.GenreDAO;
-import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
 
 @Path("/genre")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.CONTENT_MODERATOR_ROLE, Role.Names.UI_MANAGER_ROLE})
+@RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.CONTENT_MODERATOR_ROLE, RoleNames.UI_MANAGER_ROLE})
 public class GenreResource extends BaseResource {
 
     private final GenreDAO genreDAO;
@@ -38,7 +35,7 @@ public class GenreResource extends BaseResource {
 
     /** Create **/
     @POST
-    @RolesAllowed({Role.Names.ADMIN_ROLE, Role.Names.GUARDIAN_ROLE, Role.Names.UI_MANAGER_ROLE})
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.UI_MANAGER_ROLE})
     @UnitOfWork
     public Response createGenre(Genre genre) {
 	Genre o = genreDAO.create(genre);

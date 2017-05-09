@@ -75,7 +75,7 @@ COMMIT;
 START TRANSACTION;
 USE `mydb`;
 
-INSERT INTO `token` (`active`, `audience`, `idp`, `issuer`, `subject`, `user_id`) VALUES (TRUE, 'client.apps.beancabfamilyuser.com', 'accounts.google.com', 'localhost', '113488468913948362093', 1);
+INSERT INTO `token` (`active`, `audience`, `idp`, `issuer`, `subject`, `user_id`) VALUES (TRUE, 'client.beancabfamilyuser.com', 'accounts.google.com', 'localhost', '113488468913948362093', 1);
 COMMIT;
 
 

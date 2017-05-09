@@ -63,7 +63,7 @@ public class Playlist implements Comparable<Playlist>{
     //Transient
     //JoinColumn(name = "user_id", nullable = false, updatable = false, insertable = false)
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne( fetch = FetchType.LAZY)
     private User user;
 //	@JoinColumn(name="cart_id", nullable=false)
 
