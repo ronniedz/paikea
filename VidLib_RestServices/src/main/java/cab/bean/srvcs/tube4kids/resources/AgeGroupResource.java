@@ -1,10 +1,8 @@
 package cab.bean.srvcs.tube4kids.resources;
 
-import cab.bean.srvcs.tube4kids.core.AgeGroup;
-import cab.bean.srvcs.tube4kids.core.Role;
-import cab.bean.srvcs.tube4kids.db.AgeGroupDAO;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.dropwizard.jersey.params.LongParam;
+
+import java.util.List;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -17,8 +15,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import java.util.List;
 import cab.bean.srvcs.tube4kids.auth.RoleNames;
+import cab.bean.srvcs.tube4kids.core.AgeGroup;
+import cab.bean.srvcs.tube4kids.db.AgeGroupDAO;
 
 @Path("/age")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,7 +35,6 @@ public class AgeGroupResource {
     public AgeGroup createAgeGroup(AgeGroup ageGroup) {
         return ageGroupDAO.create(ageGroup);
     }
-
     
     @Path("/{id}")
     @DELETE
@@ -52,5 +50,4 @@ public class AgeGroupResource {
     public List<AgeGroup> listAges() {
         return ageGroupDAO.findAll();
     }
-
 }

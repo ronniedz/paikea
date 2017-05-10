@@ -66,8 +66,6 @@ import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 
 
 public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Tube4kidsApplication.class);
-
     
     private final HibernateBundle<Tube4kidsConfiguration> hibernateBundle = 
 	new ScanningHibernateBundle<Tube4kidsConfiguration>("cab.bean.srvcs.tube4kids.core") {

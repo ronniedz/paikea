@@ -43,7 +43,7 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     private String template;
     
     @NotEmpty
-    private String defaultName = "Stranger";
+    private String defaultName = "Guest";
 
     @Valid
     @NotNull

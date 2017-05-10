@@ -3,21 +3,18 @@ package cab.bean.srvcs.tube4kids.db;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.User;
-
-import java.util.stream.Collectors;
 
 public class PlaylistDAO extends AbstractDAO<Playlist> {
     
@@ -34,39 +31,24 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
     }
     
     public Playlist delete(Long id) {
-    	Playlist o = get(id);
-    	
-    	if ( o != null ) {
-    	Session sess = currentSession();
-    	User u = o.getUser();
-    	
-    	if (u !=null) { 
-    	    u.getPlaylists().remove(o);
-    	    sess.update(u);
-    	}
+	Playlist o = get(id);
 
-//        	if ( o.getReviewers() != null && ! o.getReviewers().isEmpty()) {
-//        	    
-//        	    o.getReviewers()
-//        	     .stream()
-//        	     .filter( ch -> ch.getPlaylists().remove(o))
-//        	     .map( ch -> {
-//        		 sess.update(ch);
-//        		 return ch;
-//        	     });
-//        	}
-        	
-        	if (o.getVideos() != null) o.getVideos().clear();
+	if (o != null) {
+	    Session sess = currentSession();
+	    User u = o.getUser();
 
+	    if (u != null) {
+		u.getPlaylists().remove(o);
+		sess.update(u);
+	    }
+	    if (o.getVideos() != null) o.getVideos().clear();
 	    try {
 		sess.delete(o);
 	    } catch (org.hibernate.ObjectDeletedException oe) {
-		System.err.println("DeletedException Message: "
-			+ oe.getMessage());
-		System.err.println("DeletedException Cause: " + oe.getCause());
+		oe.printStackTrace();
 	    }
 	}
-    	return o;
+	return o;
     }
 
     public List<Playlist> findAll() {
@@ -88,36 +70,20 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
 	if (o != null) {
 	    try {
 		currentSession().saveOrUpdate(update(objectData, o));
-	    } catch (IllegalAccessException | InvocationTargetException
-		    | NoSuchMethodException e) {
+	    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 		e.printStackTrace();
 	    }
 	}
-
 	return o;
     }
      
-    public Playlist update(Playlist objectData, Playlist o)
-	    throws IllegalAccessException, InvocationTargetException,
-	    NoSuchMethodException {
-	BeanUtils
-		.describe(objectData)
-		.entrySet()
-		.stream()
-		.filter((entry) -> {
-		    return !(entry.getValue() == null || entry.getValue()
-			    .trim().equals(""));
-		})
-		.forEach(
-			entry -> {
-			    try {
-				BeanUtils.setProperty(o, entry.getKey(),
-					entry.getValue());
-			    } catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			    }
-			});
+    public Playlist update(Playlist objectData, Playlist o) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	for (Map.Entry<String, String> entry : BeanUtils.describe(objectData)
+		.entrySet()) {
+	    if (StringUtils.isNotBlank(entry.getValue())) {
+		BeanUtils.setProperty(o, entry.getKey(), entry.getValue());
+	    }
+	}
 	return o;
     }
 
@@ -126,6 +92,4 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
 	user.getPlaylists().size();
 	return user.getPlaylists();
     }
-
-    
 }

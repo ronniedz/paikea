@@ -18,13 +18,11 @@ import org.slf4j.LoggerFactory;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
 import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 
-import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 /**
  * Forwards requests to a video search-request queue. The queue directs whether the request 
  * is fulfilled by Y.T. or from local store. 
- *
  */
 public class YouTubeAPIProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(YouTubeAPIProxy.class);
@@ -41,8 +39,7 @@ public class YouTubeAPIProxy {
     */
     private static final String HDR_NAME_SERVICE_DEST = "X-ServiceDestination";
     private static final String HDR_VALUE_SERVICE_DEST = "youTubeAgent";
-    
-    
+
     /**
      * @param url 
      */
@@ -75,7 +72,8 @@ public class YouTubeAPIProxy {
 	// Add params to query
 	webResource = putParamsInRequest(webResource, params);
 
-	Response clientResponse = webResource.request(MediaType.APPLICATION_JSON).header(HDR_NAME_SERVICE_DEST, HDR_VALUE_SERVICE_DEST).get(Response.class); 
+	Response clientResponse = webResource.request(MediaType.APPLICATION_JSON)
+		.header(HDR_NAME_SERVICE_DEST, HDR_VALUE_SERVICE_DEST).get(Response.class); 
 	LOGGER.info("clientResponsegetStatus: {}", clientResponse.getStatus());
 	
 	String body = clientResponse.readEntity(String.class);
@@ -130,21 +128,4 @@ public class YouTubeAPIProxy {
 	for (String k : params.keySet() )  webResource = webResource.queryParam(k, params.get(k) );
 	return webResource;
     }
-    
-//    
-//    private List<String> sortParamNames(Map<String, String> params) {
-//	List<String> list = new LinkedList<String>(params.keySet());
-//	list.sort(new Comparator<String>() {
-//	    public int compare(String a, String b)  { return a.toUpperCase().compareTo(b.toUpperCase()); }
-//	});
-//	return list;
-//    }
-
 }
-
-
-//javax.ws.rs.core.Response jsonResponse = client.target(url).request(MediaType.APPLICATION_JSON).get();
-//Map<SomeClassOfYours> entitiesFromResponse = jsonResponse.readEntity(new GenericType<Map<SomeClassOfYours>>() {});
-//SomeClassOfYours entityFromResponse = jsonResponse.readEntity(SomeClassOfYours.class);
-//
-

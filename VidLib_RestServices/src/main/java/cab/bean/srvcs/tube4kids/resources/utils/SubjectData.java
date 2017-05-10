@@ -118,7 +118,6 @@ public class SubjectData extends HashMap<String, Object> {
 	return (String) get("jwtId");
     }
 
-    
     // Delete from final copy
     public String removeIssuer() {
 	return (String) remove("issuer");
@@ -128,4 +127,3 @@ public class SubjectData extends HashMap<String, Object> {
 	return this;
     }
 }
-

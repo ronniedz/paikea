@@ -49,7 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <ul>
  * <li>If principal is not found, a 401 response is returned.
  * <li>If the user is not in one of the declared <i>admin</i> roles, a 403 response is returned. 
- * <li>If the <i>ownership</i> tests from the annotation (Eg: <code> provoPropria= { "isMyChild:arg0"} ) </code>)  return false, a 403 response is returned. 
+ * <li>If the <i>ownership</i> tests from the annotation (Eg: <code> ownerTests= { "isMyChild:arg0"} ) </code>)  return false, a 403 response is returned. 
  * </ul>
  * <p/>
  * @author Ronald B. Dennison (ronniedz@gmail.com)
@@ -68,7 +68,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	    final ImmutableList.Builder<OwnerTest> listBuilder = ImmutableList .builder();
 	    final Parameter[] methodArgs = method.getParameters();
 
-	    for (String testString : aclAnnotation.provoPropria()) {
+	    for (String testString : aclAnnotation.ownerTests()) {
 		listBuilder.add(createOwnershipTest(testString, methodArgs));
 	    }
 	    configuration.register(new AdminOrOwnerRequestFilter(aclAnnotation.adminRoles(), listBuilder.build()));

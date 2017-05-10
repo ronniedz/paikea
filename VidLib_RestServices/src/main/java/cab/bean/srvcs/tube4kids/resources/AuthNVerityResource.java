@@ -147,7 +147,6 @@ public class AuthNVerityResource extends BaseResource {
 	return rb.build();
     }
 
-
     @Path("logout")
     @GET
     @UnitOfWork
@@ -179,12 +178,10 @@ public class AuthNVerityResource extends BaseResource {
 
 	// Zero, to retire cookie
 	final int maxAge = 0;
-
 	return
 		doGET(dat).cookie(genCookie("", jwtConf, request, maxAge, c.getTime()))
 		.build();
     }
-
 
     private boolean deactivateToken(String subject) {
 	// Optional<Token> t = tokenDAO.findBySubjectAndIssuer(subject,
@@ -197,7 +194,6 @@ public class AuthNVerityResource extends BaseResource {
 	    return true;
 	}
 	return false;
-
     }
 
     @Path("revoke")
@@ -245,7 +241,6 @@ public class AuthNVerityResource extends BaseResource {
 	return uri;
     }
 
-
     private Optional<String> getTokenFromCookieOrHeader(HttpServletRequest request) {
 	Enumeration<String> re = request.getHeaders(AUTHORIZATION);
 	if ( re != null && re.hasMoreElements()) {
@@ -259,7 +254,6 @@ public class AuthNVerityResource extends BaseResource {
         return cookieToken.isPresent() ? cookieToken : Optional.empty();
     }
 
-
     private Optional<String> getTokenFromHeader( final String header) {
         if (header != null) {
             int space = header.indexOf(' ');
@@ -271,10 +265,8 @@ public class AuthNVerityResource extends BaseResource {
                 }
             }
         }
-
         return Optional.empty();
     }
-
 
     private Optional<String> getTokenFromCookie(HttpServletRequest request) {
 	for( Cookie tokenCookie: request.getCookies()) {
@@ -284,7 +276,6 @@ public class AuthNVerityResource extends BaseResource {
         }
         return Optional.empty();
     }
-
 
     private NewCookie genCookie(String value, JWTConfiguration conf, HttpServletRequest request, int maxAge, Date expiry) {
 
@@ -316,7 +307,6 @@ public class AuthNVerityResource extends BaseResource {
         httpOnly if true make the cookie HTTP only, i.e. only visible as part of an HTTP request.
 */
     }
-
 
     private void updateUser(Map<String, Object> userValues, Token beanToken) {
 	final User user = beanToken.getUser();

@@ -3,28 +3,15 @@ package cab.bean.srvcs.tube4kids.resources.utils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
-import java.security.interfaces.RSAPrivateKey;
-import java.util.List;
 
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
-import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwk.HttpsJwks;
-import org.jose4j.jwk.JsonWebKey;
-import org.jose4j.jwk.JsonWebKeySet;
-import org.jose4j.jwk.VerificationJwkSelector;
-import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
-import org.jose4j.jwx.JsonWebStructure;
 import org.jose4j.keys.HmacKey;
-import org.jose4j.keys.resolvers.JwksVerificationKeyResolver;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
 import org.jose4j.lang.JoseException;
-import org.jose4j.lang.UnresolvableKeyException;
 
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
 
@@ -58,16 +45,6 @@ public abstract class FederationConfig {
     protected String realmName;
 
     protected AlgorithmConstraints jwsAlgorithmConstraints;
-
-
-//    public VerificationKeyResolver refreshSignatureKeyResolver() throws Exception {
-//	if (this.httpsJWKS == null) {
-//	    throw new Exception("httpsJWKS Not Set");
-//	}
-//	httpsJWKS.refresh();
-//	signatureVerificationKeyResolver = new JwksVerificationKeyResolver(httpsJWKS.getJsonWebKeys());
-//	return signatureVerificationKeyResolver;
-//    }
     
     public VerificationKeyResolver getSignatureVerificationKeyResolver() throws JoseException, IOException {
 	if (this.httpsJWKS != null) {
@@ -106,20 +83,18 @@ public abstract class FederationConfig {
 	Key v = null;
 	VerificationKeyResolver vkr = null;;
 	
-            	if ((v = getVerificationKey()) != null) {
-            		builder.setVerificationKey(v); 
-            	}
-            	else if ((vkr = getSignatureVerificationKeyResolver()) != null) {
-		    // verify the signature with the public key
-		    builder.setVerificationKeyResolver(vkr);
-		}
-		else {
-		    throw new ConfigurationException("On of either the verificationKey or signatureVerificationKeyResolver must be set");
-		}
+	if ((v = getVerificationKey()) != null) {
+	    builder.setVerificationKey(v); 
+	}
+	else if ((vkr = getSignatureVerificationKeyResolver()) != null) {
+	    // verify the signature with the public key
+	    builder.setVerificationKeyResolver(vkr);
+	}
+	else {
+	    throw new ConfigurationException("On of either the verificationKey or signatureVerificationKeyResolver must be set");
+	}
 	return builder;
     }
-
-    
 
     /**
      * @return the publicKey
@@ -381,38 +356,4 @@ public abstract class FederationConfig {
         this.httpsJWKS = httpsJWKS;
 	return this;
     }
-
-    
-//  RSAPrivateKey privateKey = getPrivateKey(keyStore, keyStorePassword, alias);
-
-
-////////////////////////////////////////
-//  public abstract boolean getEnableRequireEncryption();
-//  public abstract boolean getDisableRequireSignature();
-//  public abstract boolean getEnableLiberalContentTypeHandling();
-//  public abstract boolean getSkipSignatureVerification();
-//  public abstract boolean getSkipAllValidators();
-//  public abstract boolean getSkipAllDefaultValidators();
-//  public abstract AlgorithmConstraints getJwsAlgorithmConstraints();
-//  public abstract AlgorithmConstraints getJweAlgorithmConstraints();
-//  public abstract AlgorithmConstraints getJweContentEncryptionAlgorithmConstraints();
-//  public abstract Key getDecryptionKey();
-
-//  public abstract DecryptionKeyResolver getDecryptionKeyResolver();
-//  public abstract boolean getSkipDefaultAudienceValidation();
-//
-//  public abstract boolean getRequireJwtId();
-//  public abstract boolean getRequireExpirationTime();
-//  public abstract boolean getRequireIssuedAt();
-//  public abstract boolean getRequireNotBefore();
-//  public abstract NumericDate getEvaluationTime();
-//  public abstract int getAllowedClockSkewInSeconds();
-//  public abstract int getMaxFutureValidityInMinutes();
-//  public abstract boolean getRelaxVerificationKeyValidation();
-//  public abstract String getRelaxDecryptionKeyValidation();
-  
-//  public abstract JwsCustomizer getJwsCustomizer();
-//  public abstract JweCustomizer getJweCustomizer();
-//  public abstract ProviderContext getJwsProviderContext();
-//  public abstract ProviderContext getJweProviderContext();
 }

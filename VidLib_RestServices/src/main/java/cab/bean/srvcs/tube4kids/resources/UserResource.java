@@ -65,5 +65,4 @@ public class UserResource {
     public List<User> listUsers() {
         return userDAO.findAll();
     }
-
 }

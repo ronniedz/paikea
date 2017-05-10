@@ -6,12 +6,12 @@ import io.dropwizard.jersey.PATCH;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -21,10 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import cab.bean.srvcs.tube4kids.auth.AdminOrOwner;
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.Role;
-import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.ChildDAO;
 import cab.bean.srvcs.tube4kids.db.PlaylistDAO;
@@ -36,7 +36,6 @@ import cab.bean.srvcs.tube4kids.db.UserDAO;
 @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE })
 public class ChildResource extends BaseResource {
 
-//    private final long fakeUserId = 1L;
     private final ChildDAO childDAO;
     private final UserDAO userDAO;
     private final PlaylistDAO playlistDAO;
@@ -72,12 +71,11 @@ public class ChildResource extends BaseResource {
         	).build();
     }
 
-    @Path("/u")
     @PATCH
     @UnitOfWork
     @AdminOrOwner(
 	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
-	    provoPropria= { "isMyChild:arg0"} )
+	    ownerTests= { "isMyChild:arg0"} )
     public Response updateChild(Child aChild, @Auth User user) {
 	return
 	    doPOST(new ResponseData().setSuccess(true).setEntity( childDAO.update(aChild)))
@@ -90,7 +88,7 @@ public class ChildResource extends BaseResource {
     @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE , RoleNames.CHILD_ROLE})
     @AdminOrOwner(
 	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
-	    provoPropria= { "isMyChild:cid"} )
+	    ownerTests= { "isMyChild:cid"} )
     public Response viewChild(@Auth User user, @PathParam("cid") Long childId) {
 	    Child child = childDAO.findById(childId)
         		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
@@ -102,7 +100,7 @@ public class ChildResource extends BaseResource {
     @UnitOfWork
     @AdminOrOwner(
 	    adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
-	    provoPropria= { "isMyChild:cid", "isMyPlaylist:pid"} )
+	    ownerTests= { "isMyChild:cid", "isMyPlaylist:pid"} )
     public Response playlist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long platlistId) {
 
 	Child child = childDAO.findByIdLoadPlaylists(childId)
@@ -124,13 +122,13 @@ public class ChildResource extends BaseResource {
     @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE, RoleNames.CHILD_EDIT_ROLE , RoleNames.CHILD_ROLE})
     @AdminOrOwner(
 	adminRoles={ RoleNames.SUDO_ROLE, RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE},
-	provoPropria= { "isMyChild:cid", "isMyPlaylist:pid"} )
+	ownerTests= { "isMyChild:cid", "isMyPlaylist:pid"} )
     public Response dePlaylist(@Auth User user, @PathParam("cid") Long childId, @PathParam("pid") Long playlistId) {
 
 	Child child = childDAO.findByIdLoadPlaylists(childId)
-		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child with id [%d] not found", childId)));
+		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Child [%d] not found", childId)));
 	Playlist playlist = playlistDAO.findById(playlistId)
-		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Playlist with id [%d] not found", playlistId)));
+		.orElseThrow(() -> new javax.ws.rs.NotFoundException(String.format("Playlist [%d] not found", playlistId)));
 
 	boolean flagSuccess = child.getPlaylists().remove(playlist);
 	// Update the Child
@@ -141,7 +139,7 @@ public class ChildResource extends BaseResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    @AdminOrOwner(adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE}, provoPropria={ "isMyChild:id"} )
+    @AdminOrOwner(adminRoles={ RoleNames.ADMIN_ROLE, RoleNames.CHILD_EDIT_ROLE}, ownerTests={ "isMyChild:id"} )
     public Response deleteChild(@Auth User user, @PathParam("id") Long id) {
 	ResponseData resData = new ResponseData().setSuccess(false);
 	Child child = childDAO.findById(id)

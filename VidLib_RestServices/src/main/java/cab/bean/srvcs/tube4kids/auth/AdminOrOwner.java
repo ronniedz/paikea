@@ -3,25 +3,16 @@ package cab.bean.srvcs.tube4kids.auth;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import io.dropwizard.auth.Auth;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
-import cab.bean.srvcs.tube4kids.auth.RoleNames;
-import cab.bean.srvcs.tube4kids.core.Child;
-import cab.bean.srvcs.tube4kids.core.User;
-
-
 /**
  * This attribute can be applied to resource <b>methods</b>.
  * The {@code adminRoles} property is a list of security role names.
  * <p/>
- * The attribute {@code provoPropria}, is a list consisting of colon separated pairs:
+ * The attribute {@code ownerTests}, is a list consisting of colon separated pairs:
  * <blockquote>
  * <code>
  * 	{ <b>user-method</b>:<b>operandReference</b>, ... }
@@ -51,7 +42,7 @@ import cab.bean.srvcs.tube4kids.core.User;
  * <pre>
 @AdminOrOwner(
  adminRoles={RoleNames.ADMIN_ROLE, RoleNames.SUDO_ROLE},
- provoPropria= {"isMyChild:<b>arg0</b>"}
+ ownerTests= {"isMyChild:<b>arg0</b>"}
 )
 public Response updateChild(Child aChild, @Auth User user) { ...
  * </pre>
@@ -82,7 +73,7 @@ public Response updateChild(Child aChild, @Auth User user) { ...
  * <pre>
 @AdminOrOwner(
  adminRoles={RoleNames.ADMIN_ROLE, RoleNames.SUDO_ROLE},
- provoPropria= {"isMyChild:<b>cid</b>", "isMyPlaylist:<b>pid</b>"})
+ ownerTests= {"isMyChild:<b>cid</b>", "isMyPlaylist:<b>pid</b>"})
 public Response playlist(@PathParam("<b>cid</b>") Long childId, @PathParam("<b>pid</b>") Long playlistId, @Auth User user) { ...
  * </pre>
  * <b>cid</b> refers to the parameter <code>childId</code>:
@@ -107,5 +98,5 @@ public Response playlist(@PathParam("<b>cid</b>") Long childId, @PathParam("<b>p
 @Target({TYPE, METHOD})
 public @interface AdminOrOwner {
     String[] adminRoles() default { RoleNames.SUDO_ROLE, RoleNames.ADMIN_ROLE };
-    String[] provoPropria();
+    String[] ownerTests();
 }

@@ -17,7 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@SuppressWarnings("deprecation")
 @Entity
 @Table(name = "playlist")
 @NamedQueries({
@@ -45,7 +45,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ToString(exclude= {"reviewers", "user"})
 @NoArgsConstructor
-//EqualsAndHashCode(exclude= {"reviewers", "user"})
 @EqualsAndHashCode(of  = {"id"})
 @Data
 public class Playlist implements Comparable<Playlist>{
@@ -55,17 +54,9 @@ public class Playlist implements Comparable<Playlist>{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //JsonProperty(value="creator_id", access=JsonProperty.Access.READ_ONLY)
-//    @Column(name = "user_id", nullable = true)
-//    private Long userId;
-
- //   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    //Transient
-    //JoinColumn(name = "user_id", nullable = false, updatable = false, insertable = false)
     @JsonIgnore
     @ManyToOne( fetch = FetchType.LAZY)
     private User user;
-//	@JoinColumn(name="cart_id", nullable=false)
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -101,9 +92,5 @@ public class Playlist implements Comparable<Playlist>{
 		? ( other.getId() == null) ? 0 : -1
 		:  ( other.getId() == null) ? 1 : this.id.compareTo(other.getId());
     }
-
- 
-
-    // ------------------ END JOINS ------------------- //
 
 }

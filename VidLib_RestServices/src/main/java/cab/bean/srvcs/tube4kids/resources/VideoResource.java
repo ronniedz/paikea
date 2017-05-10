@@ -1,23 +1,12 @@
 package cab.bean.srvcs.tube4kids.resources;
 
-import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
-import cab.bean.srvcs.tube4kids.core.Playlist;
-import cab.bean.srvcs.tube4kids.core.Role;
-import cab.bean.srvcs.tube4kids.auth.RoleNames;
-import cab.bean.srvcs.tube4kids.core.Video;
-import cab.bean.srvcs.tube4kids.core.User;
-import cab.bean.srvcs.tube4kids.core.VideoGenre;
-import cab.bean.srvcs.tube4kids.db.GenreDAO;
-import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
-import cab.bean.srvcs.tube4kids.db.UserDAO;
-import cab.bean.srvcs.tube4kids.db.VideoDAO;
-import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
-import cab.bean.srvcs.tube4kids.resources.ResourceStandards.ResponseData;
-import cab.bean.srvcs.tube4kids.utils.StringTool;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.PATCH;
-import io.dropwizard.jersey.params.LongParam;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -29,26 +18,21 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.Record;
-import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
-import org.neo4j.helpers.collection.Iterators;
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
+import cab.bean.srvcs.tube4kids.auth.RoleNames;
+import cab.bean.srvcs.tube4kids.core.User;
+import cab.bean.srvcs.tube4kids.core.Video;
+import cab.bean.srvcs.tube4kids.core.VideoGenre;
+import cab.bean.srvcs.tube4kids.db.Neo4JGraphDAO;
+import cab.bean.srvcs.tube4kids.db.VideoDAO;
+import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
+import cab.bean.srvcs.tube4kids.utils.StringTool;
 
 @Path("/video")
 @Produces(MediaType.APPLICATION_JSON)
@@ -75,30 +59,6 @@ public class VideoResource extends BaseResource {
 	Object vList = videoDAO.findAll();
 	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
     }
-    
-//    @GET
-//    @Path("shiz")
-//    @UnitOfWork
-//    public List<Map<String, Object>> listneo() {
-//	Session session = getSession();
-//	String query = "MATCH (v:Video)-[:WITH]-(genre:Genre) return v;";
-//
-//	// StatementResult result = session.run(query);
-//	
-//	List<Map<String, Object>> list = session.run(query).list(r -> unwrap(r, "v"));
-//	session.close();
-
-//	list.forEach(d -> System.out.println(d));
-
-
-	// while (result.hasNext()) {
-	// Record record = result.next();
-	// org.neo4j.driver.v1.Value nv = record.get("v");
-	// Video vid = (Video) nv.asObject();
-	// System.out.println(vid.toString());
-	// }
-//	return neo4jGraphDAO.listAllVideo();
-//    }
 
     @Path("/{vid}")
     @GET
@@ -132,10 +92,10 @@ public class VideoResource extends BaseResource {
 		} else {
 		    video.getVideoGenres().add(vg);
 		}
-		
+
 		boolean isMini = isMinimalRequest();
 		Object o = videoDAO.create(video, isMini); // This is a saveOrUpdate() call
-		
+
 		dat
 		 .setSuccess(true)
 		 .setEntity(o); 
@@ -165,11 +125,11 @@ public class VideoResource extends BaseResource {
 
 	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());
 	Map<String, String> paramMap = ImmutableMap.of("part", "contentDetails,snippet", "id" ,vids);
-	
+
 	// Pull video detail from youtube
 	YouTubeVideoDetailResponse detailResp = ytProxyClient.runVideoDetail(paramMap);
 	List<String>ids = new ArrayList<String>();
-	
+
 	for (int syncedIndex = 0; syncedIndex <  videos.size(); syncedIndex++ ) {
 	    Video tempVideo = videos.get(syncedIndex);
 	    tempVideo.setUserId(user.getId());
@@ -178,14 +138,12 @@ public class VideoResource extends BaseResource {
 		g.getPk().setUser(user);
 		g.getPk().setVideo(tempVideo);
 	    });
-	    
+
 	    tempVideo.setDetail(detailResp.getItems().get(syncedIndex));
 	    ids.add(videoDAO.create(tempVideo).getVideoId());
 //	    neo4jGraphDAO.insert(video);
 	}
-	
         return doPOST(new ResponseData(ids).setSuccess(true)).build();
     }
-    
-
 }
+

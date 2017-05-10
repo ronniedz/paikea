@@ -2,26 +2,22 @@ package cab.bean.srvcs.tube4kids.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.core.Child;
 import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.User;
 
 public class ChildDAO extends AbstractDAO<Child> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChildDAO.class);
 
     public ChildDAO(SessionFactory factory) {
 	super(factory);
@@ -36,36 +32,21 @@ public class ChildDAO extends AbstractDAO<Child> {
 	if (o != null) {
 	    try {
 		currentSession().saveOrUpdate(update(objectData, o));
-	    } catch (IllegalAccessException | InvocationTargetException
-		    | NoSuchMethodException e) {
+	    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 		e.printStackTrace();
 	    }
 	}
-
 	return o;
     }
      
     public Child update(Child objectData, Child o)
-	    throws IllegalAccessException, InvocationTargetException,
-	    NoSuchMethodException {
-	BeanUtils
-		.describe(objectData)
-		.entrySet()
-		.stream()
-		.filter((entry) -> {
-		    return !(entry.getValue() == null || entry.getValue()
-			    .trim().equals(""));
-		})
-		.forEach(
-			entry -> {
-			    try {
-				BeanUtils.setProperty(o, entry.getKey(),
-					entry.getValue());
-			    } catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			    }
-			});
+	    throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	for (Map.Entry<String, String> entry : BeanUtils.describe(objectData)
+		.entrySet()) {
+	    if (StringUtils.isNotBlank(entry.getValue())) {
+		BeanUtils.setProperty(o, entry.getKey(), entry.getValue());
+	    }
+	}
 	return o;
     }
     
@@ -99,7 +80,6 @@ public class ChildDAO extends AbstractDAO<Child> {
     public Optional<Child> findById(Long id) {
 	return Optional.ofNullable(get(id));
     }
-
 
     public Optional<Child> findByIdLoadPlaylists(Long id) {
 	Child child = get(id);

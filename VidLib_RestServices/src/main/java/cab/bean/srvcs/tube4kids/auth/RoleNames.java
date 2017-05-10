@@ -20,20 +20,17 @@ public interface RoleNames {
 	public static final String VIDEO_EDIT_ROLE				=	"edit_video";
 	public static final String CHILD_ROLE					=	"child";
 
-
 	public static final String[] MEMBER			= new String[]{ VIDEO_EDIT_ROLE, PLAYLIST_EDIT_ROLE, MEMBER_ROLE };
 
 	public static final String[] GUARDIAN		= ArrayUtils.addAll( MEMBER, new String[]{ CHILD_EDIT_ROLE, GUARDIAN_ROLE } );
-	
+
 	public static final String[] PLAYLIST_MANAGER	= new String[]{ ADMIN_ROLE, VIDEO_MANAGER_ROLE, PLAYLIST_MANAGER_ROLE};
-	
+
 	public static final String[] CONTENT_EDITOR		= ArrayUtils.addAll(PLAYLIST_MANAGER, new String[]{ UI_MANAGER_ROLE , CONTENT_MODERATOR_ROLE });
-	
+
 	public static final String[] USER_MANAGER	= new String[]{ ADMIN_ROLE, ROLE_MANAGER_ROLE, USER_MANAGER_ROLE, CHILD_EDIT_ROLE };
 
 	public static final String[] ADMIN			= ArrayUtils.addAll(ArrayUtils.addAll( CONTENT_EDITOR, USER_MANAGER ), PLAYLIST_MANAGER);
 
 	public static final String[] SUDO			= ArrayUtils.add(ADMIN, SUDO_ROLE);
-
 }
-

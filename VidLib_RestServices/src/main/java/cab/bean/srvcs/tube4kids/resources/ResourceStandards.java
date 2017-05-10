@@ -45,15 +45,10 @@ public abstract class ResourceStandards {
     @Context
     protected javax.ws.rs.core.Request request;
 
-
     @Context
     protected javax.ws.rs.core.HttpHeaders headers;
     
-//    protected UriBuilder uriBuilder;
-
-    protected ResourceStandards() {
-//	this.uriBuilder = UriBuilder.fromResource(this.getClass());
-    }
+    protected ResourceStandards() { }
 
     /**
      * Default status response:<pre>
@@ -68,23 +63,6 @@ public abstract class ResourceStandards {
      * @return
      * 		a responseBuilder
      */
-//    protected ResponseBuilder doPOST(ResponseData respData, String redirStr) {
-//
-//	boolean isOk = respData.success;
-//	ResponseBuilder rb = Response
-//		.status(isOk
-//			? respData.hasEntity() ? Response.Status.CREATED : Response.Status.NO_CONTENT
-//				: Response.Status.BAD_REQUEST);
-//	
-//	if (respData.success &&  ! respData.hasLocation()) {
-//	    rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
-//	}
-//	
-//	
-//	parseRespData( respData, rb);
-//	return rb;
-//    }
-    
     protected ResponseBuilder doPOST(ResponseData respData) {
 	boolean isOk = respData.success;
 	ResponseBuilder rb = Response
@@ -95,8 +73,6 @@ public abstract class ResourceStandards {
 	if (respData.success &&  ! respData.hasLocation()) {
 	    rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
 	}
-
-
 	parseRespData( respData, rb);
 	return rb;
     }
@@ -210,8 +186,7 @@ public abstract class ResourceStandards {
     
     public ResponseBuilder reply(ResponseData dat) {
 	ResponseBuilder r =null;
-	//methodResponseFuncs.get(method).apply(dat);
-	    String instanceMethod = request.getMethod().toUpperCase();
+	String instanceMethod = request.getMethod().toUpperCase();
 
 	switch(instanceMethod) {
         		case "POST" : {
@@ -238,9 +213,7 @@ public abstract class ResourceStandards {
 	return r;
     }
 
-
-    private void parseRespData(ResponseData respData,
-	    ResponseBuilder rb) {
+    private void parseRespData(ResponseData respData, ResponseBuilder rb) {
 
 	if (respData.hasStatus()) {
 	    rb.status(respData.status);
@@ -257,19 +230,17 @@ public abstract class ResourceStandards {
 	}
     }
 
-    private final String full = "representation";	// return=
-    private final String minimal = "minimal"; 	// return=
+    private final String full = "representation";
+    private final String minimal = "minimal"; 
     
     protected boolean isMinimalRequest() {
 	String preftype = headers.getHeaderString("Prefer".toLowerCase());
 	return (preftype != null)
-		? preftype.contains(minimal) ? true : false
+		? preftype.contains(minimal)
 		: false;
     }
 
-
     class ResponseData {
-
 	boolean success = false;
 	String errorMessage = null;
 	String location = null;
@@ -339,9 +310,7 @@ public abstract class ResourceStandards {
 	}
 
 	public ResponseData setEntity(Object entity) {
-	    
-	    // Jersey-Jackson oversight of String in JSON fix.
-	    this.entity = (entity != null && String.class.equals(entity.getClass())) ? "\"" + entity + "\"" : entity;
+	    this.entity = entity;
 	    return this;
 	}
 

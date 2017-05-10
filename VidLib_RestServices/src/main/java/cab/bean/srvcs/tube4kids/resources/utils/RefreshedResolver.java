@@ -13,6 +13,12 @@ import org.jose4j.keys.resolvers.VerificationKeyResolver;
 import org.jose4j.lang.JoseException;
 import org.jose4j.lang.UnresolvableKeyException;
 
+/**
+ * A rewrite of JOSE  Verification resolver. Needed because Google's certificates are updated periodically.
+ * 
+ * @author ronalddennison
+ *
+ */
 public class RefreshedResolver  implements VerificationKeyResolver
 {
     private final VerificationJwkSelector selector = new VerificationJwkSelector();
@@ -53,7 +59,6 @@ public class RefreshedResolver  implements VerificationKeyResolver
             sb.append(" from JWKs ").append(jsonWebKeys);
             throw new UnresolvableKeyException(sb.toString());
         }
-
         return selected.getKey();
     }
 }
