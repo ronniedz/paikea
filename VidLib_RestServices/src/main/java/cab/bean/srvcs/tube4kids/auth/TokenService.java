@@ -1,4 +1,4 @@
-package cab.bean.srvcs.tube4kids.resources.utils;
+package cab.bean.srvcs.tube4kids.auth;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,6 +12,7 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.lang.JoseException;
 
+import cab.bean.srvcs.tube4kids.auth.utils.SubjectData;
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
 
 import com.google.common.base.Throwables;

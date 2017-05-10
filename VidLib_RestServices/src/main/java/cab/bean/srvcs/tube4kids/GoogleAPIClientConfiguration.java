@@ -2,7 +2,7 @@ package cab.bean.srvcs.tube4kids;
 
 import javax.validation.constraints.NotNull;
 
-import cab.bean.srvcs.tube4kids.resources.utils.FederationConfig;
+import cab.bean.srvcs.tube4kids.auth.FederationConfig;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 

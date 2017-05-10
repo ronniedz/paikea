@@ -1,4 +1,4 @@
-package cab.bean.srvcs.tube4kids.resources.utils;
+package cab.bean.srvcs.tube4kids.auth.utils;
 
 import java.util.HashMap;
 import java.util.Map;

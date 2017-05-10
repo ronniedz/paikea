@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.jose4j.keys.HmacKey;
 
-import cab.bean.srvcs.tube4kids.resources.utils.FederationConfig;
+import cab.bean.srvcs.tube4kids.auth.FederationConfig;
 
 public class JWTConfiguration extends FederationConfig {
 

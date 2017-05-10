@@ -46,6 +46,8 @@ import org.slf4j.LoggerFactory;
 import cab.bean.srvcs.tube4kids.GoogleAPIClientConfiguration;
 import cab.bean.srvcs.tube4kids.JWTConfiguration;
 import cab.bean.srvcs.tube4kids.auth.RoleNames;
+import cab.bean.srvcs.tube4kids.auth.TokenService;
+import cab.bean.srvcs.tube4kids.auth.utils.SubjectData;
 import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
@@ -53,8 +55,6 @@ import cab.bean.srvcs.tube4kids.db.RoleDAO;
 import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
-import cab.bean.srvcs.tube4kids.resources.utils.SubjectData;
-import cab.bean.srvcs.tube4kids.resources.utils.TokenService;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;

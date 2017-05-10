@@ -1,4 +1,4 @@
-package cab.bean.srvcs.tube4kids.resources.utils;
+package cab.bean.srvcs.tube4kids.auth;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
