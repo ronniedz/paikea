@@ -73,7 +73,7 @@ describe('searchReducer', () => {
   })
 
   it('should handle the addToPlaylist action correctly', () => {
-    const [ set, playlists ] = [ { foo: 'bar' }, ['sao', 'soetnh']]
+    const [set, playlists] = [{ foo: 'bar' }, ['sao', 'soetnh']]
     const expectedResult = state
       .setIn(['associateVideo', 'videoobj'], set)
       .setIn(['associateVideo', 'options', 'playlists'], playlists)
@@ -85,22 +85,22 @@ describe('searchReducer', () => {
       playlists: 1,
       videos: 1,
     }
-  const searchHistory = [
-    {},
-    {
-      "videos": [
-        {},
-        {
-          "videoId": "2nYjGy_ZUG8",
-          "title": "Hello To All The Children Of The World",
-          "defaultThumbnail": "https://i.ytimg.com/vi/2nYjGy_ZUG8/default.jpg?dim=120%3A90",
-          "etag": "\"m2ysk\"",
-          "description": "For educational use only. Images from various sources.",
-          "publishedAt": "2014-10-09T06:40:29.000Z"
-        }
-      ]
-    }
-  ]
+    const searchHistory = [
+      {},
+      {
+        videos: [
+          {},
+          {
+            videoId: '2nYjGy_ZUG8',
+            title: 'Hello To All The Children Of The World',
+            defaultThumbnail: 'https://i.ytimg.com/vi/2nYjGy_ZUG8/default.jpg?dim=120%3A90',
+            etag: '"m2ysk"',
+            description: 'For educational use only. Images from various sources.',
+            publishedAt: '2014-10-09T06:40:29.000Z',
+          },
+        ],
+      },
+    ]
     const playlistsindex = parseInt(listitemobj.playlists, 10)
     const itemsindex = parseInt(listitemobj.videos, 10)
 
@@ -108,10 +108,9 @@ describe('searchReducer', () => {
       .setIn(['currentIndexes', 'playlists'], playlistsindex)
       .setIn(['currentIndexes', 'videos'], itemsindex)
       .set('videoobj', searchHistory[playlistsindex].videos[itemsindex])
-    const newstate = searchReducer(fromJS({...state.toJS(), searchHistory }), changeVideo(listitemobj))
+    const newstate = searchReducer(fromJS({ ...state.toJS(), searchHistory }), changeVideo(listitemobj))
     expect(newstate.get('currentIndexes')).toEqual(expectedResult.get('currentIndexes'))
     expect(newstate.get('videoobj')).toEqual(expectedResult.get('videoobj'))
-
   })
 
   it('should handle the addToPlaylist action correctly', () => {
