@@ -12,7 +12,7 @@
 // See http://blog.mxstbr.com/2016/01/react-apps-with-pages for more information
 // about the code splitting business
 import { getHooks } from './utils/hooks'
-import auth from './utils/auth'
+import { beanToken } from './utils/auth'
 import clientpaths from './clientpaths.json'
 import R from 'ramda'
 
@@ -27,13 +27,15 @@ const loadModule = (cb) => (componentModule) => {
 }
 
 function redirectToHomePage(nextState, replace) {
-  if (!auth.loggedIn()) {
-    replace({
-      pathname: '/',
-      state: { nextPathname: nextState.location.pathname },
-    })
+  if (!beanToken()) {
+    console.warn('not logged in. accessing unauthorized area')
+    // replace({
+    //   pathname: '/',
+    //   state: { nextPathname: nextState.location.pathname },
+    // })
   }
 }
+
 
 export default function createRoutes(store) {
   const { injectReducer, injectSagas } = getHooks(store)

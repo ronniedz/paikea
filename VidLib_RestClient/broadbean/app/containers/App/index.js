@@ -53,7 +53,6 @@ import { routes } from 'clientpaths.json'
 class App extends React.Component {
   componentDidMount() {
     const { setVidDim, location } = this.props
-
     // remap the horizontal thresholds for window resize
     this.hthresholds = new Map(vidconfig.dimensions.map((ea) => [ea.upperthreshold, ea]))
 
