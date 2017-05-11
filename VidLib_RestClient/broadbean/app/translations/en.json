@@ -8,7 +8,7 @@
   "bean.components.NavMenu.search.submit": "Submit",
   "bean.components.NavMenu.createChild": "create child",
   "bean.containers.OffSpringPage.createPlaylist": "create new playlist",
-  "bean.components.PlaylistsList.doLoop": "loop videos",
+  "bean.components.PlaylistsList.doLoop": "loop video list",
   "bean.components.PlaylistsList.stopLoop": "stop looping",
   "bean.components.Footer.about": "about",
   "bean.components.Footer.contact": "contact",

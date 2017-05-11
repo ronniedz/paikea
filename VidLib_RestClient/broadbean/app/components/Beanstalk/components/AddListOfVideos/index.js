@@ -50,7 +50,7 @@ class AddListOfVideos extends Component {
             this.openAddVideoDialog(playlists[listindex].videos)
           }}
         >
-          ++
+          add all videos
         </button>
         {this.renderAddOptions(playlists[listindex].videos, userchildren, others)}
       </div>

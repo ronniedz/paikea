@@ -42,7 +42,7 @@ describe('<AddVideo />', () => {
 
   const button = renderedComponent.find('button')
   expect(button.length).toEqual(1)
-  expect(button.text()).toEqual('+')
+  expect(button.text()).toEqual('add me')
 
   // button.simulate('click')
   // expect(store.getActions()[0].type).toEqual(ADD_VIDEO)

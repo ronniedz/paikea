@@ -34,12 +34,13 @@ export function Header(props) {
       <div className={styles.container}>
         <img src={beancab} alt="mini logo" />
         <span>
-          <button
+          <a
             className={styles.brandTxt}
+            href="#"
             onClick={() => changeRoute('/')}
           >
             bean.cab
-          </button>
+          </a>
         </span>
         <div className={styles.googlogin}>
           <div className={styles.headeratomwrap}>

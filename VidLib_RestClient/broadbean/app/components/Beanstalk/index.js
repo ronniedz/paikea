@@ -45,7 +45,7 @@ function Beanstalk(props) {
           />
         </section>
         <section
-          style={{ top: videoobj ? viddim.height + 70 : 54 }}
+          style={{ top: videoobj ? viddim.height + 80 : 54 }}
           className={styles.playlistwrapper}
         >
           {children}

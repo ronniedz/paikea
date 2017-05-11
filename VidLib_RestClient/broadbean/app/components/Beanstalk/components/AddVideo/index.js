@@ -53,7 +53,7 @@ class AddVideo extends Component {
             this.openAddVideoDialog(videoobj)
           }}
         >
-          +
+          add me
         </button>
         {this.renderAddOptions(videoobj, userchildren, others)}
       </div>

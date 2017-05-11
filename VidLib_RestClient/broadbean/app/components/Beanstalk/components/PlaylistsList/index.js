@@ -84,13 +84,14 @@ function playlistStack(props) {
 }
 
 function PlaylistsList(props) {
-  const { intl } = props
-
+  const { intl, videoobj } = props
   return (
     <div id="playlistparent" className={styles.playlistsList}>
-      <button onClick={() => props.onToggleLooping(!props.isLooping)}>
-        {props.isLooping ? intl.messages[messages.loopVideos.stopLoop] : intl.messages[messages.loopVideos.doLoop]}
-      </button>
+      {videoobj &&
+        <button onClick={() => props.onToggleLooping(!props.isLooping)}>
+          {props.isLooping ? intl.messages[messages.loopVideos.stopLoop] : intl.messages[messages.loopVideos.doLoop]}
+        </button>
+      }
       {props.playlists && props.playlists.length > 0
         ? playlistStack(props)
         : null}

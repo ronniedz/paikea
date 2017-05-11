@@ -37,7 +37,7 @@ describe('<AddListOfVideos />', () => {
 
   const button = renderedComponent.find('button')
   expect(button.length).toEqual(1)
-  expect(button.text()).toEqual('++')
+  expect(button.text()).toEqual('add all videos')
 
   // button.simulate('click')
   // expect(store.getActions()[0].type).toEqual(ADD_VIDEO)

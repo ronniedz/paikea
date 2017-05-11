@@ -15,6 +15,6 @@ describe('<Header />', () => {
     const props = { authby: false }
     const reactelem = <Header {...props} />
     const renderedComponent = shallow(reactelem)
-    expect(renderedComponent.find('button').first().text()).toEqual('bean.cab')
+    expect(renderedComponent.find('a').first().text()).toEqual('bean.cab')
   })
 })
