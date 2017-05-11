@@ -46,6 +46,7 @@ import {
 import {
   find,
   curry,
+  throttle,
 } from 'lodash'
 import R from 'ramda'
 import { routes } from 'clientpaths.json'
@@ -58,9 +59,10 @@ class App extends React.Component {
 
     const staticRoutes = R.pickBy((v, k) => v.hasOwnProperty('file'))(routes)
     const staticpaths = R.values(R.map(e => e.path)(staticRoutes))
-    if (R.keys(staticRoutes).includes(location.pathname)) {
+
+    if (!R.keys(staticRoutes).includes(location.pathname)) {
       this.resizeApp = this.resizeApp.bind(this)
-      window.onresize = this.resizeApp
+      window.onresize = throttle(this.resizeApp, 250)
     }
 
     const defaultdim = find(vidconfig.dimensions, (ea) => ea.upperthreshold > window.innerWidth)
