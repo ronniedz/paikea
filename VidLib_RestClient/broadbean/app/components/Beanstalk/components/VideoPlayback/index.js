@@ -39,6 +39,7 @@ class VideoPlayback extends Component {
       },
       videovisible: false,
       scrollYThreshold: 40,
+      visibleAdd: true,
     }
     this.playerReady = this.playerReady.bind(this)
     this.onStateChange = this.onStateChange.bind(this)
@@ -126,30 +127,31 @@ class VideoPlayback extends Component {
     this.checkPlayerSize(viddim)
   }
 
+  quarterView(vdim) {
+    this.ytiframe.width = vdim.width / 2
+    this.ytiframe.height = vdim.height / 2
+    this.ytiframe.style.left = `${vdim.width / 2}px`
+  }
+
+  fullView(vdim) {
+    this.ytiframe.width = vdim.width
+    this.ytiframe.height = vdim.height
+    this.ytiframe.style.left = '0px'
+  }
+
   checkPlayerSize(vdim) {
     if (window.pageYOffset > this.state.scrollYThreshold) {
-      this.ytiframe.width = vdim.width / 2
-      this.ytiframe.height = vdim.height / 2
-      this.ytiframe.style.left = `${vdim.width / 2}px`
+      this.quarterView(vdim)
+      this.setState({ visibleAdd: false})
     } else if (this.ytiframe && vdim.width !== this.ytiframe.width) {
-      this.ytiframe.width = vdim.width
-      this.ytiframe.height = vdim.height
-      this.ytiframe.style.left = '0px'
+      this.fullView(vdim)
+      this.setState({ visibleAdd: true})
     }
   }
 
   render() {
     const { authby, enableaddvideo, ...others } = this.props
-    const { videovisible } = this.state
-    let addvideo
-    if (authby && enableaddvideo) {
-      addvideo = (
-        <div className={styles.addvidwrap}>
-          <AddVideo {...others} />
-        </div>
-      )
-    }
-
+    const { videovisible, visibleAdd } = this.state
     const visiblestyle = videovisible ? { display: 'block', visibility: 'visible' } : null
 
     return (
@@ -158,7 +160,11 @@ class VideoPlayback extends Component {
         style={visiblestyle}
       >
         <div id="player" style={{ position: 'relative', pointerEvents: 'visible' }} />
-        {addvideo}
+        {authby && enableaddvideo && visibleAdd &&
+          <div className={styles.addvidwrap}>
+            <AddVideo {...others} />
+          </div>
+        }
       </div>
     )
   }
