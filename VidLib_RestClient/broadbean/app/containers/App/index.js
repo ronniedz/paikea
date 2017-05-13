@@ -40,6 +40,7 @@ import {
 import {
   setAuthorizedBy,
   setVidDimensions,
+  setVideoMode,
 } from './actions'
 import {
   videoassets as vidconfig,
@@ -75,12 +76,12 @@ class App extends React.Component {
   }
 
   resizeVideoScrollingUp() {
-    const { viddim, setVidDim, videomode, setVideoMode } = this.props
+    const { viddim, setVidDim, videomode, setVidMode } = this.props
 
     if (window.pageYOffset > 40 && videomode == 'full') {
-      setVideoMode('topright')
+      setVidMode('topright')
     } else if (window.pageYOffset < 40 && videomode !== 'full') {
-      setVideoMode('full')
+      setVidMode('full')
     }
   }
 
@@ -141,7 +142,7 @@ function mapDispatchToProps(dispatch) {
     setAuthorized: (authorized, path) => {
       dispatch(setAuthorizedBy(authorized, path))
     },
-    setVideoMode: (mode) => dispatch(setVideoMode(mode)),
+    setVidMode: (mode) => dispatch(setVideoMode(mode)),
     dispatch,
   }
 }
@@ -153,7 +154,7 @@ App.propTypes = {
   location: PropTypes.object,
   setAuthorized: PropTypes.func,
   setVidDim: PropTypes.func,
-  setVideoMode: PropTypes.func,
+  setVidMode: PropTypes.func,
   viddim: PropTypes.object,
   videomode: PropTypes.string,
 }
