@@ -96,7 +96,6 @@ const searchReducer = (state = initialState, action) => {
         .set('loading', true)
         .set('error', false)
     case LOAD_YT_SEARCH_SUCCESS: {
-      console.log('action', action)
       let modstate = state
         .set('searchval', action.searchval.trim())
         .set('loading', false)

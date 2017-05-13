@@ -24,6 +24,7 @@ import {
 
 import { put } from 'redux-saga/effects'
 import { push } from 'react-router-redux'
+import { routes } from 'clientpaths.json'
 
 export const putIt = (err, action, ...args) => {
   if (!err) return put(action.apply(null, args))
@@ -37,7 +38,7 @@ export const dispatches = (dispatch) => ({
   },
   onNavigateChildList: (evt) => {
     evt.preventDefault()
-    dispatch(push(`/offspring/${evt.target.dataset.id}`))
+    dispatch(push(`${routes.offspring.path}/${evt.target.dataset.id}`))
   },
   changeRoute: (url) => dispatch(push(url)),
 })

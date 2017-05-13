@@ -54,10 +54,9 @@ import {
   selectAuthorizedBy,
   selectNewChild,
 } from './selectors'
-
 import { browserHistory } from 'react-router'
-
 import { playlistsLoaded } from 'containers/OffspringPage/actions'
+import { routes } from 'clientpaths.json'
 
 export function * handleExternalAuthenticators() {
   while (yield take(SET_AUTHORIZED_BY)) {
@@ -90,8 +89,9 @@ export function * handleExternalAuthenticators() {
         yield put(loadError(childrenResults.err))
       }
 
-      if (path.includes('offspring/')) {
-        const childid = path.match(/offspring\/(.*)$/)[1]
+      if (path.includes(routes.offspring.path)) {
+        const re = new RegExp(`${routes.offspring.path}/(.*)$`)
+        const childid = path.match(re)[1]
         const requestURL = `${userchildren.endpoint}/${childid}`
         const results = yield call(request, requestURL, { headers: authTokenHeader() })
 

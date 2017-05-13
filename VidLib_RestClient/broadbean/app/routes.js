@@ -13,10 +13,10 @@
 // about the code splitting business
 import { getHooks } from './utils/hooks'
 import { beanToken } from './utils/auth'
-import clientpaths from './clientpaths.json'
+import { routes } from './clientpaths.json'
 import R from 'ramda'
 
-const [staticRoutes, dynamicRoutes] = R.partition(e => e.hasOwnProperty('file'))(clientpaths.routes)
+const [staticRoutes, dynamicRoutes] = R.partition(e => e.hasOwnProperty('file'))(routes)
 
 const errorLoading = (err) => {
   console.error('Dynamic page loading failed', err) // eslint-disable-line no-console
@@ -63,7 +63,7 @@ export default function createRoutes(store) {
       },
     },
     {
-      path: '/search',
+      path: dynamicRoutes.search.path,
       name: 'search',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
@@ -85,7 +85,7 @@ export default function createRoutes(store) {
     },
     {
       onEnter: redirectToHomePage,
-      path: '/offspring(/:id)',
+      path: `${dynamicRoutes.offspring.path}(/:id)`,
       name: 'offspring',
       getComponent(nextState, cb) {
         const importModules = Promise.all([

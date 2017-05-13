@@ -4,7 +4,7 @@
       "path": "/search"
     },
     "offspring": {
-      "path": "/offspring"
+      "path": "/child"
     },
     "about": {
       "path": "/about",
@@ -13,6 +13,6 @@
     "contact": {
       "path": "/contact",
       "file": "contact.html"
-    } 
+    }
   }
 }
