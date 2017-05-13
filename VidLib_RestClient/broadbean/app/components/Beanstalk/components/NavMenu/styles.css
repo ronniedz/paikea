@@ -10,10 +10,13 @@
   border: solid gray 1px;
 }
 
-.kidbutn {
+.menusctn_offspring {
+  display: inline-block;
   border: solid gray 1px;
+  margin-left: 10px;
 }
 
+.kidbutn,
 .textinput {
   border: solid gray 1px;
 }

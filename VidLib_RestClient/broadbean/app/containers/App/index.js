@@ -76,7 +76,7 @@ class App extends React.Component {
   }
 
   resizeVideoScrollingUp() {
-    const { viddim, setVidDim, videomode, setVidMode } = this.props
+    const { videomode, setVidMode } = this.props
 
     if (window.pageYOffset > 40 && videomode == 'full') {
       setVidMode('topright')

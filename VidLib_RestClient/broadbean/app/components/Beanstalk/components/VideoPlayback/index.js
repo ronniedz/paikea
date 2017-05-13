@@ -112,16 +112,19 @@ class VideoPlayback extends Component {
         this.ytiframe.width = vdim.width
         this.ytiframe.height = vdim.height
         this.ytiframe.style.left = '0px'
+        this.setState({ visibleAdd: true })
         break
       case 'topright':
         this.ytiframe.width = vdim.width / 2
         this.ytiframe.height = vdim.height / 2
         this.ytiframe.style.left = `${vdim.width / 2}px`
+        this.setState({ visibleAdd: false })
         break
       default:
         this.ytiframe.width = vdim.width
         this.ytiframe.height = vdim.height
         this.ytiframe.style.left = '0px'
+        this.setState({ visibleAdd: true })
         break
     }
   }

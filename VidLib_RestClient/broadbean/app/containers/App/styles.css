@@ -58,7 +58,9 @@ body.fontLoaded {
   height: 120%;
 }
 
-button {
+button,
+input:not([type]),
+input[type='submit'] {
   background: #3498DB;
   background-image: -webkit-linear-gradient(to top, #3498DB, #2980B9);
   background-image: -moz-linear-gradient(to top, #3498DB, #2980B9);
