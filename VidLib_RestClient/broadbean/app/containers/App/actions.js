@@ -35,6 +35,7 @@ import {
   SET_USER,
   SET_USER_CHILDREN,
   SET_VID_DIMENSIONS,
+  SET_VIDEO_MODE,
 } from './constants'
 
 /**
@@ -139,5 +140,12 @@ export function setVidDimensions(dimensions) {
   return {
     type: SET_VID_DIMENSIONS,
     dimensions,
+  }
+}
+
+export function setVideoMode(mode) {
+  return {
+    type: SET_VIDEO_MODE,
+    mode,
   }
 }

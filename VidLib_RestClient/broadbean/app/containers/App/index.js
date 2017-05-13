@@ -35,6 +35,7 @@ import {
   selectAgeGroup,
   selectAuthorizedBy,
   selectVideoDimensions,
+  selectVideoMode,
 } from './selectors'
 import {
   setAuthorizedBy,
@@ -47,6 +48,7 @@ import {
   find,
   curry,
   throttle,
+  once,
 } from 'lodash'
 import R from 'ramda'
 import { routes } from 'clientpaths.json'
@@ -62,12 +64,24 @@ class App extends React.Component {
 
     if (!R.keys(staticRoutes).includes(location.pathname)) {
       this.resizeApp = this.resizeApp.bind(this)
+      this.resizeVideoScrollingUp = this.resizeVideoScrollingUp.bind(this)
       window.onresize = throttle(this.resizeApp, 250)
+      document.addEventListener('scroll', throttle(this.resizeVideoScrollingUp, 250))
     }
 
     const defaultdim = find(vidconfig.dimensions, (ea) => ea.upperthreshold > window.innerWidth)
 
     setVidDim.call(null, defaultdim)
+  }
+
+  resizeVideoScrollingUp() {
+    const { viddim, setVidDim, videomode, setVideoMode } = this.props
+
+    if (window.pageYOffset > 40 && videomode == 'full') {
+      setVideoMode('topright')
+    } else if (window.pageYOffset < 40 && videomode !== 'full') {
+      setVideoMode('full')
+    }
   }
 
   resizeApp() {
@@ -85,7 +99,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { children, viddim, setAuthorized, location, ...others } = this.props
+    const { children, viddim, setAuthorized, location, videomode, ...others } = this.props
     return (
       <div>
         <div className={styles.mainwrap}>
@@ -118,6 +132,7 @@ const mapStateToProps = createStructuredSelector({
   viddim: selectVideoDimensions(),
   authby: selectAuthorizedBy(),
   agegroup: selectAgeGroup(),
+  videomode: selectVideoMode(),
 })
 
 function mapDispatchToProps(dispatch) {
@@ -126,6 +141,7 @@ function mapDispatchToProps(dispatch) {
     setAuthorized: (authorized, path) => {
       dispatch(setAuthorizedBy(authorized, path))
     },
+    setVideoMode: (mode) => dispatch(setVideoMode(mode)),
     dispatch,
   }
 }
@@ -135,9 +151,11 @@ App.propTypes = {
   children: PropTypes.node,
   dispatch: PropTypes.func,
   location: PropTypes.object,
-  setVidDim: PropTypes.func,
   setAuthorized: PropTypes.func,
+  setVidDim: PropTypes.func,
+  setVideoMode: PropTypes.func,
   viddim: PropTypes.object,
+  videomode: PropTypes.string,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)

@@ -101,8 +101,8 @@ function offspringReducer(state = initialState, action) {
         .set('loading', true)
     case RETRIEVE_PLAYLISTS_SUCCESS: {
       const playlists = normlizePlaylists(action.results)
-      let playlistsindex
-      let itemsindex
+      let playlistsindex = false
+      let itemsindex = false
       if (state.getIn(['page', state.get('childid')])) {
         playlistsindex = state.getIn(['page', state.get('childid'), 'currentIndexes', 'playlists'])
         itemsindex = state.getIn(['page', state.get('childid'), 'currentIndexes', 'videos'])
@@ -114,7 +114,7 @@ function offspringReducer(state = initialState, action) {
         .setIn(['currentIndexes', 'videos'], itemsindex)
         .set('childplaylists', playlists)
         .set('videoobj',
-          (playlistsindex || itemsindex) ?
+          (playlistsindex !== false && itemsindex !== false) ?
             playlists.get(playlistsindex).videos[itemsindex]
             : false
           )

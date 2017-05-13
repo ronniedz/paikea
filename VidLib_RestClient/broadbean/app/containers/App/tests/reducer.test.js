@@ -49,6 +49,7 @@ describe('appReducer', () => {
         width: defaultviddim.width,
         thumbwidth: defaultviddim.thumbwidth,
       },
+      videomode: 'full', // full | topright
     })
   })
 

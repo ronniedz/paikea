@@ -19,6 +19,7 @@ import {
   selectMainSearchVal,
   selectUserChildren,
   selectVideoDimensions,
+  selectVideoMode,
 } from 'containers/App/selectors'
 
 import { put } from 'redux-saga/effects'
@@ -47,4 +48,5 @@ export const stateprops = {
   searchval: selectMainSearchVal(),
   userchildren: selectUserChildren(),
   viddim: selectVideoDimensions(),
+  videomode: selectVideoMode(),
 }

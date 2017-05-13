@@ -19,7 +19,7 @@ import NavMenu from './components/NavMenu'
 import styles from './styles.css'
 
 function Beanstalk(props) {
-  const { children, currentindexes, viddim, videoobj, isLooping, onChangeVideo, ...others } = props
+  const { children, currentindexes, viddim, videoobj, isLooping, onChangeVideo, videomode, ...others } = props
   return (
     <div>
       <div className={styles.navmenu} style={{ width: viddim.width }}>
@@ -41,6 +41,7 @@ function Beanstalk(props) {
               currentindexes,
               isLooping,
               onChangeVideo,
+              videomode,
             }}
           />
         </section>
@@ -68,6 +69,7 @@ Beanstalk.propTypes = {
   userchildren: PropTypes.object,
   viddim: PropTypes.object,
   videoobj: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+  videomode: PropTypes.string,
 }
 
 // export default Beanstalk

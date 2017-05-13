@@ -43,45 +43,30 @@ class VideoPlayback extends Component {
     }
     this.playerReady = this.playerReady.bind(this)
     this.onStateChange = this.onStateChange.bind(this)
-    this.loopVideos = this.loopVideos.bind(this)
-    this.resizeVideoScrollingUp = this.resizeVideoScrollingUp.bind(this)
+    this.loopVideosIfSo = this.loopVideosIfSo.bind(this)
   }
 
   componentDidMount() {
     this.player = youtubeplayer('player', this.state.config)
     this.player.on('ready', this.playerReady)
     this.player.on('stateChange', this.onStateChange)
-
-    document.addEventListener('scroll', throttle(this.resizeVideoScrollingUp, 100))
   }
 
   componentWillReceiveProps(nextprops) {
-    if (nextprops.videoobj) {
-      this.setState({ videovisible: true })
-    }
-    this.checkPlayerSize(nextprops.viddim)
+    if (this.ytiframe) { this.checkPlayerSize(nextprops.viddim, nextprops.videomode) }
+    if (nextprops.videoobj) { this.setState({ videovisible: true }) }
   }
 
   shouldComponentUpdate(nextprops) {
-    return nextprops.videoobj !== null
+    return this.ytiframe !== undefined
+      && nextprops.videoobj
   }
 
   async componentDidUpdate(prevprops) {
     const { videoobj, currentindexes } = this.props
-    const style = document.querySelector('#player').style
+    const style = this.ytiframe.style
     if (videoobj && !isEqual(currentindexes, prevprops.currentindexes)) {
-      style.setProperty('display', 'block')
-      try {
-        await this.player.loadVideoById(videoobj.videoId)
-      } catch (e) {
-        console.log('error: ', e)
-      }
-    } else {
-      const playerstate = await this.player.getPlayerState().then(s => s)
-      if (!videoobj) {
-        if (!playerstate || playerstate === 1) await this.player.pauseVideo()
-        style.setProperty('display', 'none')
-      }
+      await this.player.loadVideoById(videoobj.videoId)
     }
   }
 
@@ -91,11 +76,22 @@ class VideoPlayback extends Component {
 
   onStateChange(evt) {
     if (evt.data === 0) {
-      this.loopVideos()
+      this.loopVideosIfSo()
     }
   }
 
-  loopVideos() {
+  async playerReady() {
+    this.ytiframe = await this.player.getIframe()
+    const { videoobj, viddim, videomode } = this.props
+    // we cue the video for static landing on pages
+    if (videoobj) {
+      this.checkPlayerSize(viddim, videomode)
+      this.player.cueVideoById(videoobj.videoId)
+      this.setState({ videovisible: true })
+    }
+  }
+
+  loopVideosIfSo() {
     const { isLooping, currentindexes } = this.props
 
     if (isLooping) {
@@ -110,54 +106,34 @@ class VideoPlayback extends Component {
     }
   }
 
-  playerReady() {
-    this.ytiframe = document.querySelector('iframe')
-    const { videoobj } = this.props
-
-    // we cue the video for static landing on pages
-    if (videoobj) {
-      this.checkPlayerSize(this.props.viddim)
-      this.player.cueVideoById(videoobj.videoId)
-      this.setState({ videovisible: true })
-    }
-  }
-
-  resizeVideoScrollingUp() {
-    const { viddim } = this.props
-    this.checkPlayerSize(viddim)
-  }
-
-  quarterView(vdim) {
-    this.ytiframe.width = vdim.width / 2
-    this.ytiframe.height = vdim.height / 2
-    this.ytiframe.style.left = `${vdim.width / 2}px`
-  }
-
-  fullView(vdim) {
-    this.ytiframe.width = vdim.width
-    this.ytiframe.height = vdim.height
-    this.ytiframe.style.left = '0px'
-  }
-
-  checkPlayerSize(vdim) {
-    if (window.pageYOffset > this.state.scrollYThreshold) {
-      this.quarterView(vdim)
-      this.setState({ visibleAdd: false})
-    } else if (this.ytiframe && vdim.width !== this.ytiframe.width) {
-      this.fullView(vdim)
-      this.setState({ visibleAdd: true})
+  checkPlayerSize(vdim, vmode) {
+    switch (vmode) {
+      case 'full':
+        this.ytiframe.width = vdim.width
+        this.ytiframe.height = vdim.height
+        this.ytiframe.style.left = '0px'
+        break
+      case 'topright':
+        this.ytiframe.width = vdim.width / 2
+        this.ytiframe.height = vdim.height / 2
+        this.ytiframe.style.left = `${vdim.width / 2}px`
+        break
+      default:
+        this.ytiframe.width = vdim.width
+        this.ytiframe.height = vdim.height
+        this.ytiframe.style.left = '0px'
+        break
     }
   }
 
   render() {
     const { authby, enableaddvideo, ...others } = this.props
     const { videovisible, visibleAdd } = this.state
-    const visiblestyle = videovisible ? { display: 'block', visibility: 'visible' } : null
 
     return (
       <div
         className={styles.playerwrap}
-        style={visiblestyle}
+        style={videovisible ? { display: 'block', visibility: 'visible' } : null}
       >
         <div id="player" style={{ position: 'relative', pointerEvents: 'visible' }} />
         {authby && enableaddvideo && visibleAdd &&
@@ -180,6 +156,7 @@ VideoPlayback.propTypes = {
   viddim: PropTypes.object,
   isLooping: PropTypes.bool,
   onChangeVideo: PropTypes.func,
+  videomode: PropTypes.string,
 }
 
 export default VideoPlayback

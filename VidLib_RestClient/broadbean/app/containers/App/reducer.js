@@ -33,6 +33,7 @@ import {
   SET_AUTHORIZED_BY,
   SET_USER_CHILDREN,
   SET_VID_DIMENSIONS,
+  SET_VIDEO_MODE,
 } from './constants'
 import { fromJS, List } from 'immutable'
 import { videoassets as vidconfig } from 'siteconfig'
@@ -67,6 +68,7 @@ const initialState = fromJS({
     width: defaultviddim.width,
     thumbwidth: defaultviddim.thumbwidth,
   },
+  videomode: 'full', // full | topright
 })
 const appReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -106,6 +108,10 @@ const appReducer = (state = initialState, action) => {
         .setIn(['pagedimensions', 'height'], action.dimensions.height)
         .setIn(['pagedimensions', 'width'], action.dimensions.width)
         .setIn(['pagedimensions', 'thumbwidth'], action.dimensions.thumbwidth)
+    }
+    case SET_VIDEO_MODE: {
+      return state
+        .set('videomode', action.mode)
     }
     case SET_USER_CHILDREN:
       return state

@@ -83,6 +83,11 @@ export const selectPath = () => createSelector(
   (globalState) => globalState.get('path')
 )
 
+export const selectVideoMode = () => createSelector(
+  selectGlobal(),
+  (globalState) => globalState.get('videomode')
+)
+
 export const selectLocationState = () => {
   let prevRoutingState
   let prevRoutingStateJS
