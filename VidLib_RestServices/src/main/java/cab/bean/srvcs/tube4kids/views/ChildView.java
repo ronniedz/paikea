@@ -1,15 +1,15 @@
 package cab.bean.srvcs.tube4kids.views;
 
-import cab.bean.srvcs.tube4kids.core.Person;
+import cab.bean.srvcs.tube4kids.core.Child;
 
 import io.dropwizard.views.View;
 
-public class PersonView extends View {
-    private final Person person;
+public class ChildView extends View {
+    private final Child child;
 
     public enum Template {
-        FREEMARKER("freemarker/person.ftl"),
-        MUSTACHE("mustache/person.mustache");
+        FREEMARKER("freemarker/child.ftl"),
+        MUSTACHE("mustache/child.mustache");
 
         private String templateName;
 
@@ -22,12 +22,12 @@ public class PersonView extends View {
         }
     }
 
-    public PersonView(PersonView.Template template, Person person) {
+    public ChildView(ChildView.Template template, Child child) {
         super(template.getTemplateName());
-        this.person = person;
+        this.child = child;
     }
 
-    public Person getPerson() {
-        return person;
+    public Child getChild() {
+        return child;
     }
 }

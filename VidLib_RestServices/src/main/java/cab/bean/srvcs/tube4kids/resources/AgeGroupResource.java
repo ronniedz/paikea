@@ -21,7 +21,6 @@ import cab.bean.srvcs.tube4kids.db.AgeGroupDAO;
 
 @Path("/age")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.CONTENT_MODERATOR_ROLE, RoleNames.UI_MANAGER_ROLE})
 public class AgeGroupResource {
 
     private final AgeGroupDAO ageGroupDAO;
@@ -32,6 +31,7 @@ public class AgeGroupResource {
 
     @POST
     @UnitOfWork
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.CONTENT_MODERATOR_ROLE, RoleNames.UI_MANAGER_ROLE})
     public AgeGroup createAgeGroup(AgeGroup ageGroup) {
         return ageGroupDAO.create(ageGroup);
     }
@@ -39,6 +39,7 @@ public class AgeGroupResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.CONTENT_MODERATOR_ROLE, RoleNames.UI_MANAGER_ROLE})
     public Response deleteAgeGroup(@PathParam("id") Long id) {
     	ageGroupDAO.delete(id);
 	return Response.status(Response.Status.NO_CONTENT).build();
@@ -46,7 +47,6 @@ public class AgeGroupResource {
 
     @GET
     @UnitOfWork
-    @PermitAll
     public List<AgeGroup> listAges() {
         return ageGroupDAO.findAll();
     }

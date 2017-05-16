@@ -67,7 +67,7 @@ assets:
   overrides:
     /: ../assets/
 
-
+testUrl: http://localhost:8080/api/age
     
 # Logging settings.
 logging:

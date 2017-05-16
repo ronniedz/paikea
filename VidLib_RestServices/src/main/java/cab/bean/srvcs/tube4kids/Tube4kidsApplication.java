@@ -25,8 +25,12 @@ import java.util.Map;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import javax.ws.rs.client.Client;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+
+import io.dropwizard.client.JerseyClientBuilder;
+
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jose4j.jwt.consumer.JwtContext;
@@ -35,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.auth.JWTAuthenticator;
+import cab.bean.srvcs.tube4kids.auth.TokenService;
 import cab.bean.srvcs.tube4kids.cli.RenderCommand;
 import cab.bean.srvcs.tube4kids.core.User;
 //import cab.bean.srvcs.tube4kids.core.AgeGroup;
@@ -49,6 +54,7 @@ import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.db.VideoDAO;
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
 import cab.bean.srvcs.tube4kids.filter.AdminOrOwnerDynamicFeature;
+import cab.bean.srvcs.tube4kids.health.APIHealthCheck;
 import cab.bean.srvcs.tube4kids.health.TemplateHealthCheck;
 import cab.bean.srvcs.tube4kids.remote.YouTubeAPIProxy;
 import cab.bean.srvcs.tube4kids.resources.AgeGroupResource;
@@ -85,7 +91,8 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 	final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
 	jsonProvider.setMapper(new JodaMapper());
 	environment.jersey().getResourceConfig().addProperties(singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false));
-	environment.healthChecks().register("template", new TemplateHealthCheck(configuration.buildTemplate()));
+
+	environment.healthChecks().register("api-service", new APIHealthCheck(new JerseyClientBuilder(environment).build("Dr. REST Client"), configuration.getTestUrl()));
 	environment.jersey().register(jsonProvider);
 	// Contain this REST service to sub-directory (<code>/api/</code>)
 	environment.jersey().setUrlPattern(configuration.getAppContextUri());
@@ -140,6 +147,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         final AgeGroupDAO ageGroupDAO = new AgeGroupDAO(hibernateBundle.getSessionFactory());
         final ChildDAO childDAO = new ChildDAO(hibernateBundle.getSessionFactory());
 
+
         jerseyConf.register(new YouTubeVideoResource(ytProxyClient));
         jerseyConf.register(new GenreResource(genreDAO));
         jerseyConf.register(new UserResource(userDAO));
@@ -147,7 +155,10 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         jerseyConf.register(new ChildResource(childDAO, userDAO, playlistDAO, roleDAO));
         jerseyConf.register(new PlaylistResource(playlistDAO, videoDAO));
         jerseyConf.register(new VideoResource(videoDAO, neo4JGraphDAO, ytProxyClient));
-        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO, configuration.getGoogleAPIClientConfiguration(), configuration.getJwtConfiguration()));
+        jerseyConf.register(new AuthNVerityResource(tokenDAO, userDAO, roleDAO,
+        		configuration.getGoogleAPIClientConfiguration(), configuration.getJwtConfiguration(),
+        		new TokenService(configuration.getJwtConfiguration()))
+        );
         jerseyConf.register(new AuthDynamicFeature( buildJwtAuthFilter(tokenDAO, configuration.getJwtConfiguration()) ));
         jerseyConf.register(new AuthValueFactoryProvider.Binder<>(User.class));
 
