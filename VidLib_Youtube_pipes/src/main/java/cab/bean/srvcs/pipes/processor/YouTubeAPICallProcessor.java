@@ -21,20 +21,22 @@ import cab.bean.srvcs.tube4kids.resources.YouTubeAgent;
 public class YouTubeAPICallProcessor implements Processor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YouTubeAPICallProcessor.class);
-
-    private YouTubeAgent youTubeAgent = null;
+    private final YouTubeAgent youTubeAgent;
+    
+    
+    public YouTubeAPICallProcessor(YouTubeAgent youTubeAgent) {
+	super();
+	this.youTubeAgent = youTubeAgent;
+    }
     
     public YouTubeAgent getYouTubeAgent() {
         return youTubeAgent;
     }
 
-    public void setYouTubeAgent(YouTubeAgent yta) {
-        this.youTubeAgent = yta;
-    }
-    
-    public <T> T readEntity(Class<T> entityType) {
-        return null;
-    }
+//    
+//    public <T> T readEntity(Class<T> entityType) {
+//        return null;
+//    }
 
     public void process(Exchange exchange) throws Exception {
 

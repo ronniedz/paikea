@@ -140,6 +140,7 @@ neo4jConf:
 googleAPIClientConfiguration:
   audience:
     - 16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com
+    - 447179296185-v7eddk6j71u2o1k3oom25bolk8q4a9sf.apps.googleusercontent.com
   issuer:
     - accounts.google.com
     - https://accounts.google.com

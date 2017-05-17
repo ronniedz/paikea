@@ -93,8 +93,7 @@ public class RestRouteBuilder extends RouteBuilder {
             	.end();
 		
 	from("direct:inbound_cached")
-	    .process(cachePullProcessor)
-	;
+	    .process(cachePullProcessor);
 	
 	from("direct:inbound_novel")
 	    .setHeader("servicePath", simple("inbound_novella"))

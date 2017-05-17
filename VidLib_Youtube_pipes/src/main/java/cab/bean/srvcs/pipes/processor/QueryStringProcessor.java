@@ -1,6 +1,5 @@
 package cab.bean.srvcs.pipes.processor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,6 +13,7 @@ import org.mongojack.JacksonDBCollection;
 import org.restlet.Request;
 
 import cab.bean.srvcs.pipes.PersistenceHelper;
+import cab.bean.srvcs.pipes.QueueException;
 import cab.bean.srvcs.pipes.model.VideoSearchRequest;
 
 import com.mongodb.BasicDBObject;
@@ -23,49 +23,41 @@ import com.mongodb.DBObject;
 public class QueryStringProcessor implements Processor {
     private static Log LOGGER = LogFactory.getLog(QueryStringProcessor.class);
 
-    private DB db;
+    private final DB db;
 
     public QueryStringProcessor(DB db) {
 	this.db = db;
     }
 
     @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) throws QueueException {
 	LOGGER.debug("IN  - GET Headers(): " + exchange.getIn().getHeaders().keySet());
 	LOGGER.debug("OUT - GET Headers(): " + exchange.getOut().getHeaders().keySet());
 
-	Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
-
-	Map<String, String> params = request.getResourceRef().getQueryAsForm().getValuesMap();
-
-	VideoSearchRequest aQuery = new VideoSearchRequest();
+	final Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
+	final Map<String, String> params = request.getResourceRef().getQueryAsForm().getValuesMap();
+	
 	try {
-	    BeanUtils.copyProperties(aQuery, params);
-	} catch (IllegalAccessException | InvocationTargetException e) {
-	    e.printStackTrace();
+    	    final VideoSearchRequest aQuery = new VideoSearchRequest();
+    	    BeanUtils.copyProperties(aQuery, params);
+    	    
+    	    final String collectionName = PersistenceHelper.makeNameFromQuery(params);
+    	    final Optional<VideoSearchRequest> needleState =  cacheContains(aQuery, collectionName);
+    	    
+    	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, needleState.orElse(aQuery) );
+    	    exchange.getOut().setHeader(PersistenceHelper.HDR_FOUNDQUERY, needleState.isPresent());
+    	    //	    exchange.getIn().setHeader(PersistenceHelper.HDR_FOUNDQUERY, Boolean.TRUE);
+    	    // The Java DSL route needs me to set the 'found' flag in the IN-message 
+    	    exchange.getOut().setBody(aQuery);
+    	    exchange.getOut().setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, params);
+    	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME,collectionName);
 	}
-
-	String collectionName = PersistenceHelper.determineName(params);
-	
-	VideoSearchRequest found = null;
-	if ( (found = cacheContains(aQuery, collectionName)) != null ) {
-	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, found );
-	    exchange.getOut().setHeader(PersistenceHelper.HDR_FOUNDQUERY, Boolean.TRUE);
-//	    exchange.getIn().setHeader(PersistenceHelper.HDR_FOUNDQUERY, Boolean.TRUE);
-	    // The Java DSL route needs me to set the 'found' flag in the IN-message 
+	catch (Exception e) {
+	    throw new QueueException(e.getMessage());
 	}
-	else {
-	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA,aQuery);
-	}
-
-	exchange.getOut().setBody(aQuery);
-
-	exchange.getOut().setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, params);
-	
-	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME,collectionName);
     }
 
-    private VideoSearchRequest cacheContains(VideoSearchRequest queryObj, String collectionName) {
+    private Optional<VideoSearchRequest> cacheContains(VideoSearchRequest queryObj, String collectionName) {
         VideoSearchRequest foundSearchResponse = null;
 
 	if ( db.collectionExists(collectionName) ) {
@@ -75,15 +67,11 @@ public class QueryStringProcessor implements Processor {
 		    org.bson.types.ObjectId.class
 	    );
             DBObject query = new BasicDBObject();
-            
-//            if (StringUtils.isNotBlank(queryObj.getPageToken())) {
-        		query.put("pageToken" , Optional.ofNullable(queryObj.getPageToken()).orElse(""));
-        		query.put("collectionName" , collectionName);
-//            }
+            query.put("pageToken" , Optional.ofNullable(queryObj.getPageToken()).orElse(""));
+            query.put("collectionName" , collectionName);
             foundSearchResponse = metadat.findOne(query);
-           
 	}
-	return foundSearchResponse;
+	return Optional.ofNullable(foundSearchResponse);
     }
 
 }

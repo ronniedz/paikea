@@ -39,7 +39,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	</bean>
 	
 	<bean id="ytAPICallProcessor" class="cab.bean.srvcs.pipes.processor.YouTubeAPICallProcessor">
-		<property name="youTubeAgent" ref="youTubeAgentImpl" />
+		<constructor-arg ref="youTubeAgentImpl" />
 	</bean>
 
 	<bean id="restRouteBuilder" class="cab.bean.srvcs.pipes.route.RestRouteBuilder">
