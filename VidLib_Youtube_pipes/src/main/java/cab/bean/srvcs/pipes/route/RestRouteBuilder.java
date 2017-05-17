@@ -85,7 +85,7 @@ public class RestRouteBuilder extends RouteBuilder {
             		.routeId("search")
             		.process(queryStringProcessor)
             		.choice()
-            	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY).isNotNull())
+            	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY).isEqualTo(Boolean.TRUE))
             	   	    	.to("direct:inbound_cached")
             	   	    .otherwise()
             	   	   	.to("direct:inbound_novel")
@@ -93,7 +93,8 @@ public class RestRouteBuilder extends RouteBuilder {
             	.end();
 		
 	from("direct:inbound_cached")
-	    .process(cachePullProcessor);
+	    .process(cachePullProcessor)
+	;
 	
 	from("direct:inbound_novel")
 	    .setHeader("servicePath", simple("inbound_novella"))

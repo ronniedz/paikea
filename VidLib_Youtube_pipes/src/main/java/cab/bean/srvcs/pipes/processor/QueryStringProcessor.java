@@ -44,8 +44,8 @@ public class QueryStringProcessor implements Processor {
     	    final String collectionName = PersistenceHelper.makeNameFromQuery(params);
     	    final Optional<VideoSearchRequest> needleState =  cacheContains(aQuery, collectionName);
     	    
-    	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, needleState.orElse(aQuery) );
     	    exchange.getOut().setHeader(PersistenceHelper.HDR_FOUNDQUERY, needleState.isPresent());
+    	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, needleState.orElse(aQuery) );
     	    //	    exchange.getIn().setHeader(PersistenceHelper.HDR_FOUNDQUERY, Boolean.TRUE);
     	    // The Java DSL route needs me to set the 'found' flag in the IN-message 
     	    exchange.getOut().setBody(aQuery);
