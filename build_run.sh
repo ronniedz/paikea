@@ -106,7 +106,9 @@ if [ "$CODE" -eq "0" ]; then
 
 	cd ..
 
-    build_client
+    if [ "$1" eq "client"]; then
+        build_client
+    fi
 
     if [ MSG_b == 1 ]
     then

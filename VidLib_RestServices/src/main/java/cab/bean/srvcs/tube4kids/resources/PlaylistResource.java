@@ -186,8 +186,15 @@ public class PlaylistResource extends BaseResource {
 	if (subjectPlaylistOpt != null) {
 
 	    Playlist p =  subjectPlaylistOpt .orElseThrow(() -> new javax.ws.rs.NotFoundException());
-	    Pair<Integer, Collection<Video>> t = bulkFindUtil(videoIds);
-	    p.getVideos().addAll(t.getRight());
+	    final Pair<Integer, Collection<Video>> t = bulkFindUtil(videoIds);
+	    final Set<Video> listVids = p.getVideos();
+	    p.getVideos().addAll(
+		    // Remove duplicates
+            	    t.getRight().stream().filter(uVid -> {
+            		return ! listVids.contains(uVid);
+            	    }) .collect(Collectors.toSet())
+	    );
+//	    p.getVideos().addAll(t.getRight());
 	    p = playlistDAO.create(p);
 	    dat.setSuccess(true).setEntity(isMinimalRequest() ? null : p);
 	    if (t.getLeft().equals(0)) {
