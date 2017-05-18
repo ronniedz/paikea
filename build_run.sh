@@ -12,21 +12,32 @@
 #
 ##############################################################################
 
-RUNPID=$(ls ./run/*.pid 2>/dev/null || false)
+conponent_dirs="utility-deps rdbms-deps"
 
-if [ "$RUNPID" ]; then
-	for pidfile in ${RUNPID[@]};
-	do
-		echo "Killing $pidfile"
-		kill -KILL "`cat ${pidfile}`" && rm ${pidfile} && echo "Stopped"
-		sleep 1
-	done
-fi
+function build_client {
+    cd VidLib_RestClient/broadbean/ && npm i && npm run build
+    cd ../..
+}
+
+function shutdown {
+    RUNPID=$(ls ./run/*.pid 2>/dev/null || false)
+
+    if [ "$RUNPID" ]; then
+        for pidfile in ${RUNPID[@]};
+        do
+            echo "Killing $pidfile"
+            kill -KILL "`cat ${pidfile}`" && rm ${pidfile} && echo "Stopped"
+            sleep 1
+        done
+    fi
+}
 
 
+# Shutdown running processes
+shutdown
 
 ##
-# TODO - this value should be set from the configuration file or 
+# TODO - this value should be set from the configuration file or
 # passed on the command-line
 QUEUE_IF_PORT=7070
 
@@ -46,20 +57,20 @@ done
 
 
 ## Install basic dependencies
+for compdir in ${conponent_dirs};
+do
+    cd $compdir
+    mvn clean install
+    cd ..
+done
 
-cd utility-deps/
-mvn clean install
-cd ../rdbms-deps/
-mvn clean install
-cd ..
-
-## Build and install queue
+## Build and run queue
 mvn clean install
 mvn -pl VidLib_Youtube_pipes camel:run 2>&1 >> logs/paikea_queue.log &
 QUEUE_PID=$!
 echo "Starting 'Camel Router' (pid: ${QUEUE_PID}) ..."
 
-## Check that port is update
+## Check that port is updated
 
 let MAX_TRY=6
 CODE=$(/bin/bash -c "cat < /dev/null > /dev/tcp/localhost/${QUEUE_IF_PORT} 2>&1>/dev/null ; echo -n \$?")
@@ -94,6 +105,8 @@ if [ "$CODE" -eq "0" ]; then
 	echo -n ${RSERVER_PID} > ../run/paikea_restserver.pid
 
 	cd ..
+
+    build_client
 
     if [ MSG_b == 1 ]
     then
