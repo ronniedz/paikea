@@ -30,12 +30,18 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<!-- <context:property-placeholder location="classpath:yt-gateway.properties" /> -->
 
 
+	<bean id="configurator" class="cab.bean.srvcs.pipes.Configurator">
+		<constructor-arg value="configuration.json" />
+	</bean>
+		
 	<bean id="mongoBean" class="com.mongodb.Mongo">
 		<constructor-arg name="host" value="${mongodb.host}" />
 	</bean>
-	
+		
 	<bean id="youTubeAgentImpl" class="cab.bean.srvcs.tube4kids.resources.YouTubeAgentImpl">
-		<constructor-arg name="apiKey" value="${youtube.apiKey}" />
+		<constructor-arg><!--  name="mongoDb" -->
+      <bean factory-bean="configurator" factory-method="getYoutubeResourceConfiguration"/>
+    </constructor-arg>
 	</bean>
 	
 	<bean id="ytAPICallProcessor" class="cab.bean.srvcs.pipes.processor.YouTubeAPICallProcessor">
@@ -48,10 +54,9 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
          <constructor-arg value="${mongodb.dbname}"/>
       </bean>
     </constructor-arg>
-		<property name="restServerPort" value="${restserver.port}" />
-		<property name="restServerHost" value="${restserver.host}" />
-		<property name="resourcePath" value="${resource.path}" />
-		<property name="serviceUri" value="${service.uri}" />
+		<constructor-arg><!--  name="mongoDb" -->
+      <bean factory-bean="configurator" factory-method="getConfiguration"/>
+    </constructor-arg>
 	</bean>
 
 <!--  

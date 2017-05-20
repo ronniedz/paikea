@@ -26,7 +26,7 @@ import com.mongodb.DBObject;
 public class CachePullProcessor implements Processor {
     private static final Logger LOGGER = LoggerFactory.getLogger(CachePullProcessor.class);
     private final DB db;
-    
+
     public CachePullProcessor(DB db) {
 	this.db = db;
     }

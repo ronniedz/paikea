@@ -115,11 +115,11 @@ public class PlaylistResource extends BaseResource {
     @PUT
     @UnitOfWork
     public Response pickPlaylist(@PathParam("pid") Long pid,
-	    Playlist destPlaylist, @Auth User user) {
+	Playlist destPlaylist, @Auth User user) {
 	
 	// TODO In the future won't need to liberate() as only decoupled
 	// playlists will be findable
-	Playlist org = liberatePlaylist(pid, user);
+	final Playlist org = liberatePlaylist(pid, user);
 
 	if (destPlaylist.getTitle().isEmpty()) {
 	    destPlaylist.setTitle(org.getTitle() + " (picked)");
@@ -130,8 +130,9 @@ public class PlaylistResource extends BaseResource {
 	).collect(Collectors.toSet()));
 
 	playlistDAO.create(destPlaylist);
-	ResponseData dat = new ResponseData(destPlaylist).setSuccess(destPlaylist != null);
-	return doPOST(dat).build();
+	return doPOST(
+		new ResponseData(destPlaylist).setSuccess(destPlaylist != null)
+	).build();
     }
 
     @Path("/liberate/{pid: [0-9]+}")
@@ -141,7 +142,7 @@ public class PlaylistResource extends BaseResource {
 	    RoleNames.PLAYLIST_EDIT_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE })
     public Playlist liberatePlaylist(@PathParam("pid") Long pid, @Auth User user) {
 
-	Playlist org = playlistDAO.retrieve(pid);
+	final Playlist org = playlistDAO.retrieve(pid);
 	Playlist o = new Playlist();
 
 	o.setTitle(org.getTitle() + " (copy)");
@@ -168,8 +169,8 @@ public class PlaylistResource extends BaseResource {
     @PATCH
     @UnitOfWork
     @RolesAllowed({ RoleNames.GUARDIAN_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE })
-    public Response addVideos(@PathParam("pidVal") Long pidVal,Set<String> videoIds, @Auth User user) {
-	ResponseData dat = new ResponseData().setSuccess(false);
+    public Response addVideos(@PathParam("pidVal") Long pidVal, Set<String> videoIds, @Auth User user) {
+	final ResponseData dat = new ResponseData().setSuccess(false);
 
 	Optional<Playlist> subjectPlaylistOpt = null;
 

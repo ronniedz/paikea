@@ -7,10 +7,10 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.restlet.RestletConstants;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mongojack.JacksonDBCollection;
 import org.restlet.Request;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.pipes.PersistenceHelper;
 import cab.bean.srvcs.pipes.QueueException;
@@ -21,7 +21,7 @@ import com.mongodb.DB;
 import com.mongodb.DBObject;
 
 public class QueryStringProcessor implements Processor {
-    private static Log LOGGER = LogFactory.getLog(QueryStringProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryStringProcessor.class);
 
     private final DB db;
 

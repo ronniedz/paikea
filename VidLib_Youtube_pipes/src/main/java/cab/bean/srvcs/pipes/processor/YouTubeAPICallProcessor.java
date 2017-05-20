@@ -2,7 +2,6 @@ package cab.bean.srvcs.pipes.processor;
 
 import java.util.Map;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 import org.apache.camel.Exchange;
@@ -33,18 +32,10 @@ public class YouTubeAPICallProcessor implements Processor {
         return youTubeAgent;
     }
 
-//    
-//    public <T> T readEntity(Class<T> entityType) {
-//        return null;
-//    }
-
     public void process(Exchange exchange) throws Exception {
 
-	String servicePath = exchange.getIn().getHeader("servicePath", String.class);
-	
 	String path = exchange.getFromRouteId();
 //	String path = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-	System.out.println("path: " + path);
 	LOGGER.debug("path: {}" , path);
 	
 	if (path.equals("detail")) {

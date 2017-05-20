@@ -1,6 +1,8 @@
 package cab.bean.srvcs.pipes;
 
-public class QueueException extends Exception {
+import javax.ws.rs.ProcessingException;
+
+public class QueueException extends ProcessingException {
 
     public QueueException(String message) {
 	super(message);

@@ -24,7 +24,7 @@ public class Config {
 	DATASRC_CTX_URI("dataSrcCtxUri", 	"/youtube/v3"),
 	DATASRC_SEARCH_SRV_URI("dataSrcSearchUri", "/search"),
 	DATASRC_DETAILS_SRV_URI("dataSrcDetailsUri",	 "/videos"),
-	APIKEY("apiKey", 		null);
+	APIKEY("apiKey", null);
 
 	private final String keyName;
 	private String defaultValue;

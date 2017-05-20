@@ -106,7 +106,8 @@ if [ "$CODE" -eq "0" ]; then
 
 	cd ..
 
-    if [ "$1" eq "client"]; then
+    if [[ ! -z $1 ]];
+    then
         build_client
     fi
 
