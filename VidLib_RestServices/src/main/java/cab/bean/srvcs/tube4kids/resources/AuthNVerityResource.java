@@ -10,11 +10,8 @@ import java.net.URISyntaxException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -36,8 +33,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.glassfish.jersey.server.internal.LocalizationMessages;
-import org.jose4j.jws.JsonWebSignature;
-import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
@@ -48,7 +43,6 @@ import cab.bean.srvcs.tube4kids.JWTConfiguration;
 import cab.bean.srvcs.tube4kids.auth.RoleNames;
 import cab.bean.srvcs.tube4kids.auth.TokenService;
 import cab.bean.srvcs.tube4kids.auth.utils.SubjectData;
-import cab.bean.srvcs.tube4kids.core.Role;
 import cab.bean.srvcs.tube4kids.core.Token;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.db.RoleDAO;
@@ -56,7 +50,6 @@ import cab.bean.srvcs.tube4kids.db.TokenDAO;
 import cab.bean.srvcs.tube4kids.db.UserDAO;
 import cab.bean.srvcs.tube4kids.exception.ConfigurationException;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 
 
@@ -79,11 +72,13 @@ public class AuthNVerityResource extends BaseResource {
 
     private final TokenService tokenService;
     
-    public AuthNVerityResource( TokenDAO tokenDAO, UserDAO userDAO, RoleDAO roleDAO, GoogleAPIClientConfiguration googleAPIConf, JWTConfiguration jwtConf)
+    public AuthNVerityResource( final TokenDAO tokenDAO, final UserDAO userDAO,
+	    final RoleDAO roleDAO, final GoogleAPIClientConfiguration googleAPIConf,
+	    final JWTConfiguration jwtConf, final TokenService tokenService)
     {
 	this.googleAPIConf = googleAPIConf;
 	this.jwtConf = jwtConf;
-	this.tokenService = new TokenService(jwtConf);
+	this.tokenService = tokenService;
 	this.tokenDAO = tokenDAO;
 	this.userDAO = userDAO;
 	this.roleDAO = roleDAO;
@@ -319,7 +314,7 @@ public class AuthNVerityResource extends BaseResource {
 	beanToken.setUser(userDAO.create(user));
 	
 	tokenDAO.create(beanToken);
-	userValues.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
+//	userValues.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
 
     }
 

@@ -238,7 +238,12 @@ compile("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.7.2")
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
-		        </dependency>
+		    </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-client</artifactId>
+		    </dependency>
+		    
 <!--
          <dependency>
             <groupId>io.dropwizard</groupId>

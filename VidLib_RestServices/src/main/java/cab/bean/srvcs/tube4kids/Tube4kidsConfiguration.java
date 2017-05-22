@@ -42,6 +42,10 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     @NotEmpty
     private String template;
     
+    
+    @NotEmpty
+    private String testUrl;
+    
     @NotEmpty
     private String defaultName = "Guest";
 
@@ -187,5 +191,21 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     public void setAppContextUri(String appUriPrefix) {
         this.appContextUri = appUriPrefix;
     }
+
+    /**
+     * @return the testUrl
+     */
+    @JsonProperty
+    public String getTestUrl() {
+        return testUrl;
+    }
+
+    /**
+     * @param testUrl the testUrl to set
+     */
+    public void setTestUrl(String testUrl) {
+        this.testUrl = testUrl;
+    }
+
 
 }

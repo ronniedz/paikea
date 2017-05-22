@@ -1,35 +1,26 @@
 package cab.bean.srvcs.tube4kids.core;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.JoinColumn;
-
 import org.hibernate.annotations.Cascade;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "genre")
@@ -39,8 +30,8 @@ import org.hibernate.annotations.Cascade;
                 query = "SELECT p FROM Genre p"
         )
 })
-@EqualsAndHashCode(exclude = { "videoGenres", "created" })
 @Data
+@EqualsAndHashCode(exclude = { "videoGenres", "created" })
 public class Genre {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
