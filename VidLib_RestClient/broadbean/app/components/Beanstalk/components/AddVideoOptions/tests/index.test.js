@@ -32,7 +32,7 @@ describe('<AddVideoOptions />', () => {
   }
   const renderedComponent = mount(
     <AddVideoOptions
-      videoobj={fixture2}
+      videoitems={[fixture2]}
       {...fixture}
       store={store}
     />

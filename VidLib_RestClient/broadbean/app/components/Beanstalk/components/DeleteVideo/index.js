@@ -7,7 +7,7 @@
 
 /**
 *
-* AddVideo
+* Delete Video
 *
 */
 

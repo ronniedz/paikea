@@ -5,8 +5,6 @@
 * @Last modified time: 2016-12-16T21:59:40-08:00
 */
 
-/* eslint-disable no-unused-vars */
-
 /*
  *
  * OffspringPage reducer

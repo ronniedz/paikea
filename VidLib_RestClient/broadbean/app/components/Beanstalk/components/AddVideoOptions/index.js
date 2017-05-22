@@ -17,9 +17,6 @@ import BeanModal from 'components/BeanModal'
 class AddVideoOptions extends Component {
   constructor(props) {
     super(props)
-    this.state = {
-      modal: true,
-    }
     this.renderChildPlaylist = this.renderChildPlaylist.bind(this)
     this.addVideo = this.addVideo.bind(this)
     this.closeChildDialog = this.closeChildDialog.bind(this)
@@ -33,17 +30,17 @@ class AddVideoOptions extends Component {
   }
 
   submitAddVideo(playlistids) {
-    const { videoobj, videoitems, onAddToPlaylist } = this.props
-    onAddToPlaylist(videoobj ? [videoobj] : videoitems, playlistids)
+    const { videoitems, onAddToPlaylist } = this.props
+    onAddToPlaylist(videoitems, playlistids)
     this.closeChildDialog()
   }
 
   closeChildDialog() {
-    this.setState({ modal: false })
+    this.props.toggleOffVisible.call()
   }
 
-  renderChildrenPlaylists(childrendata) {
-    return childrendata.map((child, index) => (
+  renderChildrenPlaylists(userchildren) {
+    return userchildren.map((child, index) => (
       <li key={index}>
         {child.name}
         <ul style={{ marginLeft: '8px' }}>
@@ -61,40 +58,32 @@ class AddVideoOptions extends Component {
     ))
   }
 
-  renderVideoInfo(videoobj) {
-    return (
-      videoobj ?
-      (
-        <div>
-          <div><b>{videoobj.title}</b></div>
-          <img role="presentation" src={videoobj.defaultThumbnail} />
-        </div>
+  renderVideoItemTitles(videoitems) {
+    const litype = videoitems.length < 5
+      ? (ea) => (
+        <li key={ea.videoId}>
+          <b>{ea.title}</b>
+          <img role="presentation" src={ea.defaultThumbnail} />
+        </li>
       )
-      : null
-    )
-  }
+      : (ea) => (
+        <li key={ea.videoId}>
+          {ea.title}
+        </li>
+      )
 
-  renderVideoItemTitles(videos) {
     return (
-      videos ?
-      (
-        <ul>
-          {
-            videos.map((ea) => (<li key={ea.videoId}>{ea.title}</li>))
-          }
-        </ul>
-      )
-      : null
+      <ul>
+        {videoitems.map(litype)}
+      </ul>
     )
   }
 
   render() {
-    const { videoobj, videoitems, userchildren } = this.props
-    const { modal } = this.state
+    const { videoitems, userchildren, isVisible } = this.props
     return (
-      <BeanModal isOpen={modal} height="650px">
+      <BeanModal isOpen={isVisible} height="650px">
         <button onClick={this.closeChildDialog}>close</button>
-        {this.renderVideoInfo(videoobj)}
         {this.renderVideoItemTitles(videoitems)}
         <div>
           <form onSubmit={this.addVideo}>
@@ -111,8 +100,9 @@ class AddVideoOptions extends Component {
 AddVideoOptions.propTypes = {
   onAddToPlaylist: PropTypes.func,
   userchildren: PropTypes.object,
-  videoobj: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
   videoitems: PropTypes.array,
+  isVisible: PropTypes.bool,
+  toggleOffVisible: PropTypes.func,
 }
 
 export default AddVideoOptions

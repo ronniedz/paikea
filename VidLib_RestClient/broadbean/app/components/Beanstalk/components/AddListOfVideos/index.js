@@ -21,28 +21,36 @@ class AddListOfVideos extends Component {
 
     this.state = {
       renderOptions: false,
+      optionsVisible: true,
     }
+    this.toggleOffVisible = this.toggleOffVisible.bind(this)
   }
 
   openAddVideoDialog(videos) {
     if (videos && videos.length > 0) {
-      this.setState({ renderOptions: true })
+      this.setState({ renderOptions: true, optionsVisible: true })
     }
   }
 
-  renderAddOptions(videoitems, userchildren, others) {
+  toggleOffVisible() {
+    this.setState({ optionsVisible: false })
+  }
+
+  renderAddOptions(videoitems, userchildren, onAddToPlaylist) {
     return this.state.renderOptions
     ? (
       <AddVideoOptions
-        {...{ videoitems, userchildren }}
-        {...others}
+        videoitems={videoitems}
+        isVisible={this.state.optionsVisible}
+        toggleOffVisible={this.toggleOffVisible}
+        {...{ userchildren, onAddToPlaylist }}
       />
     )
     : null
   }
 
   render() {
-    const { playlists, listindex, userchildren, ...others } = this.props
+    const { playlists, listindex, userchildren, onAddToPlaylist } = this.props
     return (
       <div className={styles.addListOfVideos}>
         <button
@@ -52,7 +60,7 @@ class AddListOfVideos extends Component {
         >
           add all videos
         </button>
-        {this.renderAddOptions(playlists[listindex].videos, userchildren, others)}
+        {this.renderAddOptions(playlists[listindex].videos, userchildren, onAddToPlaylist)}
       </div>
     )
   }
@@ -62,6 +70,7 @@ AddListOfVideos.propTypes = {
   listindex: PropTypes.number,
   playlists: PropTypes.array,
   userchildren: PropTypes.object,
+  onAddToPlaylist: PropTypes.func,
 }
 
 export default AddListOfVideos
