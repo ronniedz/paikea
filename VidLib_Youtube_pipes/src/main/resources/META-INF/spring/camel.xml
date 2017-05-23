@@ -29,9 +29,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	</bean>
 	<!-- <context:property-placeholder location="classpath:yt-gateway.properties" /> -->
 
-
 	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
-
 
 	<bean id="configurator" class="cab.bean.srvcs.pipes.Configurator">
 		<constructor-arg value="configuration.json" />
@@ -45,14 +43,6 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 		<constructor-arg name="host" value="${mongodb.host}" />
 	</bean>
 		
-	<bean id="youTubeAgentImpl" class="cab.bean.srvcs.tube4kids.resources.YouTubeAgentImpl">
-		<constructor-arg ref="ytconf"/>
-	</bean>
-	
-	<bean id="ytAPICallProcessor" class="cab.bean.srvcs.pipes.processor.YouTubeAPICallProcessor">
-		<constructor-arg ref="youTubeAgentImpl" />
-	</bean>
-
 	<bean id="restRouteBuilder" class="cab.bean.srvcs.pipes.route.RestRouteBuilder">
 		<constructor-arg>
       <bean factory-bean="mongoBean" factory-method="getDB">

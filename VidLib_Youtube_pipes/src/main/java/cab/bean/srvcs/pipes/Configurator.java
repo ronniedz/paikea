@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.pipes.Configuration.RestServerConfiguration;
+import cab.bean.srvcs.pipes.Configuration.YoutubeResourceConfiguration;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;

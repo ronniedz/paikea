@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.component.restlet.RestletConstants;
 import org.restlet.Request;
@@ -39,31 +40,30 @@ public class Http4Processor implements Processor {
  * to the OUT message headers.
  */
     public void process(Exchange exchange) throws Exception {
-
-	org.apache.camel.Message messageIn = exchange.getIn();
-	org.apache.camel.Message message = exchange.getOut();
+	final Message IN = exchange.getIn();
+	final Message OUT = exchange.getOut();
 	
-	YouTubeResponse ytResp = objectMapper.readValue((InputStream)messageIn.getBody(), YouTubeResponse.class);
+	YouTubeResponse ytResp = objectMapper.readValue((InputStream)IN.getBody(), YouTubeResponse.class);
 //	VideoSearchRequest ytReq = objectMapper.readValue((InputStream)message.getBody(), VideoSearchRequest.class);
-	VideoSearchRequest ytReq = messageIn.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, VideoSearchRequest.class);
+	VideoSearchRequest ytReq = IN.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, VideoSearchRequest.class);
  //   	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, exchange.getIn().getBody(VideoSearchRequest.class));
 	
-	message.setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, messageIn.getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME));
-	message.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, messageIn.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA));
-	message.setHeader(PersistenceHelper.HDR_FOUNDQUERY, messageIn.getHeader(PersistenceHelper.HDR_FOUNDQUERY));
+	OUT.setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, IN.getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME));
+	OUT.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, IN.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA));
+	OUT.setHeader(PersistenceHelper.HDR_FOUNDQUERY, IN.getHeader(PersistenceHelper.HDR_FOUNDQUERY));
         
-	String collectionName = messageIn.getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, String.class);
-    	System.err.println("PersistenceHelper.HDR_NAME_COLLECTION_NAME: " + collectionName);
+	String collectionName = IN.getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, String.class);
+//    	System.err.println("PersistenceHelper.HDR_NAME_COLLECTION_NAME: " + collectionName);
 	ytResp.setCollectionName(collectionName);
-	message.setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, collectionName);
+	OUT.setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, collectionName);
 	
 	
-        System.err.println("IN  - GET Headers(): " + exchange.getIn().getHeaders().keySet());
-        System.err.println("OUT - GET Headers(): " + exchange.getOut().getHeaders().keySet());
-
-	System.err.println("ytResp: " + ytResp);
+//        System.err.println("IN  - GET Headers(): " + exchange.getIn().getHeaders().keySet());
+//        System.err.println("OUT - GET Headers(): " + exchange.getOut().getHeaders().keySet());
+//
+//	System.err.println("ytResp: " + ytResp);
 	
-	message.setBody(ytResp);
+	OUT.setBody(ytResp);
 	
 
 //

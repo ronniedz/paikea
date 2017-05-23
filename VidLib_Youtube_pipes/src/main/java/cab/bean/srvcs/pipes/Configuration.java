@@ -34,11 +34,43 @@ public class Configuration {
 	return restServerConfiguration;
     }
 
+    public void setRestServerConfiguration(RestServerConfiguration rc) {
+	this.restServerConfiguration = rc;
+    }
+    
     public YoutubeResourceConfiguration getYoutubeResourceConfiguration() {
 	return youtubeResource;
     }
 
-
+    public void setYoutubeResourceConfiguration(YoutubeResourceConfiguration ytc) {
+	this.youtubeResource = ytc;
+    }
+    
+    @EqualsAndHashCode
+    @ToString
+    @Data
+    public class YoutubeResourceConfiguration  {
+	@NotEmpty
+	@JsonProperty
+	private String apiKey;
+	
+	@NotEmpty
+	@JsonProperty
+	private String host;
+	
+	@NotEmpty
+	@JsonProperty
+	private String contextPath ;
+	
+	@NotEmpty
+	@JsonProperty
+	private String videoSearchPath;
+	
+	@NotEmpty
+	@JsonProperty
+	private String videoDetailPath;
+    }
+    
     @EqualsAndHashCode
     @ToString
     @Data

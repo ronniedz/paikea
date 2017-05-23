@@ -1,21 +1,31 @@
 package cab.bean.srvcs.pipes.route;
 
+import java.io.InputStream;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.file.FileComponent;
+import org.apache.camel.component.restlet.RestletConstants;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestDefinition;
+import org.restlet.Request;
 
 import cab.bean.srvcs.pipes.Configuration;
+import cab.bean.srvcs.pipes.Configuration.RestServerConfiguration;
+import cab.bean.srvcs.pipes.Configuration.YoutubeResourceConfiguration;
 import cab.bean.srvcs.pipes.PersistenceHelper;
+import cab.bean.srvcs.pipes.model.VideoSearchRequest;
 import cab.bean.srvcs.pipes.processor.CacheNewVideosProcessor;
 import cab.bean.srvcs.pipes.processor.CachePullProcessor;
 import cab.bean.srvcs.pipes.processor.Http4Processor;
 import cab.bean.srvcs.pipes.processor.QueryStringProcessor;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
+import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.DB;
@@ -40,15 +50,14 @@ public class RestRouteBuilder extends RouteBuilder {
     private final CachePullProcessor cachePullProcessor;
     private final QueryStringProcessor queryStringProcessor;
     private final CacheNewVideosProcessor stashNovelDataProcessor;
-    private final String ytAPICallProcessor = "ytAPICallProcessor";
-    private final Configuration.RestServerConfiguration serverConfig;
+    private final Configuration configuration;
     private final ObjectMapper objectMapper;
 //    private final YouTubeAgent youTubeAgent;
 
     public RestRouteBuilder(DB mongoDb,  Configuration configuration, ObjectMapper objectMapper) {
 	super();
 	this.objectMapper = objectMapper;
-	this.serverConfig = configuration.getRestServerConfiguration();
+	this.configuration = configuration;
 //	this.youTubeAgent = new YouTubeAgentImpl(configuration.getYoutubeResourceConfiguration());
 //	this.ytAPICallProcessor = new YouTubeAPICallProcessor(youTubeAgent);
 	this.cachePullProcessor = new CachePullProcessor(mongoDb);
@@ -67,9 +76,16 @@ public class RestRouteBuilder extends RouteBuilder {
     @SuppressWarnings("deprecation")
     public void configure() {
 
+	final RestServerConfiguration  serverConfig = configuration.getRestServerConfiguration();
+	final YoutubeResourceConfiguration  ytApiConfig = configuration.getYoutubeResourceConfiguration();
+	
+	System.out.println("ytApiConfig : " + ytApiConfig);
+	System.out.println("serverConfig : " + serverConfig);
+	final String ytContext = String.format("https4://%s%s" , ytApiConfig.getHost(), ytApiConfig.getContextPath());
+	
 	restConfiguration().component("restlet")
-		.host(this.serverConfig.getHost())
-		.port(this. serverConfig.getPort())
+		.host(serverConfig.getHost())
+		.port(serverConfig.getPort())
 		.bindingMode(RestBindingMode.auto)
 		.componentProperty("chunked", "true");
 
@@ -98,23 +114,23 @@ public class RestRouteBuilder extends RouteBuilder {
 		new Processor() {
             	    @Override
             	    public void process(Exchange exchange) throws Exception {
-            		org.apache.camel.Message messageIn = exchange.getIn();
-            		org.apache.camel.Message message = exchange.getOut();
-
-            		String Q = messageIn.getHeader("Q" , String.class);
+            		final Message IN = exchange.getIn();
+            		final Message OUT = exchange.getOut();
+            		String Q = IN.getHeader("Q" , String.class);
             		
-            		message.setHeader(Exchange.HTTP_QUERY,  Q);
-            		message.setHeader(Exchange.HTTP_METHOD, constant(org.apache.camel.component.http4.HttpMethods.GET));
-            		message.setHeader("servicePath", simple("inbound_novella"));
+            		OUT.setHeader(Exchange.HTTP_QUERY,  Q);
+            		OUT.setHeader(Exchange.HTTP_METHOD, constant(org.apache.camel.component.http4.HttpMethods.GET));
+            		OUT.setHeader("servicePath", simple("inbound_novella"));
             		
-            		message.setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, messageIn.getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME));
-            		message.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, messageIn.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA));
-            		message.setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, messageIn.getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME));
-            		message.setHeader(PersistenceHelper.HDR_FOUNDQUERY, messageIn.getHeader(PersistenceHelper.HDR_FOUNDQUERY));
+            		OUT.setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, IN.getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME));
+            		OUT.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, IN.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA));
+            		OUT.setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, IN.getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME));
+            		OUT.setHeader(PersistenceHelper.HDR_FOUNDQUERY, IN.getHeader(PersistenceHelper.HDR_FOUNDQUERY));
             	    }
             	}
 	)
-	.to("https4://www.googleapis.com/youtube/v3/search?"
+	.to(String.format(ytContext + "%s" ,  ytApiConfig.getVideoSearchPath() ) 
+		+ "?"
 		+ "disableStreamCache=true"
 		+ "&copyHeaders=true"
 		+ "&transferException=true"
@@ -134,7 +150,46 @@ public class RestRouteBuilder extends RouteBuilder {
 	.bindingMode(RestBindingMode.json)
 	.route()
 	.routeId("detail")
-	.process(ytAPICallProcessor)
+	.process(
+		new Processor() {
+            	    @Override
+            	    public void process(Exchange exchange) throws Exception {
+            		final Message IN = exchange.getIn();
+            		final Message OUT = exchange.getOut();
+            		
+            		final Request request = IN.getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
+
+            		String Q = request.getResourceRef().getQuery();
+            		
+            		OUT.setHeader(Exchange.HTTP_QUERY,  Q);
+            		OUT.setHeader(Exchange.HTTP_METHOD, constant(org.apache.camel.component.http4.HttpMethods.GET));
+            		
+            		OUT.setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, IN.getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME));
+            		OUT.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, IN.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA));
+            		OUT.setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, IN.getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME));
+            		OUT.setHeader(PersistenceHelper.HDR_FOUNDQUERY, IN.getHeader(PersistenceHelper.HDR_FOUNDQUERY));
+            	    }
+            	}
+	)
+	.to(String.format(ytContext + "%s" ,  ytApiConfig.getVideoDetailPath() ) 
+		+ "?"
+		+ "disableStreamCache=true"
+		+ "&copyHeaders=true"
+		+ "&transferException=true"
+		+ "&useSystemProperties=true"
+	)
+//	.to("log:target/dump.txt?showBody=true&showHeaders=true")
+
+	.process(new  Processor () {
+	    @Override
+	    public void process(Exchange exchange) throws Exception {
+		final Message IN = exchange.getIn();
+		final Message OUT = exchange.getOut();
+		YouTubeVideoDetailResponse ytResp = objectMapper.readValue((InputStream)IN.getBody(), YouTubeVideoDetailResponse.class);
+		OUT.setBody(ytResp);
+	    }
+	    
+	})
 	.end();
     }
 
