@@ -170,8 +170,8 @@ public class Config {
      * 
      */
     public static WebTarget setRequestQueryParams(WebTarget webResource, Map<String, String> nameValuePairs) {
-	for (String k : nameValuePairs.keySet())
-	    webResource = webResource.queryParam(k, nameValuePairs.get(k));
+	for (Map.Entry<String,String> entry : nameValuePairs.entrySet())
+	    webResource = webResource.queryParam(entry.getKey(), entry.getValue());
 	return webResource;
     }
 

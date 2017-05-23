@@ -1,10 +1,11 @@
 package cab.bean.srvcs.pipes.route;
 
-import java.io.InputStream;
+import java.util.Map;
 
-import org.apache.camel.Predicate;
+import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.file.FileComponent;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestDefinition;
 
@@ -12,8 +13,11 @@ import cab.bean.srvcs.pipes.Configuration;
 import cab.bean.srvcs.pipes.PersistenceHelper;
 import cab.bean.srvcs.pipes.processor.CacheNewVideosProcessor;
 import cab.bean.srvcs.pipes.processor.CachePullProcessor;
+import cab.bean.srvcs.pipes.processor.Http4Processor;
 import cab.bean.srvcs.pipes.processor.QueryStringProcessor;
+import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.DB;
 
 
@@ -33,19 +37,20 @@ public class RestRouteBuilder extends RouteBuilder {
     /**
      * The following values are set in Spring beans.
      */
-    private final  Processor cachePullProcessor;
-    private final  Processor queryStringProcessor;
-    private final  Processor stashNovelDataProcessor;
-    
-    private final Configuration.RestServerConfiguration configuration;
+    private final CachePullProcessor cachePullProcessor;
+    private final QueryStringProcessor queryStringProcessor;
+    private final CacheNewVideosProcessor stashNovelDataProcessor;
+    private final String ytAPICallProcessor = "ytAPICallProcessor";
+    private final Configuration.RestServerConfiguration serverConfig;
+    private final ObjectMapper objectMapper;
+//    private final YouTubeAgent youTubeAgent;
 
-    private static final String GAPI_Agent = "ytAPICallProcessor";
-
-    public RestRouteBuilder(DB mongoDb,  Configuration configuration) {
+    public RestRouteBuilder(DB mongoDb,  Configuration configuration, ObjectMapper objectMapper) {
 	super();
-	
-	this.configuration = configuration.getRestServerConfiguration();
-
+	this.objectMapper = objectMapper;
+	this.serverConfig = configuration.getRestServerConfiguration();
+//	this.youTubeAgent = new YouTubeAgentImpl(configuration.getYoutubeResourceConfiguration());
+//	this.ytAPICallProcessor = new YouTubeAPICallProcessor(youTubeAgent);
 	this.cachePullProcessor = new CachePullProcessor(mongoDb);
 	this.stashNovelDataProcessor = new CacheNewVideosProcessor(mongoDb);
 	this.queryStringProcessor = new QueryStringProcessor(mongoDb);
@@ -63,14 +68,14 @@ public class RestRouteBuilder extends RouteBuilder {
     public void configure() {
 
 	restConfiguration().component("restlet")
-		.host(this.configuration.getHost())
-		.port(this. configuration.getPort())
+		.host(this.serverConfig.getHost())
+		.port(this. serverConfig.getPort())
 		.bindingMode(RestBindingMode.auto)
 		.componentProperty("chunked", "true");
 
-	RestDefinition  def = rest(configuration.getContextPath());
+	RestDefinition  def = rest(serverConfig.getContextPath());
 
-	def.get(configuration.getSearchServicePath())
+	def.get(serverConfig.getSearchServicePath())
 		.produces("application/json")
 		.bindingMode(RestBindingMode.json)
             	.route()
@@ -89,21 +94,47 @@ public class RestRouteBuilder extends RouteBuilder {
 	;
 	
 	from("direct:inbound_novel")
-	    .setHeader("servicePath", simple("inbound_novella"))
+	.process(
+		new Processor() {
+            	    @Override
+            	    public void process(Exchange exchange) throws Exception {
+            		org.apache.camel.Message messageIn = exchange.getIn();
+            		org.apache.camel.Message message = exchange.getOut();
 
-	    .process(GAPI_Agent)
-	    .wireTap("direct:store_novel_data", true);
+            		String Q = messageIn.getHeader("Q" , String.class);
+            		
+            		message.setHeader(Exchange.HTTP_QUERY,  Q);
+            		message.setHeader(Exchange.HTTP_METHOD, constant(org.apache.camel.component.http4.HttpMethods.GET));
+            		message.setHeader("servicePath", simple("inbound_novella"));
+            		
+            		message.setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, messageIn.getHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME));
+            		message.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, messageIn.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA));
+            		message.setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, messageIn.getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME));
+            		message.setHeader(PersistenceHelper.HDR_FOUNDQUERY, messageIn.getHeader(PersistenceHelper.HDR_FOUNDQUERY));
+            	    }
+            	}
+	)
+	.to("https4://www.googleapis.com/youtube/v3/search?"
+		+ "disableStreamCache=true"
+		+ "&copyHeaders=true"
+		+ "&transferException=true"
+		+ "&useSystemProperties=true"
+	)
+//	.to("log:target/dump.txt?showBody=true&showHeaders=true")
+	.process(new Http4Processor(objectMapper))
+	.wireTap("direct:store_novel_data", true)
+	;
 
 	from("direct:store_novel_data")
 	    .process(stashNovelDataProcessor)
 	    .end();
 
-	def.get(configuration.getDetailServicePath())
+	def.get(serverConfig.getDetailServicePath())
 	.produces("application/json")
 	.bindingMode(RestBindingMode.json)
 	.route()
 	.routeId("detail")
-	.process(GAPI_Agent)
+	.process(ytAPICallProcessor)
 	.end();
     }
 

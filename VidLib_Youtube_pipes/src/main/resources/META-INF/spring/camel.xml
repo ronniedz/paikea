@@ -30,18 +30,23 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<!-- <context:property-placeholder location="classpath:yt-gateway.properties" /> -->
 
 
+	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+
 	<bean id="configurator" class="cab.bean.srvcs.pipes.Configurator">
 		<constructor-arg value="configuration.json" />
+		<constructor-arg ref="objectMapper" />
 	</bean>
+
+	<bean id="conf" factory-bean="configurator" factory-method="getConfiguration"/>
+	<bean id="ytconf" factory-bean="conf" factory-method="getYoutubeResourceConfiguration"/>
 		
 	<bean id="mongoBean" class="com.mongodb.Mongo">
 		<constructor-arg name="host" value="${mongodb.host}" />
 	</bean>
 		
 	<bean id="youTubeAgentImpl" class="cab.bean.srvcs.tube4kids.resources.YouTubeAgentImpl">
-		<constructor-arg><!--  name="mongoDb" -->
-      <bean factory-bean="configurator" factory-method="getYoutubeResourceConfiguration"/>
-    </constructor-arg>
+		<constructor-arg ref="ytconf"/>
 	</bean>
 	
 	<bean id="ytAPICallProcessor" class="cab.bean.srvcs.pipes.processor.YouTubeAPICallProcessor">
@@ -49,14 +54,13 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	</bean>
 
 	<bean id="restRouteBuilder" class="cab.bean.srvcs.pipes.route.RestRouteBuilder">
-		<constructor-arg><!--  name="mongoDb" -->
+		<constructor-arg>
       <bean factory-bean="mongoBean" factory-method="getDB">
          <constructor-arg value="${mongodb.dbname}"/>
       </bean>
     </constructor-arg>
-		<constructor-arg><!--  name="mongoDb" -->
-      <bean factory-bean="configurator" factory-method="getConfiguration"/>
-    </constructor-arg>
+		<constructor-arg ref="conf"/>
+		<constructor-arg ref="objectMapper" />
 	</bean>
 
 <!--  

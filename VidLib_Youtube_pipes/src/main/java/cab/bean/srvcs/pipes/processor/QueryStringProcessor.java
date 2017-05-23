@@ -20,6 +20,21 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 
+/**
+ * Initialize with a MongoDB connection.
+ *<p /> 
+ * This class expects a {@link org.restlet.Request}  on the {@code IN} Header({@link RestletConstants.RESTLET_REQUEST})
+ * <blockquote>
+ * The Request is processed and the following values are set on the {@code OUT} headers:
+ * <ul>
+ * <li>{@code 'Q'}	<b> : The original query string</b></li>
+ * <li>{@code 'HDR_QUERYPARAMS_NAME'}	<b> : The query as a Map</b></li>
+ * <li>{@code 'HDR_NAME_SERVICE_DEST_DATA'}	<b> : The VideoSearchRequest object</b></li>
+ * <li>{@code 'HDR_NAME_COLLECTION_NAME'}	<b> : A unique name derived from the query params.</b></li>
+ * <li>{@code 'HDR_FOUNDQUERY'}	<b> : A Boolean indicating whether this query was found in persistence.</b></li>
+ * </ul>
+ * </blockquote>
+ */
 public class QueryStringProcessor implements Processor {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryStringProcessor.class);
 
@@ -35,6 +50,8 @@ public class QueryStringProcessor implements Processor {
 	LOGGER.debug("OUT - GET Headers(): " + exchange.getOut().getHeaders().keySet());
 
 	final Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
+	exchange.getOut().setHeader("Q", request.getResourceRef().getQuery());
+
 	final Map<String, String> params = request.getResourceRef().getQueryAsForm().getValuesMap();
 	
 	try {

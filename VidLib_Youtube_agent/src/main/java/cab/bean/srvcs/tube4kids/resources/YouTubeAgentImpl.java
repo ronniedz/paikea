@@ -8,15 +8,18 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.filter.LoggingFilter;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cab.bean.srvcs.pipes.route.YoutubeResourceConfiguration;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
 //import cab.bean.srvcs.tube4kids.resources.Config;
 
 import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
@@ -27,45 +30,25 @@ public class YouTubeAgentImpl implements YouTubeAgent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YouTubeAgentImpl.class);
     private final Client jClient;
-    private  WebTarget baseTarget;
+    private final WebTarget baseTarget;
+    private final String apiKey;
     private final String nullStr = null;
     
-    public YouTubeAgentImpl(Configuration.YoutubeResourceConfiguration configuration) {
-	
-    }
     
-    public YouTubeAgentImpl() {
-	this.jClient = ClientBuilder.newClient().register(new JacksonJaxbJsonProvider()); //.register(mapper); 
-	this.baseTarget = jClient
-		.target( Config.PropKey.DATASRC_DOMAIN.getValue() + Config.PropKey.DATASRC_CTX_URI.getValue() )
-		.queryParam("key", nullStr)
-		.queryParam("key", Config.PropKey.APIKEY.getValue());
-    } 
+    private final String videoSearchPath;
 
-    public YouTubeAgentImpl(JacksonJsonProvider jsonProvider) {
-	this.jClient = ClientBuilder.newClient().register(jsonProvider); 
-	this.baseTarget = jClient
-		.target( Config.PropKey.DATASRC_DOMAIN.getValue() + Config.PropKey.DATASRC_CTX_URI.getValue() )
-		.queryParam("key", nullStr)
-		.queryParam("key", Config.PropKey.APIKEY.getValue());
-    }
+    private final String videoDetailPath;
 
-    public YouTubeAgentImpl(Client jClient) {
-	this.jClient = jClient; 
-	this.baseTarget = jClient
-		.target( Config.PropKey.DATASRC_DOMAIN.getValue() + Config.PropKey.DATASRC_CTX_URI.getValue() )
-		.queryParam("key", nullStr)
-		.queryParam("key", Config.PropKey.APIKEY.getValue());
-    }
-    
-    
-    public YouTubeAgentImpl(String apiKey) {
-	this();
-	setApiKey(apiKey);
+    public YouTubeAgentImpl(Map<String, String> props) {
+	this.jClient = ClientBuilder.newClient( new ClientConfig().register(LOGGER).register(new JacksonJaxbJsonProvider() )); 
+	this.videoSearchPath = props.get("videoSearchPath");
+	this.videoDetailPath = props.get("videoDetailPath");
+	this.apiKey = props.get("apiKey");
+	this.baseTarget = jClient.target(props.get("host")).path(props.get("contextPath"));
     }
     
     public WebTarget setApiKey(String apiKey) {
-	return baseTarget = baseTarget.queryParam("key", nullStr).queryParam("key", apiKey);
+	return baseTarget.queryParam("key", nullStr).queryParam("key", apiKey);
     }
     
     public Response doRequest(Map<String, String> params, String route) {
@@ -83,16 +66,22 @@ public class YouTubeAgentImpl implements YouTubeAgent {
 
 
     public Response runSearchQuery(Map<String, String> params)  {
-	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_SEARCH_SRV_URI.getValue());
-	webResource = Config.setRequestQueryParams(webResource, params);
+	WebTarget webResource = Config.setRequestQueryParams(baseTarget.path(videoSearchPath), params);
+	if ( ! params.containsKey("key")) {
+	    webResource = webResource.queryParam("key", apiKey);
+	}
 	Response remoteReply = webResource.request(MediaType.APPLICATION_JSON).get();
 	YouTubeResponse body = remoteReply.readEntity(YouTubeResponse.class);
 	return Response.status(remoteReply.getStatusInfo()).entity(body).build();
     }
     
     public Response runVideoDetailsQuery(Map<String, String> params)  {
-	WebTarget webResource = baseTarget.path(Config.PropKey.DATASRC_DETAILS_SRV_URI.getValue());
-	webResource = Config.setRequestQueryParams(webResource, params);
+	WebTarget webResource = Config.setRequestQueryParams(baseTarget.path(videoDetailPath), params);
+	if ( ! params.containsKey("key")) {
+	    webResource = webResource.queryParam("key", apiKey);
+	}
+
+	
 	LOGGER.debug("YT Details Request:\n{}\n", webResource.getUri().toString());
 	Response remoteReply = webResource.request(MediaType.APPLICATION_JSON).get();
 	YouTubeVideoDetailResponse body = remoteReply.readEntity(YouTubeVideoDetailResponse.class);
