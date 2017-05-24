@@ -1,0 +1,47 @@
+{
+	"db" : {
+		"name" : "test",
+		"host" : "localhost",
+		"port" : null
+	},
+	
+	"restServerConfiguration" : {
+		"host" : "localhost",
+		"port": 7070,
+		"contextPath": "pipes",
+		"searchServicePath": "/search",
+		"detailServicePath": "/detail"
+	},
+	
+	"youtubeResourceConfiguration" : {
+		"host": "www.googleapis.com",
+		"contextPath": "/youtube/v3",
+		"videoSearchPath": "/search",
+		"videoDetailPath": "/videos",
+		"apiKey" : "AIzaSyAmOXO8tcUauYkj1POSnEzle_Rm61LAOes"
+	},
+	
+	"testParams" : {
+		"search" : {
+		     "q" : "filmes completo dublado -legendado",
+		     "part" : "snippet",
+		     "maxResults" : "2",
+		     "order" : "date",
+		     "publishedAfter" : "2006-01-01T00:00:00Z",
+		     "regionCode" : "BR",
+		     "relevanceLanguage" : "PT",
+		     "type" : "video",
+		     "videoCaption" : "any",
+		     "videoDuration" : "long",
+		     "videoLicense" : "youtube",
+		     "videoType" : "any",
+		     "fields" : "etag,items,kind,nextPageToken,prevPageToken,pageInfo"
+		},
+	
+		"detailLookup" : {
+			"id" : "QH4DhHpYEIc,4o1TFIIciAg",
+			"part" : "contentDetails,snippet"
+		}
+	}
+}
+
