@@ -99,7 +99,7 @@
 	<modules>
 		<module>VidLib_common_api</module>
 		<module>VidLib_Youtube_pipes</module>
-		<module>VidLib_Youtube_agent</module>
+		
 	</modules>
 
 	<build>
