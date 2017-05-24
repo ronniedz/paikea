@@ -20,14 +20,14 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 ">
 
 	<!-- Need a special configurer for variables in attributes (e.g. see route below). -->
-	<bean id="bridgePropertyPlaceholder" class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
+<!-- 	<bean id="bridgePropertyPlaceholder" class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
 		<property name="locations">
 	    <list>
 	      <value>classpath:app-queue.properties</value>
 	    </list>
 	  </property>
 	</bean>
-	<!-- <context:property-placeholder location="classpath:yt-gateway.properties" /> -->
+ -->	<!-- <context:property-placeholder location="classpath:yt-gateway.properties" /> -->
 
 	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
 
@@ -38,18 +38,25 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 	<bean id="conf" factory-bean="configurator" factory-method="getConfiguration"/>
 	<bean id="ytconf" factory-bean="conf" factory-method="getYoutubeResourceConfiguration"/>
+	<bean id="db" factory-bean="conf" factory-method="getDb"/>
 		
 	<bean id="mongoBean" class="com.mongodb.Mongo">
-		<constructor-arg name="host" value="${mongodb.host}" />
+		<constructor-arg name="host">
+			<bean factory-bean="db" factory-method="get"><constructor-arg value="host"/></bean>
+		</constructor-arg>
 	</bean>
-		
+
 	<bean id="restRouteBuilder" class="cab.bean.srvcs.pipes.route.RestRouteBuilder">
 		<constructor-arg>
-      <bean factory-bean="mongoBean" factory-method="getDB">
-         <constructor-arg value="${mongodb.dbname}"/>
-      </bean>
-    </constructor-arg>
-		<constructor-arg ref="conf"/>
+			<bean factory-bean="mongoBean" factory-method="getDB">
+				<constructor-arg>
+					<bean factory-bean="db" factory-method="get">
+						<constructor-arg value="name" />
+					</bean>
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+		<constructor-arg ref="conf" />
 		<constructor-arg ref="objectMapper" />
 	</bean>
 

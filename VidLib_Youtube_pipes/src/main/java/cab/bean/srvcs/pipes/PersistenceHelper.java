@@ -12,6 +12,7 @@ public class PersistenceHelper {
     public static final String HDR_NAME_COLLECTION_NAME = "X-CollectionName";
     public static final String HDR_NAME_SERVICE_DEST_DATA = "X-dbstore_data";
     public static final String HDR_NAME_SERVICE_DEST = "X-ServiceDestination";
+    public static final String REST_QUERYSTRING = "X-QueryString";
 
     public static final String prefix = "vcache_";
     public static final String HDR_QUERYPARAMS_NAME = "params";

@@ -44,12 +44,12 @@
 		</dependency>
 
 		<!-- bean.cab YouTube agent plus dependencies -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>cab.bean.srvcs.tube4kids</groupId>
 			<artifactId>VidLib_Youtube_agent</artifactId>
 			<version>0.8</version>
 		</dependency>
-
+ -->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-gson</artifactId>

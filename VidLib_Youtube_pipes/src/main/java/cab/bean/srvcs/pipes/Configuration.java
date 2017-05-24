@@ -1,6 +1,7 @@
 package cab.bean.srvcs.pipes;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
@@ -23,17 +24,26 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class Configuration {
 
     @NotNull
-    @JsonProperty
-    private RestServerConfiguration restServerConfiguration = new RestServerConfiguration();
+    @JsonProperty(value="db")
+    public Map<String, String> db;
 
+    
     @NotNull
     @JsonProperty
-    private YoutubeResourceConfiguration youtubeResource = new YoutubeResourceConfiguration();
+    public RestServerConfiguration restServerConfiguration = new RestServerConfiguration();
+    
+    @NotNull
+    @JsonProperty
+    public YoutubeResourceConfiguration youtubeResource = new YoutubeResourceConfiguration();
+
+    public Map<String, String> getDb() {
+	return db;
+    }
 
     public RestServerConfiguration getRestServerConfiguration() {
 	return restServerConfiguration;
     }
-
+    
     public void setRestServerConfiguration(RestServerConfiguration rc) {
 	this.restServerConfiguration = rc;
     }
