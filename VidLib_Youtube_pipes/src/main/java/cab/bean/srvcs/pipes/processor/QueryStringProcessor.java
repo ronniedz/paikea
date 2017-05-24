@@ -23,7 +23,7 @@ import com.mongodb.DBObject;
 
 /**
  * Initialize with a MongoDB connection.
- *<p /> 
+ *<p />
  * This class expects a {@link org.restlet.Request}  on the {@code IN} Header({@link RestletConstants.RESTLET_REQUEST})
  * <blockquote>
  * The Request is processed and the following values are set on the {@code OUT} headers:
@@ -49,24 +49,24 @@ public class QueryStringProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws QueueException {
 	final Message mout = exchange.getOut();
-	
+
 	final Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
 	final String queryString = request.getResourceRef().getQuery();
-	
+
 	mout.setHeader(PersistenceHelper.REST_QUERYSTRING, queryString);
 
 	final Map<String, String> params = request.getResourceRef().getQueryAsForm().getValuesMap();
-	
+
 	try {
     	    final VideoSearchRequest aQuery = new VideoSearchRequest();
     	    BeanUtils.copyProperties(aQuery, params);
-    	    
+
     	    final String collectionName = PersistenceHelper.makeNameFromQuery(params);
 
     	    aQuery.setCollectionName(collectionName);
-    	    
+
     	    final Optional<VideoSearchRequest> needleState = cacheContains(aQuery);
-    	    
+
     	    mout.setHeader(PersistenceHelper.HDR_FOUNDQUERY, needleState.isPresent());
     	    mout.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, needleState.orElse(aQuery) );
 

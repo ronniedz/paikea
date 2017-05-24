@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Configurator {
 
     final Configuration configuration;
-    
+
     public Configurator(String arg, ObjectMapper objectMapper) throws Exception {
 	super();
 	System.err.println("Loading Configuration from: " + arg);
@@ -22,11 +22,11 @@ public class Configurator {
     public RestServerConfiguration getRestServerConfiguration() {
         return configuration.getRestServerConfiguration();
     }
-    
+
     public YoutubeResourceConfiguration getYoutubeResourceConfiguration() {
 	return configuration.getYoutubeResourceConfiguration();
     }
-    
+
     /**
      * @return the configuration
      */

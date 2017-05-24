@@ -27,11 +27,11 @@ public class Configuration {
     @JsonProperty(value="db")
     public Map<String, String> db;
 
-    
+
     @NotNull
     @JsonProperty
     public RestServerConfiguration restServerConfiguration = new RestServerConfiguration();
-    
+
     @NotNull
     @JsonProperty
     public YoutubeResourceConfiguration youtubeResource = new YoutubeResourceConfiguration();
@@ -43,11 +43,11 @@ public class Configuration {
     public RestServerConfiguration getRestServerConfiguration() {
 	return restServerConfiguration;
     }
-    
+
     public void setRestServerConfiguration(RestServerConfiguration rc) {
 	this.restServerConfiguration = rc;
     }
-    
+
     public YoutubeResourceConfiguration getYoutubeResourceConfiguration() {
 	return youtubeResource;
     }
@@ -55,7 +55,7 @@ public class Configuration {
     public void setYoutubeResourceConfiguration(YoutubeResourceConfiguration ytc) {
 	this.youtubeResource = ytc;
     }
-    
+
     @EqualsAndHashCode
     @ToString
     @Data
@@ -63,24 +63,24 @@ public class Configuration {
 	@NotEmpty
 	@JsonProperty
 	private String apiKey;
-	
+
 	@NotEmpty
 	@JsonProperty
 	private String host;
-	
+
 	@NotEmpty
 	@JsonProperty
 	private String contextPath ;
-	
+
 	@NotEmpty
 	@JsonProperty
 	private String videoSearchPath;
-	
+
 	@NotEmpty
 	@JsonProperty
 	private String videoDetailPath;
     }
-    
+
     @EqualsAndHashCode
     @ToString
     @Data

@@ -26,7 +26,7 @@ public class VideoSearchRequest {
 
     @JsonProperty
     private String collectionName;
-    
+
     @JsonProperty
     private String etag;
 
@@ -39,20 +39,20 @@ public class VideoSearchRequest {
 
     @JsonProperty
     private String nextPageToken;
-    
+
     @QueryParam("pageToken")
     private String pageToken;
-    
+
     @JsonProperty
     private String prevPageToken;
-    
+
     @JsonProperty
     @QueryParam("regionCode")
     private String regionCode;
-    
+
     @QueryParam("q")
     private String q;
-    
+
     @JsonProperty
     private Long totalResults;
 
