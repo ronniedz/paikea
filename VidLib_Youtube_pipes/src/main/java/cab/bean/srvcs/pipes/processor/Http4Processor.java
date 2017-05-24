@@ -9,6 +9,13 @@ import cab.bean.srvcs.pipes.model.VideoSearchRequest;
 import cab.bean.srvcs.tube4kids.api.YouTubeResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Converts the in.message.body into a  {@link YouTubeResponse} object.
+ * Forwards in.headers to the out message.
+ *  
+ * @author ronalddennison
+ *
+ */
 public class Http4Processor implements Processor {
 
     private final ObjectMapper objectMapper;
@@ -28,6 +35,8 @@ public class Http4Processor implements Processor {
 	final Message OUT = exchange.getOut();
 	
 	YouTubeResponse ytResp = objectMapper.readValue((InputStream)IN.getBody(), YouTubeResponse.class);
+	
+	// TODO confirm if needed in pipe
 	VideoSearchRequest ytReq = IN.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, VideoSearchRequest.class);
    	exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, ytReq);
 	

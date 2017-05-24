@@ -31,7 +31,7 @@ public class CacheNewVideosProcessor implements Processor {
 		db.getCollection(PersistenceHelper.META_DATA_DB_NAME),
 		VideoSearchRequest.class, String.class);
     }
-    
+
     /**
      * Persists new Videos from message
      */
@@ -39,10 +39,10 @@ public class CacheNewVideosProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
 
 	final YouTubeResponse ytResp = exchange.getIn().getBody(YouTubeResponse.class);
-	
+
 	final String collectionName = exchange.getIn()
 		.getHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME, String.class);
-	
+
 	final VideoSearchRequest queryDetail = exchange.getIn()
 		.getHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, VideoSearchRequest.class);
 
@@ -51,10 +51,10 @@ public class CacheNewVideosProcessor implements Processor {
 	queryDetail.setCollectionName(collectionName);
 
 	final DBCollection coll = db.getCollection(collectionName);
-	
+
 	final JacksonDBCollection<MongoVideo, org.bson.types.ObjectId> jVidColl =
 		JacksonDBCollection.wrap(coll, MongoVideo.class, org.bson.types.ObjectId.class);
-	
+
 	final WriteResult<MongoVideo, org.bson.types.ObjectId> res = jVidColl.insert(
 		ytResp.getItems().stream().map( item -> {
 		    MongoVideo mg = new MongoVideo();
@@ -63,11 +63,11 @@ public class CacheNewVideosProcessor implements Processor {
 		    return mg;
 		}).collect(Collectors.toList())
 	);
-	
+
 	queryDetail.setLastId(res.getSavedId().toString());
-	
+
 	WriteResult<VideoSearchRequest, String> result = qryAllocColl.insert(queryDetail);
-	
+
 	LOGGER.debug("Saved " + result.getSavedIds().size() + " videos");
 
     }

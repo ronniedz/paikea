@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.component.restlet.RestletConstants;
 import org.apache.commons.beanutils.BeanUtils;
@@ -47,10 +48,12 @@ public class QueryStringProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws QueueException {
-	final Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
-	String queryString = request.getResourceRef().getQuery();
+	final Message mout = exchange.getOut();
 	
-	exchange.getOut().setHeader(PersistenceHelper.REST_QUERYSTRING, queryString);
+	final Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
+	final String queryString = request.getResourceRef().getQuery();
+	
+	mout.setHeader(PersistenceHelper.REST_QUERYSTRING, queryString);
 
 	final Map<String, String> params = request.getResourceRef().getQueryAsForm().getValuesMap();
 	
@@ -64,12 +67,12 @@ public class QueryStringProcessor implements Processor {
     	    
     	    final Optional<VideoSearchRequest> needleState = cacheContains(aQuery);
     	    
-    	    exchange.getOut().setHeader(PersistenceHelper.HDR_FOUNDQUERY, needleState.isPresent());
-    	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, needleState.orElse(aQuery) );
+    	    mout.setHeader(PersistenceHelper.HDR_FOUNDQUERY, needleState.isPresent());
+    	    mout.setHeader(PersistenceHelper.HDR_NAME_SERVICE_DEST_DATA, needleState.orElse(aQuery) );
 
-    	    exchange.getOut().setBody(aQuery);
-    	    exchange.getOut().setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, params);
-    	    exchange.getOut().setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME,collectionName);
+    	    mout.setBody(aQuery);
+    	    mout.setHeader(PersistenceHelper.HDR_QUERYPARAMS_NAME, params);
+    	    mout.setHeader(PersistenceHelper.HDR_NAME_COLLECTION_NAME,collectionName);
 	}
 	catch (Exception e) {
 	    throw new QueueException(e.getMessage());
@@ -80,15 +83,14 @@ public class QueryStringProcessor implements Processor {
         VideoSearchRequest foundSearchResponse = null;
 
 	if ( db.collectionExists(queryObj.getCollectionName()) ) {
-	    JacksonDBCollection<VideoSearchRequest, org.bson.types.ObjectId> metadat = JacksonDBCollection.wrap(
-		    db.getCollection(PersistenceHelper.META_DATA_DB_NAME),
-		    VideoSearchRequest.class,
-		    org.bson.types.ObjectId.class
-	    );
             DBObject query = new BasicDBObject();
             query.put("pageToken" , Optional.ofNullable(queryObj.getPageToken()).orElse(""));
             query.put("collectionName" , queryObj.getCollectionName());
-            foundSearchResponse = metadat.findOne(query);
+            foundSearchResponse = JacksonDBCollection.wrap(
+        		    db.getCollection(PersistenceHelper.META_DATA_DB_NAME),
+        		    VideoSearchRequest.class,
+        		    org.bson.types.ObjectId.class
+        	    ).findOne(query);
 	}
 	return Optional.ofNullable(foundSearchResponse);
     }

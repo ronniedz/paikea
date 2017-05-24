@@ -29,12 +29,12 @@ import com.mongodb.DB;
  * Route requests received at the Restlet endpoint. "Search" requests
  * can be fulfilled from cache (in MongoDB) or by the
  * GAPI_Agent (configured in spring context)
- * 
+ *
  * The current endpoints to the Restlet are:
- * 
+ *
  * 	'/search'	- to search for videos
  * 	'/detail'	- to get details for a specified video
- *  
+ *
  */
 public class RestRouteBuilder extends RouteBuilder {
 
@@ -55,13 +55,13 @@ public class RestRouteBuilder extends RouteBuilder {
 	this.cachePullProcessor = new CachePullProcessor(mongoDb);
 	this.stashNovelDataProcessor = new CacheNewVideosProcessor(mongoDb);
 	this.queryStringProcessor = new QueryStringProcessor(mongoDb);
-	
+
 	// enable Jackson json type converter
 	getContext().getProperties().put("CamelJacksonEnableTypeConverter", "true");
 	// allow Jackson json to convert to pojo types also (by default jackson only converts to String and other simple types)
 	getContext().getProperties().put("CamelJacksonTypeConverterToPojo", "true");
     }
-	
+
     /**
      * Routes ...
      */
@@ -75,8 +75,8 @@ public class RestRouteBuilder extends RouteBuilder {
 		+ "?disableStreamCache=true&transferException=true&useSystemProperties=true",
 		ytApiConfig.getHost(), ytApiConfig.getContextPath(), "%s");
 
-	final String youtubeSearchURL = String.format(ytContext,  ytApiConfig.getVideoSearchPath()); 
-	final String youtubeDetailsURL = String.format(ytContext,  ytApiConfig.getVideoDetailPath()); 
+	final String youtubeSearchURL = String.format(ytContext,  ytApiConfig.getVideoSearchPath());
+	final String youtubeDetailsURL = String.format(ytContext,  ytApiConfig.getVideoDetailPath());
 
 
 	restConfiguration().component("restlet")
@@ -87,22 +87,24 @@ public class RestRouteBuilder extends RouteBuilder {
 
 	RestDefinition  def = rest(serverConfig.getContextPath());
 
+	/**
+	 * Receive Video query
+	 */
 	def.get(serverConfig.getSearchServicePath())
-		.produces("application/json")
-		.bindingMode(RestBindingMode.json)
-            	.route()
-            		.routeId("search")
-            		.process(queryStringProcessor)
-            		.choice()
-            	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY).isEqualTo(Boolean.TRUE))
-            	   	    	.to("direct:inbound_cached")
-            	   	    .otherwise()
-            	   	   	.to("direct:inbound_novel")
-            	   	   .endChoice()
-            	.end();
-		
+	.produces("application/json")
+	.bindingMode(RestBindingMode.json)
+	.route()
+	.routeId("search")
+		.process(queryStringProcessor)  // Creates a VideoSearch object, determines "novelty" of the query
+            	.choice()
+    	   	    .when(header(PersistenceHelper.HDR_FOUNDQUERY).isEqualTo(Boolean.TRUE))
+    	   	    	.to("direct:inbound_cached")
+    	   	    .otherwise()
+    	   	   	.to("direct:inbound_novel")
+    	   	.endChoice()
+    	.end();
+	// Pull from cache if a repeated query
 	from("direct:inbound_cached").process(cachePullProcessor);
-
 
 	/**
 	 * A function to copy state  and data headers
@@ -118,8 +120,9 @@ public class RestRouteBuilder extends RouteBuilder {
 	    }
 	    return mout;
 	};
-	
+
 	from("direct:inbound_novel")
+	// Prepare query for remote YT query
         	.process( exchange -> {
         	    final Message mout = exchange.getOut();
         	    final Message min = exchange.getIn();
@@ -127,22 +130,28 @@ public class RestRouteBuilder extends RouteBuilder {
         	    forwardHeaders.apply(min, mout);
 
         	    mout.setHeader("servicePath", simple("inbound_novella"));
-        	    
+
         	    final Object queryString = exchange.getIn().getHeader(PersistenceHelper.REST_QUERYSTRING);
         	    if (queryString != null) {
         		mout.setHeader(Exchange.HTTP_QUERY, queryString);
         	    }
         	    mout.setHeader(Exchange.HTTP_METHOD, constant(org.apache.camel.component.http4.HttpMethods.GET));
         	})
+        	/*
+        	 * This is a call to  {@code http4} component
+        	 */
 	.to(youtubeSearchURL)
-//	.to("log:target/dump.txt?showBody=true&showHeaders=true")
+	// process the response
 	.process(new Http4Processor(objectMapper))
+
+	// send a copy of the response to be cached in the DB
 	.wireTap("direct:store_novel_data", true);
 
 	from("direct:store_novel_data")
 	.process(stashNovelDataProcessor)
 	.end();
 
+	// Lookup Video detail from YT
 	def.get(serverConfig.getDetailServicePath())
 	.produces("application/json")
 	.bindingMode(RestBindingMode.json)
@@ -161,7 +170,7 @@ public class RestRouteBuilder extends RouteBuilder {
         	    mout.setHeader(Exchange.HTTP_METHOD, constant(org.apache.camel.component.http4.HttpMethods.GET));
         	})
 	.to(youtubeDetailsURL)
-//	.to("log:target/dump.txt?showBody=true&showHeaders=true")
+//	.to("log:?showBody=true&showHeaders=true")
         	.process( exchange -> {
         	    final Message IN = exchange.getIn();
         	    final Message OUT = exchange.getOut();
