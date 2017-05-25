@@ -130,18 +130,22 @@ class VideoPlayback extends Component {
   }
 
   render() {
-    const { authby, enableaddvideo, ...others } = this.props
+    const { authby, enableaddvideo, videoobj, onAddToPlaylist, userchildren } = this.props
     const { videovisible, visibleAdd } = this.state
-
     return (
       <div
         className={styles.playerwrap}
         style={videovisible ? { display: 'block', visibility: 'visible' } : null}
       >
-        <div id="player" style={{ position: 'relative', pointerEvents: 'visible' }} />
+        <div id="player" style={{ position: 'relative' }} />
+        <br />
         {authby && enableaddvideo && visibleAdd &&
           <div className={styles.addvidwrap}>
-            <AddVideo {...others} />
+            <AddVideo
+              videoobj={videoobj}
+              onAddToPlaylist={onAddToPlaylist}
+              userchildren={userchildren}
+            />
           </div>
         }
       </div>
@@ -160,6 +164,8 @@ VideoPlayback.propTypes = {
   isLooping: PropTypes.bool,
   onChangeVideo: PropTypes.func,
   videomode: PropTypes.string,
+  onAddToPlaylist: PropTypes.func,
+  userchildren: PropTypes.object,
 }
 
 export default VideoPlayback

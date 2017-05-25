@@ -23,28 +23,23 @@ class AddVideo extends Component {
 
     this.state = {
       renderOptions: false,
+      optionsVisible: true,
     }
     this.renderAddVideo = this.renderAddVideo.bind(this)
+    this.toggleOffVisible = this.toggleOffVisible.bind(this)
   }
 
   openAddVideoDialog(vidobj) {
     if (vidobj) {
-      this.setState({ renderOptions: true })
+      this.setState({ renderOptions: true, optionsVisible: true })
     }
   }
 
-  renderAddOptions(videoobj, userchildren, others) {
-    return this.state.renderOptions
-    ? (
-      <AddVideoOptions
-        {...{ videoobj, userchildren }}
-        {...others}
-      />
-    )
-    : null
+  toggleOffVisible() {
+    this.setState({ optionsVisible: false })
   }
 
-  renderAddVideo(videoobj, userchildren, others) {
+  renderAddVideo(videoobj, userchildren, onAddToPlaylist) {
     return (
       <div>
         <button
@@ -55,27 +50,36 @@ class AddVideo extends Component {
         >
           add me
         </button>
-        {this.renderAddOptions(videoobj, userchildren, others)}
+        {this.state.renderOptions && // for
+          <AddVideoOptions
+            videoitems={[videoobj]}
+            isVisible={this.state.optionsVisible}
+            toggleOffVisible={this.toggleOffVisible}
+            {...{ userchildren, onAddToPlaylist }}
+          />
+        }
       </div>
     )
   }
 
   render() {
-    const { playlists, itemindex, videoobj, userchildren, ...others } = this.props
+    const { videoobj, userchildren, onAddToPlaylist } = this.props
     return (
       <div>
-        {(videoobj || playlists) ? this.renderAddVideo(videoobj || playlists.videos[itemindex], userchildren, others) : null}
+        {
+          this.renderAddVideo(videoobj, userchildren, onAddToPlaylist)
+        }
       </div>
     )
   }
 }
 
 AddVideo.propTypes = {
-  videos: PropTypes.oneOfType([PropTypes.array, PropTypes.bool]),
-  itemindex: PropTypes.number,
-  playlists: PropTypes.object,
+  // itemindex: PropTypes.number,
+  // playlists: PropTypes.object,
   userchildren: PropTypes.object,
   videoobj: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  onAddToPlaylist: PropTypes.func,
 }
 
 

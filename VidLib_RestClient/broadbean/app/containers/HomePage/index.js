@@ -73,6 +73,11 @@ function mapDispatchToProps(dispatch) {
       if (evt !== undefined && evt.preventDefault) evt.preventDefault()
       if (evt.target.querySelector('#searchinput').value !== '') dispatch(push('/search'))
     },
+    onAddToPlaylist: (vidobj, playlistids) => {
+      console.log('no dispatch method yet hooked up. Should move /SearchPage method to /App')
+
+      // dispatch(addToPlaylist(vidobj, playlistids))
+    },
     onToggleLooping: (value) => {
       dispatch(toggleLooping(value))
     },

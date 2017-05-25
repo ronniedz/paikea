@@ -5,8 +5,6 @@
 * @Last modified time: 2016-12-16T21:59:28-08:00
 */
 
-/* eslint-disable no-unused-vars */
-
 /*
  *
  * OffspringPage
@@ -23,7 +21,6 @@ import {
   selectLooping,
 } from './selectors'
 import { push } from 'react-router-redux'
-import auth from 'utils/auth'
 import Modal from 'react-modal'
 import { List } from 'immutable'
 import {

@@ -7,6 +7,13 @@ import {
   auth,
 } from 'siteconfig'
 
+let tokenData
+export const beanToken = (data) => {
+  if (data) { tokenData = data }
+  return tokenData
+}
+
+/*
 
 function prepareAuthRequest(token, cb) {
   sendAuthRequest(auth.endpoint, {
@@ -21,11 +28,6 @@ function sendAuthRequest(url, options) {
     .then((res) => console.log('res', res))
 }
 
-let tokenData
-export const beanToken = (data) => {
-  if (data) { tokenData = data }
-  return tokenData
-}
 
 export default {
   beanlogin(token) {
@@ -72,3 +74,4 @@ function pretendRequest(email, pass, cb) {
     }
   }, 500)
 }
+*/

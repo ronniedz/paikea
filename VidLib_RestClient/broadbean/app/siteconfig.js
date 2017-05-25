@@ -6,7 +6,15 @@
 */
 // defaultparams: '&part=snippet&maxResults=15&order=date&publishedAfter=2006-01-01T00%3A00%3A00Z&regionCode=BR&relevanceLanguage=PT&type=video&videoCaption=any&videoDuration=long&videoLicense=youtube&videoType=any&fields=etag%2Citems%2Ckind%2CnextPageToken%2CpageInfo'
 
-const domain = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : ''
+const domain = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:8080'
+  : ''
+
+// export const gapicid = process.env.NODE_ENV === 'development'
+// /* garrick's app id */
+//   ? '447179296185-v7eddk6j71u2o1k3oom25bolk8q4a9sf.apps.googleusercontent.com'
+// /* production app id */
+//   : '16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com'
 
 export const gapicid = '16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com'
 

@@ -20,43 +20,41 @@ import styles from './styles.css'
 import AddVideo from '../AddVideo'
 import DeleteVideo from '../DeleteVideo'
 
-function addVideo(authby, enableaddvideo, videos, listindex, index, others) {
-  if (authby && enableaddvideo) {
-    return (
-      <AddVideo
-        itemindex={index}
-        {...{ listindex, videos }}
-        {...others}
-      />
-    )
-  }
+function addVideo(videoobj, userchildren, onAddToPlaylist) {
+  return (
+    <AddVideo
+      videoobj={videoobj}
+      onAddToPlaylist={onAddToPlaylist}
+      userchildren={userchildren}
+    />
+  )
 }
 
-function deleteVideo(authby, enabledeletevideo, videos, listindex, index, others) {
-  if (authby && enabledeletevideo) {
-    return (
-      <DeleteVideo
-        itemindex={index}
-        {...{ listindex, videos }}
-        {...others}
-      />
-    )
-  }
+function deleteVideo(videos, listindex, index, others) {
+  return (
+    <DeleteVideo
+      itemindex={index}
+      {...{ listindex, videos }}
+      {...others}
+    />
+  )
 }
-
-
-function Thumbnails(videos, properties) {
+/*
+*/
+function Thumbnails(videos, others) {
   const {
     onChangeVideo,
     listindex,
     currentindexes,
+    authby,
     enableaddvideo,
     enabledeletevideo,
-    authby,
     viddim,
-    ...others,
-  } = properties
-
+    playlists,
+    onAddToPlaylist,
+    userchildren,
+    params,
+  } = others
   return (
     <div className="listgroupswrap" >
       {videos.map((val, index) => (
@@ -73,7 +71,7 @@ function Thumbnails(videos, properties) {
             href={`#${val.videoId}`}
             onClick={(evt) => {
               evt.preventDefault()
-              onChangeVideo(evt.currentTarget.dataset, properties.params.id)
+              onChangeVideo(evt.currentTarget.dataset, params.id)
             }}
             data-playlists={listindex}
             data-videos={index}
@@ -87,8 +85,10 @@ function Thumbnails(videos, properties) {
               {val.title.slice(0, 52)}...
           </a>
           <div className={styles.vidctrlwrap}>
-            {addVideo(authby, enableaddvideo, videos, listindex, index, others)}
-            {deleteVideo(authby, enabledeletevideo, videos, listindex, index, others)}
+            {authby && enableaddvideo &&
+              addVideo(playlists.videos[index], userchildren, onAddToPlaylist)}
+            {authby && enabledeletevideo &&
+              deleteVideo(videos, listindex, index, others)}
           </div>
         </div>
         )
@@ -131,6 +131,7 @@ PlaylistItem.propTypes = {
     data: PropTypes.array,
   }),
   titleprepend: React.PropTypes.string,
+  params: React.PropTypes.object,
 }
 
 export default PlaylistItem

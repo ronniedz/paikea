@@ -10,7 +10,6 @@
   position: fixed;
   top: 50px;
   display: inline-block;
-  pointer-events: none;
 }
 
 .navmenu {

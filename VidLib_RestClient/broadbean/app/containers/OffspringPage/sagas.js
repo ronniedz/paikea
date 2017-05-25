@@ -5,8 +5,6 @@
 * @Last modified time: 2016-12-09T01:05:17-08:00
 */
 
-/* eslint-disable no-unused-vars */
-
 import {
   take,
   takeLatest,

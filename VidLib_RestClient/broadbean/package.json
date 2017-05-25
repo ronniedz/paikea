@@ -89,7 +89,7 @@
       ],
       "new-cap": 0,
       "no-sparse-arrays": 0,
-      "no-unused-vars": 1,
+      "no-unused-vars": 0,
       "eqeqeq": 0
     },
     "settings": {
