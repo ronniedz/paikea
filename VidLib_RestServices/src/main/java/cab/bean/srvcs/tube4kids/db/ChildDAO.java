@@ -38,7 +38,7 @@ public class ChildDAO extends AbstractDAO<Child> {
 	}
 	return o;
     }
-     
+
     public Child update(Child objectData, Child o)
 	    throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 	for (Map.Entry<String, String> entry : BeanUtils.describe(objectData)
@@ -49,16 +49,16 @@ public class ChildDAO extends AbstractDAO<Child> {
 	}
 	return o;
     }
-    
+
     public Long quickCreate(Child child) {
 	return (Long) currentSession().save(child);
     }
-    
+
     public Child delete(Child o) {
 	delete(o.getId());
 	return o;
     }
-    
+
     public Child delete(Long id) {
 	Child o = get(id);
 	if (o != null) {
@@ -86,7 +86,7 @@ public class ChildDAO extends AbstractDAO<Child> {
 	if (child !=null) { child.getPlaylists().size(); }
 	return Optional.ofNullable(child);
     }
-    
+
     public Object create(Child aChild,  boolean identOnly) {
 	return identOnly ? currentSession().save(aChild) : this.create(aChild);
     }

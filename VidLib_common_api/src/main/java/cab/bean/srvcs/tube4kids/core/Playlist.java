@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
                 name = "cab.bean.srvcs.tube4kids.core.Playlist.findAll",
                 query = "SELECT p FROM Playlist p"
         ),
-        
+
         @NamedQuery(
             	name = "cab.bean.srvcs.tube4kids.core.Playlist.findUserLists",
             	query = "SELECT p FROM Playlist p where p.user = :user"
@@ -48,7 +48,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @EqualsAndHashCode(of  = {"id"})
 @Data
 public class Playlist implements Comparable<Playlist>{
- 
+
     @Column(name = "id", nullable = false)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,24 +70,24 @@ public class Playlist implements Comparable<Playlist>{
     	joinColumns = @JoinColumn(name = "playlist_id", referencedColumnName = "id"),
     	inverseJoinColumns = @JoinColumn(name = "video_id", referencedColumnName = "video_id"))
     private Set<Video> videos;
-    
+
     //@Transient
     @JsonIgnore
     @ManyToMany(
 	    mappedBy = "playlists",
 	    targetEntity = Child.class,
-	    fetch = FetchType.LAZY, 
+	    fetch = FetchType.LAZY,
 	    cascade = CascadeType.ALL
     )
     private Set<Child> reviewers;
 
     @Override
     public int compareTo(Playlist o) {
-	
+
 	if ( o == null ) return -1;
-	
+
 	Playlist other = (Playlist) o;
-	
+
 	return (this.id == null)
 		? ( other.getId() == null) ? 0 : -1
 		:  ( other.getId() == null) ? 1 : this.id.compareTo(other.getId());

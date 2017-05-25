@@ -29,16 +29,16 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.ALWAYS)
 public class RegionRestriction {
-    
+
     @Column
     public String allowed = null;
 
     @Column
     public  String blocked = null;
-    
+
     public boolean isPermittedIn(String region) {
 	return (
-	    (allowed != null) ? allowed.contains(region) : true  
+	    (allowed != null) ? allowed.contains(region) : true
 	    &&
 	    (blocked == null) ? true : ! blocked.contains(region)
 	);
@@ -53,7 +53,7 @@ public class RegionRestriction {
     public String getBlocked() {
         return blocked;
     }
-    
+
     public void setAllowed(String allowed) {
 	this.allowed = allowed;
     }
@@ -69,7 +69,7 @@ public class RegionRestriction {
 
     @JsonSetter("allowed")
     public void setAllowedList(List<String> allowedList) {
-	this.allowed = StringTool.join(allowedList, ",", false); 
+	this.allowed = StringTool.join(allowedList, ",", false);
     }
-   
+
 }

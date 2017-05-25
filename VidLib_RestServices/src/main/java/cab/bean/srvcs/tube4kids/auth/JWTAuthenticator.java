@@ -27,7 +27,7 @@ public class JWTAuthenticator implements Authenticator<JwtContext, User> {
     @UnitOfWork(readOnly=true, flushMode=FlushMode.MANUAL, transactional=false)
     @Override
     public Optional<User> authenticate(JwtContext context) {
-	
+
         try {
             return tokenDAO.findUserByActiveSubject(context.getJwtClaims().getSubject());
         }

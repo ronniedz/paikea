@@ -25,23 +25,23 @@ public class Neo4JRestServerConfiguration {
 	@NotEmpty
 	@JsonProperty
 	private String host = "localhost";
-    
+
 	@NotEmpty
 	@JsonProperty
 	private String protocol;
-	
+
 	@JsonProperty
 	private String path;
-	
+
 	@Min(1)
 	@Max(65535)
 	@JsonProperty
 	private Integer port;
-	
+
 	@NotEmpty
 	@JsonProperty
 	private String username = "neo4j";
-	
+
 	@JsonProperty
 	private String password = "reggae";
 
@@ -68,13 +68,13 @@ public class Neo4JRestServerConfiguration {
 	public String getPassword() {
 	    return password;
 	}
-	
+
 	public URI getURI() {
 	    URI uri = null;
 	    System.out.println("host: " + host + " / path: " + path + " / port: " + port);
 	    try {
-	               
-		//  new URI( scheme, userInfo,  host, port, path, query, fragment)	               
+
+		//  new URI( scheme, userInfo,  host, port, path, query, fragment)
 		uri = new URI(protocol, null, host, port, path, null, null);
 
 	    } catch (URISyntaxException e) {

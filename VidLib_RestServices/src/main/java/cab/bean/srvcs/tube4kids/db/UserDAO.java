@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class UserDAO extends AbstractDAO<User> {
-    
+
     public UserDAO(SessionFactory factory) {
         super(factory);
     }
@@ -32,7 +32,7 @@ public class UserDAO extends AbstractDAO<User> {
     public User create(User user) {
         return persist(user);
     }
-    
+
     public Boolean delete(Long id) {
 	Boolean rep = Boolean.FALSE;
 	User o = get(id);
@@ -49,23 +49,23 @@ public class UserDAO extends AbstractDAO<User> {
 
     private Optional<PropertyDescriptor> findGetterOf(String propName) {
 	try {
-	   return 
+	   return
 		   Arrays.asList(Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors())
 		   	.stream().filter(propDesc -> { return propDesc.getName().equals(propName); } )
 		   	.findFirst();
-	   
+
 	} catch (IntrospectionException e) {
 	    e.printStackTrace();
 	}
 	return Optional.<PropertyDescriptor>empty();
     }
-    
+
     public User loadAssets(User user, String[] properties) {
 
 	currentSession().load(user, user.getId());
 	try {
 	    Optional<PropertyDescriptor> desc = null;
-	    
+
 	    Object o = null;
 	    for (String propertiy : properties) {
             	desc = findGetterOf(propertiy);
@@ -84,19 +84,19 @@ public class UserDAO extends AbstractDAO<User> {
 	}
 	return user;
     }
-    
+
     public User loadRoles(User user) {
 	currentSession().load(user, user.getId());
 	user.getRoles().size();
 	return user;
     }
-    
+
     public User loadPlaylists(User user) {
 	currentSession().load(user, user.getId());
 	user.getPlaylists().size();
 	return user;
     }
-    
+
     public User loadChildren(User user) {
 	currentSession().load(user, user.getId());
 	user.getRoles().size();

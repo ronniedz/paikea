@@ -13,7 +13,7 @@ import org.hibernate.criterion.Restrictions;
 import cab.bean.srvcs.tube4kids.core.Role;
 
 public class RoleDAO extends AbstractDAO<Role> {
-    
+
     public RoleDAO(SessionFactory factory) {
 	super(factory);
     }
@@ -36,7 +36,7 @@ public class RoleDAO extends AbstractDAO<Role> {
     }
     /**
      * Returns a Role if successful <code>null</code> otherwise.
-     * 
+     *
      * @param id
      * @return
      * 		A role.
@@ -62,9 +62,9 @@ public class RoleDAO extends AbstractDAO<Role> {
 
     /**
      * Return a Role on successful update. Return null if update fails.
-     * 
+     *
      * @param role - must include the ID of the role whose properties will be updated.
-     *  
+     *
      * @return
      * 		A role.
      */
@@ -79,9 +79,9 @@ public class RoleDAO extends AbstractDAO<Role> {
 
     /**
      * Return a Role on successful delete. Return null if delete fails.
-     * 
-     * @param id - the ID of the role to delete 
-     *  
+     *
+     * @param id - the ID of the role to delete
+     *
      * @return
      * 		A role or null if not deleted.
      */

@@ -31,11 +31,11 @@ public class VideoDAO extends AbstractDAO<Video> {
     public List<Video> findWithIds(String... vids) {
 	return findWithIds(Arrays.asList(vids));
     }
-    
+
     public Video create(Video video) {
         return persist(video);
     }
-    
+
     public Video delete(String id) {
 	Video o = get(id);
 	if ( o != null ) {

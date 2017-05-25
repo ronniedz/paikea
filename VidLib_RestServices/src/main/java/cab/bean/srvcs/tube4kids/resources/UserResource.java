@@ -30,7 +30,7 @@ public class UserResource {
     public UserResource(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
-    
+
     @Path("/{id}")
     @DELETE
     @UnitOfWork
@@ -52,10 +52,10 @@ public class UserResource {
     public Optional<User> self(@Auth User user) {
 	return userDAO.findById(user.getId());
     }
-    
+
     @POST
     @UnitOfWork
-    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.USER_MANAGER_ROLE}) 
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.USER_MANAGER_ROLE})
     public User createUser(User user) {
         return userDAO.create(user);
     }

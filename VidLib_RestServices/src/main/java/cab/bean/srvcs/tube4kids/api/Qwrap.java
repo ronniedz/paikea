@@ -24,7 +24,7 @@ public class Qwrap {
 
     @JsonProperty
     private List<String> actions;
-    
+
     @JsonProperty
     private String etag;
 
@@ -33,19 +33,19 @@ public class Qwrap {
 
     @JsonProperty
     private String prevPageToken;
-    
+
     @JsonProperty
     private String regionCode;
-    
+
     @JsonProperty
     private Long totalResults;
-    
+
     @JsonProperty
     private List<Video> items;
 
     @JsonProperty(value="error")
     private ErrorBox error;
-  
+
     @JsonProperty(value="error")
     private Map status;
 
@@ -63,6 +63,6 @@ public class Qwrap {
 	this.totalResults  = new Long((Integer) pageInfo.get("totalResults"));
     }
 
-}        
+}
 
 

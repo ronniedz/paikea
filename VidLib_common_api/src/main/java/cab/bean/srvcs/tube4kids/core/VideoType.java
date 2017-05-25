@@ -3,13 +3,13 @@ package cab.bean.srvcs.tube4kids.core;
 import java.util.List;
 
 /**
- * 
+ *
  * @author ronalddennison
  */
 public interface VideoType {
- 
+
     public String getEtag();
-    
+
     public String getTitle();
 
     /**
@@ -17,11 +17,11 @@ public interface VideoType {
      *  Mongo generates it's own IDs.
      */
     public String getVideoId();
-    
+
     public String getDescription();
-    
+
     public String getDefaultThumbnail();
-    
+
     public List<VideoGenre> getVideoGenres();
 
 

@@ -35,7 +35,7 @@ public class AgeGroupResource {
     public AgeGroup createAgeGroup(AgeGroup ageGroup) {
         return ageGroupDAO.create(ageGroup);
     }
-    
+
     @Path("/{id}")
     @DELETE
     @UnitOfWork

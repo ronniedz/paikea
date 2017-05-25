@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * </code>
  * </blockquote>
  * <p/>
- * The <b><code>operandReference</code></b> is a reference to the annotated method's parameters. It points to the object on which the 
+ * The <b><code>operandReference</code></b> is a reference to the annotated method's parameters. It points to the object on which the
  * ownership test (<b><code>user-method</code></b>) will be applied.
  * <p/>
  * The <b><code>user-method</code></b> is a method on the User object that returns a boolean representing whether the
@@ -33,9 +33,9 @@ import java.lang.annotation.Target;
  * 	Boolean isMyEntity( [ Long | String | etc.... ] entityId );
  * </code>
  * </blockquote>
- * 
+ *
  * <p/>
- * 
+ *
  * The {@code entity or entityId} is determined via the <code>operandReference</code>. There are 3 ways to reference an <i>operand</i> ...
  * Consider the following resource method:
  * <blockquote>
@@ -47,7 +47,7 @@ import java.lang.annotation.Target;
 public Response updateChild(Child aChild, @Auth User user) { ...
  * </pre>
  * </blockquote>
- * 
+ *
  * <ol>
  * <li>
  * Refer to the intended operand via index to the resource method arguments.
@@ -55,7 +55,7 @@ public Response updateChild(Child aChild, @Auth User user) { ...
  * <p/>
  * <blockquote>
  * <code>
- * 	Boolean isOwner = user.isMyChild(aChild); 
+ * 	Boolean isOwner = user.isMyChild(aChild);
  * </code>
  * </blockquote>
  * </li>
@@ -85,13 +85,13 @@ public Response playlist(@PathParam("<b>cid</b>") Long childId, @PathParam("<b>p
  * <p/>
  * <blockquote>
  * <code>
- * 	Boolean isOwner = user.isMyChild(childId) && user.isMyPlaylist(playlistId); 
+ * 	Boolean isOwner = user.isMyChild(childId) && user.isMyPlaylist(playlistId);
  * </code>
  * </blockquote>
  * </li>
  * </ol>
- * 
- * TODO -- Allow for Collection/Array <code>operands</code>.  
+ *
+ * TODO -- Allow for Collection/Array <code>operands</code>.
  */
 @Documented
 @Retention (RUNTIME)

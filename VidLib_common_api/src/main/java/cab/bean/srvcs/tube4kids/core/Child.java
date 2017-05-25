@@ -64,9 +64,9 @@ public class Child {
 	    guardianInfo.put("guardian_id", guardian.getId());
 	    guardianInfo.put("guardian_name",  guardian.getFullName());
 	}
-	return guardianInfo; 
+	return guardianInfo;
     }
-    
+
     @JsonIgnore
     @ManyToOne(optional=false, fetch=FetchType.LAZY)
     private User guardian;

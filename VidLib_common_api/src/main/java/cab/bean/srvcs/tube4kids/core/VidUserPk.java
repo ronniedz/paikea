@@ -13,9 +13,9 @@ import lombok.ToString;
 
 /**
  * Composite key for video genres.
- * 
+ *
  * One user may associate, one pair of genre per video.
- * 
+ *
  * @author Ronald Dennison
  *
  */
@@ -24,7 +24,7 @@ import lombok.ToString;
 @Getter
 @Setter
 public class VidUserPk implements Serializable {
-    
+
     private static final long serialVersionUID = 490200883975165432L;
 
     @ManyToOne

@@ -25,7 +25,7 @@ public class SubjectData extends HashMap<String, Object> {
     private static final long serialVersionUID = 2114523776122688555L;
 
     public SubjectData(Map<String, Object> claimsMap) {
-	claimsMap.entrySet().forEach(entry -> { 
+	claimsMap.entrySet().forEach(entry -> {
 	    switch (entry.getKey()) {
 	    	case "sub" : {
 	    	    this.put("subject", entry.getValue());
@@ -55,7 +55,7 @@ public class SubjectData extends HashMap<String, Object> {
 	    	    this.put("issued_at", entry.getValue());
 	    	    break;
 	    	}
-	    	
+
 	    	case "exp" : {
 	    	    this.put("expires", entry.getValue());
 	    	    break;
@@ -69,11 +69,11 @@ public class SubjectData extends HashMap<String, Object> {
     public String getSubject() {
 	return (String) get("subject");
     }
-    
+
     public String getEmail() {
 	return (String) get("email");
     }
-    
+
     public String getEmailVerified() {
 	return (String) get("email_verified");
     }
@@ -81,7 +81,7 @@ public class SubjectData extends HashMap<String, Object> {
     public String getFirstname() {
 	return (String) get("firstname");
     }
-    
+
     public String getLastname() {
 	return (String) get("lastname");
     }
@@ -93,7 +93,7 @@ public class SubjectData extends HashMap<String, Object> {
     public String getPicture() {
 	return (String) get("picture");
     }
-    
+
     public String getAudience() {
 	return (String) get("audience");
     }

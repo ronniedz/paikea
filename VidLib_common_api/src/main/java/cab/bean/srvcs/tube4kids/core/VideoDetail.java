@@ -133,7 +133,7 @@ public class VideoDetail {
     public String getDefaultAudioLanguage() {
 	return defaultAudioLanguage;
     }
-    
+
     @JsonIgnore
     @Lob
     @Column(name="youtube_tags")

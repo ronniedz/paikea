@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
             name = "cab.bean.srvcs.tube4kids.core.Token.findBySubject",
             query = "SELECT t FROM Token t where t.subject = :subject"
     ),
-    
+
 })
 @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -37,27 +37,27 @@ public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    
+
     @Column(unique=true)
     private String subject;
 
     @Column
     private String idp;
-    
+
     @Column(nullable=false)
     private boolean active = false;
-    
+
     @Column
     private String issuer = "beancab";
-    
+
     @Column
     private String audience;
 
     @OneToOne
     private User user;
-    
+
     public Token() {}
-    
+
     public Token(User user, String subject) {
 	this.user = user;
 	this.subject = subject;
@@ -132,5 +132,5 @@ public class Token {
         return this;
     }
 
-    
+
 }

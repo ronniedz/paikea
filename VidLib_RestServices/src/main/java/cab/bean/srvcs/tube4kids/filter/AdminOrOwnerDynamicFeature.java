@@ -48,17 +48,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * The general authorization rules are:
  * <ul>
  * <li>If principal is not found, a 401 response is returned.
- * <li>If the user is not in one of the declared <i>admin</i> roles, a 403 response is returned. 
- * <li>If the <i>ownership</i> tests from the annotation (Eg: <code> ownerTests= { "isMyChild:arg0"} ) </code>)  return false, a 403 response is returned. 
+ * <li>If the user is not in one of the declared <i>admin</i> roles, a 403 response is returned.
+ * <li>If the <i>ownership</i> tests from the annotation (Eg: <code> ownerTests= { "isMyChild:arg0"} ) </code>)  return false, a 403 response is returned.
  * </ul>
  * <p/>
  * @author Ronald B. Dennison (ronniedz@gmail.com)
  */
 public class AdminOrOwnerDynamicFeature implements DynamicFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminOrOwnerDynamicFeature.class);
-    
+
     public AdminOrOwnerDynamicFeature() { super(); }
-    
+
     @Override
     public void configure(final ResourceInfo resourceInfo, final FeatureContext configuration) {
 	final Method method = resourceInfo.getResourceMethod();
@@ -107,7 +107,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
     }
 
     /**
-     * RequestFilter. Throws ForbiddenException if user is not an administrator or if the <i>test methods</i> 
+     * RequestFilter. Throws ForbiddenException if user is not an administrator or if the <i>test methods</i>
      * (from the AdminOrOwner annotation) return false;
      */
     @Priority(Priorities.AUTHORIZATION)
@@ -119,7 +119,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
             this.adminRoles = adminRoles;
             this.conditionsList = conditionsList;
         }
-	
+
 	@Override
         public void filter(final ContainerRequestContext requestContext) throws IOException {
             final User user = (User) requestContext.getSecurityContext().getUserPrincipal();
@@ -127,10 +127,10 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	    if (user == null) {
 		throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
 	    }
-	    
+
 	    if (! user.hasAnyRole(this.adminRoles)) {
 		final MultivaluedMap<String, String> map = requestContext.getUriInfo().getPathParameters();
-		
+
 		/*
 		 * Execute the Ownership tests.
 		 */
@@ -139,16 +139,16 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 			return ( isSimpleType(criteria.bindClass) )
 				? (Boolean) user.getClass().getMethod(criteria.methodName, criteria.bindClass)
 					.invoke(user, AdminOrOwnerRequestFilter.getTrueTypedVal(map.getFirst(criteria.subject), criteria.bindClass))
-					
+
 				: (Boolean) user.getClass().getMethod(criteria.methodName, criteria.bindClass)
 					.invoke(user, getEntity(requestContext, criteria.bindClass));
-					
+
 		    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
 			return false;
 		    }
 		};
-		
+
 		if (  !  conditionsList.stream().map(mapFunc).reduce(true, (a, b) -> a && b) ) {
 		    throw new ForbiddenException(LocalizationMessages.USER_NOT_AUTHORIZED());
 		}
@@ -184,7 +184,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	 * TODO Replace with registered JsonProvider.getEntity [or similar]
 	 *
 	 * @param requestContext
-	 * @param type of the object in the request body 
+	 * @param type of the object in the request body
 	 * @return the Object read from the request body.
 	 */
 	private final <T> T getEntity(ContainerRequestContext requestContext, Class<T> type) {
@@ -204,7 +204,7 @@ public class AdminOrOwnerDynamicFeature implements DynamicFeature {
 	    return null;
 	}
     }
-    
+
     private static class OwnerTest {
 
 	public static enum DataType

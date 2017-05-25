@@ -12,7 +12,7 @@ public interface RoleNames {
 	public static final String PLAYLIST_MANAGER_ROLE		=	"playlist_manager";
 	public static final String UI_MANAGER_ROLE				=	"ui_manager";
 	public static final String CONTENT_MODERATOR_ROLE	=	"content_moderator";
-	
+
 	public static final String GUARDIAN_ROLE				=	"guardian";
 	public static final String CHILD_EDIT_ROLE				=	"edit_child";
 	public static final String MEMBER_ROLE				=	"member";

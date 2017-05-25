@@ -55,7 +55,7 @@ import com.google.common.collect.ImmutableMap;
 
 /**
  * Authentication Resource. Offers 2 means for logging out: /logout as well as /revoke.
- * 'revoke' provides a means to POST the id_token and maybe use by an admin to revoke  another's token 
+ * 'revoke' provides a means to POST the id_token and maybe use by an admin to revoke  another's token
  */
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/auth")
@@ -63,7 +63,7 @@ public class AuthNVerityResource extends BaseResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthNVerityResource.class);
     private static final int preOffset = 1; // minute
-    
+
     private final TokenDAO tokenDAO;
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
@@ -71,7 +71,7 @@ public class AuthNVerityResource extends BaseResource {
     private final JWTConfiguration jwtConf;
 
     private final TokenService tokenService;
-    
+
     public AuthNVerityResource( final TokenDAO tokenDAO, final UserDAO userDAO,
 	    final RoleDAO roleDAO, final GoogleAPIClientConfiguration googleAPIConf,
 	    final JWTConfiguration jwtConf, final TokenService tokenService)
@@ -94,7 +94,7 @@ public class AuthNVerityResource extends BaseResource {
 	final ResponseData dat = (new ResponseData()).setSuccess(false).setStatus(Status.UNAUTHORIZED);
 
 	String jwt = null;
-	
+
 	try {
 	    final SubjectData userValues = new TokenService(googleAPIConf).verifyToData(idTokenString);;
 	    final String subject = userValues.getSubject();
@@ -106,12 +106,12 @@ public class AuthNVerityResource extends BaseResource {
                 		    .setAudience(jwtConf.getAudience()[0]) // Original issuer now saved as IdProvider
                 		    .setIdp(userValues.getIssuer())		// Make this server the issuer of the token
                 		    .setIssuer(jwtConf.getIssuer()[0]));
-		
+
 		// False when revoked.
 		beanToken.setActive(true).setSubject(subject);
 		// Remove prior value
 		userValues.removeIssuer();
-		
+
 		updateUser(userValues, beanToken);
 
 		jwt = tokenService.generate(userValues);
@@ -196,7 +196,7 @@ public class AuthNVerityResource extends BaseResource {
     @UnitOfWork
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    //@RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.ADMIN_ROLE}) 
+    //@RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.ADMIN_ROLE})
     public Response revoke(@FormParam("id_token") String idTokenString, @Context HttpServletRequest request) {
 
 	LOGGER.debug("deleting token {}", idTokenString);
@@ -223,7 +223,7 @@ public class AuthNVerityResource extends BaseResource {
 		doPOST(dat)
 		.cookie(genCookie("", jwtConf, request, maxAge, c.getTime()))
 		.build();
-    }    
+    }
 
     private URI getRedirect(User user) {
 	URI uri = null;
@@ -240,7 +240,7 @@ public class AuthNVerityResource extends BaseResource {
 	Enumeration<String> re = request.getHeaders(AUTHORIZATION);
 	if ( re != null && re.hasMoreElements()) {
 	    final Optional<String> headerToken = getTokenFromHeader(re.nextElement());
-    
+
             if (headerToken.isPresent()) {
                 return headerToken;
             }
@@ -280,7 +280,7 @@ public class AuthNVerityResource extends BaseResource {
         final String comment = "Access Token";
 	final boolean secure = conf.isCookieSecure();
 	boolean httpOnly = conf.isCookieHttpOnly();
-	
+
 	return
 		new NewCookie(
 			name, value, path, domain, NewCookie.DEFAULT_VERSION,
@@ -312,7 +312,7 @@ public class AuthNVerityResource extends BaseResource {
 	}
 
 	beanToken.setUser(userDAO.create(user));
-	
+
 	tokenDAO.create(beanToken);
 //	userValues.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
 
@@ -332,7 +332,7 @@ public class AuthNVerityResource extends BaseResource {
 	u.setEmailVerified(Boolean.TRUE);
 	u.setActivated(Boolean.TRUE);
 	u.setPassword(Long.toHexString(Double.doubleToLongBits(Math.random())));
-    
+
 	for(String rname : RoleNames.MEMBER) {
 	    u.addRole(roleDAO.findByName(rname).get());
 	}

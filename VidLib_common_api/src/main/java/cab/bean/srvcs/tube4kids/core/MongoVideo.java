@@ -30,14 +30,14 @@ public class MongoVideo extends BasicVideo {
 
     // TODO Add empty genres to the MongoDocument. This will allow us to use Mongo as primary source down the line
     protected List<VideoGenre> videoGenres;
-    
+
     protected String publishedAt; // snippetType.publishedAt
 
     public MongoVideo() {
 	super();
 	this.videoGenres = Arrays.asList(new VideoGenre[] { new VideoGenre().setGenreIds(new Long[] {1L, 1L}) });
     }
-    
+
     public MongoVideo(String etag) {
 	this();
 	this.etag = etag;
@@ -55,12 +55,12 @@ public class MongoVideo extends BasicVideo {
 	return videoGenres;
     }
 
-    @JsonProperty 
+    @JsonProperty
     public String getPublishedAt() {
         return publishedAt;
     }
 
-    @JsonProperty 
+    @JsonProperty
     public String getEtag() {
         return etag;
     }
@@ -70,17 +70,17 @@ public class MongoVideo extends BasicVideo {
         return videoId;
     }
 
-    @JsonProperty 
+    @JsonProperty
     public String getTitle() {
         return title;
     }
 
-    @JsonProperty 
+    @JsonProperty
     public String getDescription() {
         return description;
     }
 
-    @JsonProperty 
+    @JsonProperty
     public String getDefaultThumbnail() {
 	return this.defaultThumbnail;
     }
@@ -93,7 +93,7 @@ public class MongoVideo extends BasicVideo {
     public void setVidId(Map<String, Object> foo) {
 	this.videoId  = (String) foo.get("videoId");
     }
-    
+
     @JsonProperty(value="snippet", access=JsonProperty.Access.WRITE_ONLY)
     public void setSnippet(Map<String, Object> foo) {
 	this.publishedAt  = (String) foo.get("publishedAt");
@@ -101,7 +101,7 @@ public class MongoVideo extends BasicVideo {
 	this.description  = (String) foo.get("description");
 	this.defaultThumbnail = unpackThumbnail((Map) foo.get("thumbnails"));
     }
- 
+
     private String unpackThumbnail(Map<String, Map<String, Object>> foo) {
 	Map<String, Object> dat = foo.get("default");
 	String turl = UriBuilder.fromUri(dat.get("url").toString())
@@ -109,13 +109,13 @@ public class MongoVideo extends BasicVideo {
 		.build().toString();
 	return turl;
     }
-    
+
     // ------------------ JOINS ----------------------- //
     @JsonIgnore
     @Transient
     @ManyToMany(mappedBy = "videos", targetEntity = cab.bean.srvcs.tube4kids.core.Playlist.class)
     private Set<Playlist> playlists;
-    
+
     @JsonIgnore
     @Transient
     @ManyToMany(mappedBy = "videos", targetEntity = cab.bean.srvcs.tube4kids.core.Playlist.class)

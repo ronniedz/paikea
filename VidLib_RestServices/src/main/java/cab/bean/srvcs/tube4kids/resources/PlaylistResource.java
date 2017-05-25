@@ -44,7 +44,7 @@ import cab.bean.srvcs.tube4kids.db.VideoDAO;
 	RoleNames.ADMIN_ROLE, RoleNames.PLAYLIST_EDIT_ROLE,
 	RoleNames.CONTENT_MODERATOR_ROLE, RoleNames.SUDO_ROLE })
 public class PlaylistResource extends BaseResource {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PlaylistResource.class);
 
     private final PlaylistDAO playlistDAO;
@@ -116,7 +116,7 @@ public class PlaylistResource extends BaseResource {
     @UnitOfWork
     public Response pickPlaylist(@PathParam("pid") Long pid,
 	Playlist destPlaylist, @Auth User user) {
-	
+
 	// TODO In the future won't need to liberate() as only decoupled
 	// playlists will be findable
 	final Playlist org = liberatePlaylist(pid, user);
@@ -168,13 +168,13 @@ public class PlaylistResource extends BaseResource {
     @Path("/video/{pidVal: [0-9]+}")
     @PATCH
     @UnitOfWork
-    @RolesAllowed({ RoleNames.GUARDIAN_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE })
+    @RolesAllowed({ RoleNames.GUARDIAN_ROLE, RoleNames.PLAYLIST_MANAGER_ROLE, RoleNames.MEMBER_ROLE })
     public Response addVideos(@PathParam("pidVal") Long pidVal, Set<String> videoIds, @Auth User user) {
 	final ResponseData dat = new ResponseData().setSuccess(false);
 
 	Optional<Playlist> subjectPlaylistOpt = null;
 
-	if (user.hasRole(RoleNames.GUARDIAN_ROLE)) {
+	if (user.hasAnyRole(new String[] {RoleNames.GUARDIAN_ROLE, RoleNames.MEMBER_ROLE,})) {
 	    // LOAD lazy collection of playlists
 	    subjectPlaylistOpt = playlistDAO.loadUserPlaylists(user).stream()
 		    .filter(plitem -> plitem.getId().equals(pidVal))
@@ -219,10 +219,10 @@ public class PlaylistResource extends BaseResource {
 
     /**
      * Remove videos from playlist.
-     * 
+     *
      * Video ids may be single or a list of ids. Video ids may be separated by:
      * commas, pipes, semicolons or spaces.
-     * 
+     *
      * @param pidVal
      * @param videoIds
      * @return
@@ -242,7 +242,7 @@ public class PlaylistResource extends BaseResource {
 		? playlistDAO.loadUserPlaylists(user)
 			.stream()
 			.filter(plitem -> plitem.getId().equals(pidVal)).findFirst()
-		    
+
 		: (user.hasAnyRole(RoleNames.PLAYLIST_MANAGER))
 			? playlistDAO.findById(pidVal)
 			// User has no access
@@ -252,16 +252,16 @@ public class PlaylistResource extends BaseResource {
 	    Playlist subjectPlaylist = subjectPlaylistOpt.orElseThrow(() -> new javax.ws.rs.NotFoundException());
 	    Pair<Integer, Collection<Video>> tuple = bulkFindUtil(videoIds.split(SPLIT_PARAM_REGEX));
 	    subjectPlaylist.getVideos().removeAll(tuple.getRight());
-	    subjectPlaylist = playlistDAO.create(subjectPlaylist); 
-	    
+	    subjectPlaylist = playlistDAO.create(subjectPlaylist);
+
 	    dat.setSuccess(true).setEntity(isMinimalRequest() ? null : subjectPlaylist);
-	    
+
 	    if (tuple.getLeft().equals(0)) {
 		dat.setErrorMessage(String.format("%d of selected videos were not found", tuple.getLeft()));
 	    }
 
 	} else {
-	    // With @Auth, it should never get to this 
+	    // With @Auth, it should never get to this
 	    dat.setStatus(Response.Status.FORBIDDEN);
 	}
 	return doPATCH(dat).build();

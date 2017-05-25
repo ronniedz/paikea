@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package cab.bean.srvcs.tube4kids.core;
 
@@ -33,7 +33,7 @@ public abstract class BasicVideo implements VideoType {
     //protected String publishedAt; // snippetType.publishedAt
 
     public String publishedAt; //   snippet.publishedAt
-    
+
     @NonNull
     @JsonProperty
     public String getEtag() {
@@ -79,6 +79,6 @@ public abstract class BasicVideo implements VideoType {
     public void setDefaultThumbnail(String defaultThumbnail) {
         this.defaultThumbnail = defaultThumbnail;
     }
-    
+
 }
 

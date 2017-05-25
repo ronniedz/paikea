@@ -10,7 +10,7 @@ public class JWTConfiguration extends FederationConfig {
 
    /**
      * @return the verificationKey
-     * @throws Exception 
+     * @throws Exception
      */
     @Override
    public JWTConfiguration setVerificationKey(String keyValue) throws UnsupportedEncodingException {

@@ -33,7 +33,7 @@ public class GenreDAO extends AbstractDAO<Genre> {
     }
     /**
      * Returns a Genre if successful <code>null</code> otherwise.
-     * 
+     *
      * @param id
      * @return
      * 		A genre.
@@ -57,9 +57,9 @@ public class GenreDAO extends AbstractDAO<Genre> {
 
     /**
      * Return a Genre on successful update. Return null if update fails.
-     * 
+     *
      * @param genre - must include the ID of the genre whose properties will be updated.
-     *  
+     *
      * @return
      * 		A genre.
      */
@@ -74,9 +74,9 @@ public class GenreDAO extends AbstractDAO<Genre> {
 
     /**
      * Return a Genre on successful delete. Return null if delete fails.
-     * 
-     * @param id - the ID of the genre to delete 
-     *  
+     *
+     * @param id - the ID of the genre to delete
+     *
      * @return
      * 		A genre or null if not deleted.
      */

@@ -111,14 +111,6 @@ metrics:
   frequency: 10s
 
 
-# Get this value from:
-#    VidLib_Youtube_pipes/src/main/resources/app-queue.properties
-#
-# YouTube Rest API proxy URL
-proxySearchUrl: http://localhost:7070/pipes/search
-proxyDetailUrl: http://localhost:7070/pipes/detail
-
-
 ## Ronniedz
 ##	API key	= 16943376142-23682cd11vmd29jg91q5hg2r5g9bd6b8.apps.googleusercontent.com
 ##	Secret	= 5aLltV9mfyeteSV9ihPo77Yt
@@ -202,6 +194,27 @@ ghABK1oNLaNI2JVeBaQQjOgze2yb3JnrErPdRfmOU4d+mm6XCZX82qR4D7Yazj6f
   cookieHttpOnly: false
   cookieMaxAge: 3600
 
+youtubeResourceConfiguration:
+  host: "www.googleapis.com"
+  contextPath: "/youtube/v3"
+  videoSearchPath: "/search"
+  videoDetailPath: "/videos"
+  apiKey: "AIzaSyAmOXO8tcUauYkj1POSnEzle_Rm61LAOes"
 
+
+# Get this value from:
+#    VidLib_Youtube_pipes/src/main/resources/app-queue.properties
+#
+# YouTube Rest API proxy URL
+proxySearchUrl: http://localhost:7070/pipes/search
+proxyDetailUrl: http://localhost:7070/pipes/detail
+
+# Change to full URLs to validate during boot
+restServerConfiguration:
+  host: "localhost"
+  port: 7070
+  contextPath: /pipes
+  searchServicePath: "/search"
+  detailServicePath: "/detail"
 
 

@@ -7,12 +7,12 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
- 
+
 import com.codahale.metrics.health.HealthCheck;
- 
+
 public class APIHealthCheck extends HealthCheck {
     private final WebTarget webTarget;
- 
+
     public APIHealthCheck(Client client, String targetURL) {
         super();
         this.webTarget = client.target(targetURL);

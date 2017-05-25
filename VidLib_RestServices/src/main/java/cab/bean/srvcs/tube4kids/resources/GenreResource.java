@@ -62,7 +62,7 @@ public class GenreResource extends BaseResource {
 	List<Genre> list = genreDAO.findAll();
 	return doGET(new ResponseData(list).setSuccess(list != null)).build();
     }
-    
+
     /** Update **/
     @Path("/{id: [0-9]+}")
     @PATCH
@@ -71,38 +71,38 @@ public class GenreResource extends BaseResource {
 	genreDat.setId(id);
 	return updateGenre(genreDat);
     }
-    
+
     /** Update **/
     @PATCH
     @UnitOfWork
     public Response updateGenre(Genre objectData) {
 
 	Genre o = genreDAO.update(objectData);
-	
+
 	ResponseData dat = new ResponseData()
 		.setSuccess(o != null)
 		.setEntity(isMinimalRequest() ? null : o );
-	
+
 	if ( o != null) {
 	    dat.setLocation( UriBuilder.fromResource(this.getClass()).path(o.getId().toString()).build() );
 	}
 
         return doPATCH(dat).build();
     }
-    
+
     /** Delete **/
     @Path("/{id: [0-9]+}")
     @DELETE
     @UnitOfWork
     public Response deleteGenre(@PathParam("id") Long id) {
-	
+
 	Genre g = genreDAO.delete(id);
 
 	ResponseData dat = new ResponseData().setSuccess(g != null);
 	dat.setEntity(isMinimalRequest() ? null : g );
         return doDELETE(dat).build();
     }
-    
+
     /** Delete **/
     @Path("/{id: [0-9]+}")
     @GET

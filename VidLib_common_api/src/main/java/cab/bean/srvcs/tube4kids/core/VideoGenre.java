@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Joins video to genre with extra properties.
- * 
+ *
  * @author Ronald Dennison
  *
  */
@@ -51,12 +51,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_DEFAULT)
 @EqualsAndHashCode(of= {"pk"})
 public class VideoGenre {
-    
+
     /**
      * Composite key for video genres.
-     * 
+     *
      * One user may associate, one pair of genre per video.
-     * 
+     *
      * @author Ronald Dennison
      *
      */
@@ -64,12 +64,12 @@ public class VideoGenre {
     @ToString
     public static class VideoGenrePk implements Serializable {
         private static final long serialVersionUID = 490200883975165432L;
-        
+
         private User user;
         private Video video;
 
         public VideoGenrePk() {}
-        
+
         public VideoGenrePk(Video video, User user) {
             this.user = user;
             this.video = video;
@@ -119,19 +119,19 @@ public class VideoGenre {
     private Long genre2Id;
 
     private Long genreId;
-    
+
     private Date lastModified = new Date();
 
     VideoGenrePk pk;
-    
+
     public VideoGenre() {
 	this.pk =  new VideoGenrePk();
     }
-    
+
     public VideoGenre(Video video, User user) {
 	this.pk =  new VideoGenrePk(video, user);
     }
-    
+
     public VideoGenre(Video video, User user,
 	    ImmutablePair<Long, Long> genreIds) {
 	this(video, user);
@@ -143,13 +143,13 @@ public class VideoGenre {
 	this.genreId = genreId;
 	this.genre2Id = genre2Id;
     }
-    
+
     @JsonProperty
     @Column(name = "genre2_id", nullable = true)
     public Long getGenre2Id() {
         return genre2Id;
     }
-    
+
     @JsonProperty
     @Column(name = "genre_id", nullable = true)
     public Long getGenreId() {
@@ -174,7 +174,7 @@ public class VideoGenre {
     public User getUser() {
         return getPk().getUser();
     }
-    
+
     @JsonIgnore
     @Transient
     public Video getVideo() {
@@ -216,10 +216,10 @@ public class VideoGenre {
 	getPk().setUser(user);
     }
 
-    
+
     public void setVideo(Video video) {
 	getPk().setVideo(video);
     }
-    
+
 
 }

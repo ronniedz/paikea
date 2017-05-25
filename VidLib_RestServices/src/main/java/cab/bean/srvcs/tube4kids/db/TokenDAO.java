@@ -60,8 +60,8 @@ public class TokenDAO extends AbstractDAO<Token> {
 
     public User findUserBySubject(String subject) {
 	Optional<Token> t = findBySubject(subject);
-	
-	return t.isPresent() ? t.get().getUser() : null; 
+
+	return t.isPresent() ? t.get().getUser() : null;
     }
 
     public Optional<Token> locateSubject(Map<String, Object> userValues) {
@@ -72,5 +72,5 @@ public class TokenDAO extends AbstractDAO<Token> {
 	return Optional.ofNullable(uniqueResult(criteria.add(Restrictions.or( r1, r2, r3 ))));
     }
 
-    
+
 }

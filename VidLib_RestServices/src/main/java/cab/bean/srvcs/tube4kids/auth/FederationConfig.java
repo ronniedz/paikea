@@ -45,7 +45,7 @@ public abstract class FederationConfig {
     protected String realmName;
 
     protected AlgorithmConstraints jwsAlgorithmConstraints;
-    
+
     public VerificationKeyResolver getSignatureVerificationKeyResolver() throws JoseException, IOException {
 	if (this.httpsJWKS != null) {
 	    signatureVerificationKeyResolver = new RefreshedResolver(httpsJWKS);
@@ -66,7 +66,7 @@ public abstract class FederationConfig {
 	JwtConsumerBuilder builder = new JwtConsumerBuilder()
 	.setExpectedAudience(getAudience())
 	.setExpectedIssuers(true, getIssuer())
-	
+
 	// the JWT must have an expiration time
 	.setRequireExpirationTime()
 	// the JWT must have a subject claim
@@ -77,14 +77,14 @@ public abstract class FederationConfig {
 	.setAllowedClockSkewInSeconds(getAllowedSkew());
 
 	if (this.jwsAlgorithmConstraints != null) {
-	    builder.setJwsAlgorithmConstraints(getAlgorithmConstraints()); 
+	    builder.setJwsAlgorithmConstraints(getAlgorithmConstraints());
 	}
-	
+
 	Key v = null;
 	VerificationKeyResolver vkr = null;;
-	
+
 	if ((v = getVerificationKey()) != null) {
-	    builder.setVerificationKey(v); 
+	    builder.setVerificationKey(v);
 	}
 	else if ((vkr = getSignatureVerificationKeyResolver()) != null) {
 	    // verify the signature with the public key
@@ -129,7 +129,7 @@ public abstract class FederationConfig {
 
     /**
      * Defaults to 'Bearer'.
-     * 
+     *
      * @return the type of token
      */
     public String getTokenType() {

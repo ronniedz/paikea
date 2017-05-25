@@ -1,7 +1,7 @@
 package cab.bean.srvcs.pipes;
 
-import cab.bean.srvcs.pipes.Configuration.RestServerConfiguration;
-import cab.bean.srvcs.pipes.Configuration.YoutubeResourceConfiguration;
+import cab.bean.srvcs.tube4kids.config.RestServerConfiguration;
+import cab.bean.srvcs.tube4kids.config.YoutubeResourceConfiguration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

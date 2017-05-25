@@ -23,7 +23,7 @@ public class VideoDetailDAO extends AbstractDAO<Video> {
     public Video create(Video video) {
         return persist(video);
     }
-    
+
     public Boolean delete(String id) {
 	Boolean rep = Boolean.FALSE;
 	Video o = get(id);

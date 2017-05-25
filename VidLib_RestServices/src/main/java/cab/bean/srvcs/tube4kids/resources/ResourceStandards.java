@@ -15,24 +15,24 @@ import org.apache.commons.lang3.StringUtils;
  * The "standard" is adapted from:
  * 	- http://www.restapitutorial.com/lessons/httpmethods.html
  * 	- https://greenbytes.de/tech/webdav/rfc7240.html
- * 
+ *
  * In short:
  *<pre>
  * 	GET		->	ok: 200 || err: 400/404			- 	content	/  np-loc
- * 
+ *
  * 	POST	->	ok: 200, 204 || err: 400/409		-    ? content	/  Location
- * 	PUT		->	ok: 200, 204 || err: 404			-    ? content	/  Location  
+ * 	PUT		->	ok: 200, 204 || err: 404			-    ? content	/  Location
  * 	PATCH	->	ok: 200, 204 || err: 404, 409,412	-    ? content	/  Content-Location
  * 	DELETE	->	ok: 200, 204  || err: 404, 409,412	-    ? content	/  Location
- * 		
+ *
  * 	-: stipulate form of response using 'Prefer' header.
- * 
+ *
  * 	Eg:
- * 		
+ *
  * 		1.	`Prefer: return=representation`
- * 
+ *
  * 		2.	`Prefer: return=minimal`
- * 		
+ *
 </pre>
  * @author ronalddennison
  *
@@ -47,7 +47,7 @@ public abstract class ResourceStandards {
 
     @Context
     protected javax.ws.rs.core.HttpHeaders headers;
-    
+
     protected ResourceStandards() { }
 
     /**
@@ -122,7 +122,7 @@ public abstract class ResourceStandards {
 		.status(respData.success
 			? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
 			: Response.Status.NOT_FOUND);
-	
+
 	if (! respData.success) {
 	    rb.header("Location", respData.location);
 	}
@@ -136,7 +136,7 @@ public abstract class ResourceStandards {
      * 		Success:
      * 			- 200 (OK) if an entity is set (via setEntity(object))
      * 			- 204 (NO_CONTENT) if response body is empty
-     * 
+     *
      * 		Error:
      * 			- 404 (NOT_FOUND)
      * </pre>
@@ -146,12 +146,12 @@ public abstract class ResourceStandards {
      * 		a responseBuilder
      */
     protected ResponseBuilder doPATCH(ResponseData respData) {
-	
+
 	ResponseBuilder rb = Response
 		.status(respData.success
 			? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
 			: Response.Status.NOT_FOUND);
-	
+
 	if (! respData.success) {
 	    rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
 	}
@@ -178,12 +178,12 @@ public abstract class ResourceStandards {
             		? respData.hasEntity() ? Response.Status.OK : Response.Status.NO_CONTENT
             		:  Response.Status.NOT_FOUND
         );
-	
+
 	rb.header("Location", UriBuilder.fromResource(this.getClass()).build().toString());
 	parseRespData( respData, rb);
 	return rb;
     }
-    
+
     public ResponseBuilder reply(ResponseData dat) {
 	ResponseBuilder r =null;
 	String instanceMethod = request.getMethod().toUpperCase();
@@ -218,21 +218,21 @@ public abstract class ResourceStandards {
 	if (respData.hasStatus()) {
 	    rb.status(respData.status);
 	}
-	
+
 	if (respData.hasEntity()) {
 	    rb.entity(respData.entity);
 	} else if (respData.hasErrorMessage()) {
 	    rb.entity(respData.errorMessage);
 	}
-	
+
 	if (respData.hasLocation()) {
 	    rb.header("Location", respData.location);
 	}
     }
 
     private final String full = "representation";
-    private final String minimal = "minimal"; 
-    
+    private final String minimal = "minimal";
+
     protected boolean isMinimalRequest() {
 	String preftype = headers.getHeaderString("Prefer".toLowerCase());
 	return (preftype != null)
@@ -248,7 +248,7 @@ public abstract class ResourceStandards {
 	Response.Status status = null;
 
 	public ResponseData() {}
-	
+
 	public ResponseData(Object entity) {
 	    this();
 	    this.entity = entity;
@@ -258,12 +258,12 @@ public abstract class ResourceStandards {
 	    this(entity);
 	    this.location = location;
 	}
-	
+
 	public ResponseData(Object entity, String location, Response.Status status) {
 	    this(entity, location);
 	    this.entity = status;
 	}
-	
+
 	public ResponseData(Object entity, String location, Response.Status status, String errorMessage) {
 	    this(entity, location, status);
 	    this.errorMessage = errorMessage;
@@ -293,7 +293,7 @@ public abstract class ResourceStandards {
 	    this.success = flag;
 	    return this;
 	}
-	
+
 	public ResponseData setErrorMessage(String errorMessage) {
 	    this.errorMessage = errorMessage;
 	    return this;
@@ -303,7 +303,7 @@ public abstract class ResourceStandards {
 	    this.location = location;
 	    return this;
 	}
-	
+
 	public ResponseData setLocation(URI location) {
 	    this.location = location.toString();
 	    return this;

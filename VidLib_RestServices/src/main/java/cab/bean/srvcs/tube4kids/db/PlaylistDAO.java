@@ -17,11 +17,11 @@ import cab.bean.srvcs.tube4kids.core.Playlist;
 import cab.bean.srvcs.tube4kids.core.User;
 
 public class PlaylistDAO extends AbstractDAO<Playlist> {
-    
+
     public PlaylistDAO(SessionFactory factory) {
         super(factory);
     }
-    
+
     public Optional<Playlist> findById(Long id) {
         return Optional.ofNullable(get(id));
     }
@@ -29,7 +29,7 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
     public Playlist create(Playlist playlist) {
         return persist(playlist);
     }
-    
+
     public Playlist delete(Long id) {
 	Playlist o = get(id);
 
@@ -60,7 +60,7 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
         		namedQuery("cab.bean.srvcs.tube4kids.core.Playlist.findUserLists").setParameter("user", user)
         	);
     }
-    
+
     public Playlist retrieve(Long id) {
 	return get(id);
     }
@@ -76,7 +76,7 @@ public class PlaylistDAO extends AbstractDAO<Playlist> {
 	}
 	return o;
     }
-     
+
     public Playlist update(Playlist objectData, Playlist o) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 	for (Map.Entry<String, String> entry : BeanUtils.describe(objectData)
 		.entrySet()) {

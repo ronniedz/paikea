@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 
@@ -72,8 +73,10 @@ import com.github.toastshaman.dropwizard.auth.jwt.JwtAuthFilter;
 
 
 public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
-    
-    private final HibernateBundle<Tube4kidsConfiguration> hibernateBundle = 
+
+    final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
+
+    private final HibernateBundle<Tube4kidsConfiguration> hibernateBundle =
 	new ScanningHibernateBundle<Tube4kidsConfiguration>("cab.bean.srvcs.tube4kids.core") {
         @Override
         public DataSourceFactory getDataSourceFactory(Tube4kidsConfiguration configuration) {
@@ -84,11 +87,10 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     public static void main(String[] args) throws Exception {
         new Tube4kidsApplication().run(args);
     }
-    
+
     @Override
     public void run(Tube4kidsConfiguration configuration, Environment environment) throws Exception {
 
-	final JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
 	jsonProvider.setMapper(new JodaMapper());
 	environment.jersey().getResourceConfig().addProperties(singletonMap(ServerProperties.WADL_FEATURE_DISABLE, false));
 
@@ -103,7 +105,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
     @Override
     public void initialize(Bootstrap<Tube4kidsConfiguration> bootstrap) {
-	
+
         // Enable variable substitution with environment variables
         bootstrap.setConfigurationSourceProvider(
                 new SubstitutingSourceProvider(
@@ -114,16 +116,16 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
 
         bootstrap.addCommand(new RenderCommand());
         bootstrap.addBundle(new ConfiguredAssetsBundle("/assets", "/", "index.html"));
-        
+
         bootstrap.addBundle(new MigrationsBundle<Tube4kidsConfiguration>() {
             @Override
             public DataSourceFactory getDataSourceFactory(Tube4kidsConfiguration configuration) {
                 return configuration.getDataSourceFactory();
             }
         });
-        
+
         bootstrap.addBundle(hibernateBundle);
-        
+
         // TODO use or remove
         bootstrap.addBundle(new ViewBundle<Tube4kidsConfiguration>() {
             @Override
@@ -136,7 +138,10 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
     private void buildResources(Tube4kidsConfiguration configuration, final JerseyEnvironment jerseyConf) {
 
 	final Neo4JGraphDAO neo4JGraphDAO = new Neo4JGraphDAO(configuration.getNeo4jDriver());
-	final YouTubeAPIProxy ytProxyClient = new YouTubeAPIProxy(configuration.getProxySearchUrl());
+
+	Client jClient = ClientBuilder.newClient().register(jsonProvider);
+
+	final YouTubeAPIProxy ytProxyClient = new YouTubeAPIProxy(jClient, configuration.getRestServerConfiguration(), configuration.getYoutubeResourceConfiguration().getApiKey());
 
 	final UserDAO userDAO = new UserDAO(hibernateBundle.getSessionFactory());
 	final RoleDAO roleDAO = new RoleDAO(hibernateBundle.getSessionFactory());
@@ -206,7 +211,7 @@ public class Tube4kidsApplication extends Application<Tube4kidsConfiguration> {
         // Add URL mapping
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
     }
-        
+
     @Override
     public String getName() {
         return "tube4kids";

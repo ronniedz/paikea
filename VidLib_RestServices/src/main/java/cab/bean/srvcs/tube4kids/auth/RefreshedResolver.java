@@ -15,7 +15,7 @@ import org.jose4j.lang.UnresolvableKeyException;
 
 /**
  * A rewrite of JOSE  Verification resolver. Needed because Google's certificates are updated periodically.
- * 
+ *
  * @author ronalddennison
  *
  */
@@ -23,7 +23,7 @@ public class RefreshedResolver  implements VerificationKeyResolver
 {
     private final VerificationJwkSelector selector = new VerificationJwkSelector();
     private final HttpsJwks httpsJWKS;
-    
+
     public RefreshedResolver(HttpsJwks httpsJWKS)
     {
         this.httpsJWKS = httpsJWKS;

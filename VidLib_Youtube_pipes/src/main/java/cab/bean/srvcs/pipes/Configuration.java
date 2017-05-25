@@ -11,6 +11,9 @@ import lombok.ToString;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import cab.bean.srvcs.tube4kids.config.RestServerConfiguration;
+import cab.bean.srvcs.tube4kids.config.YoutubeResourceConfiguration;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -26,7 +29,6 @@ public class Configuration {
     @NotNull
     @JsonProperty(value="db")
     public Map<String, String> db;
-
 
     @NotNull
     @JsonProperty
@@ -54,56 +56,6 @@ public class Configuration {
 
     public void setYoutubeResourceConfiguration(YoutubeResourceConfiguration ytc) {
 	this.youtubeResource = ytc;
-    }
-
-    @EqualsAndHashCode
-    @ToString
-    @Data
-    public class YoutubeResourceConfiguration  {
-	@NotEmpty
-	@JsonProperty
-	private String apiKey;
-
-	@NotEmpty
-	@JsonProperty
-	private String host;
-
-	@NotEmpty
-	@JsonProperty
-	private String contextPath ;
-
-	@NotEmpty
-	@JsonProperty
-	private String videoSearchPath;
-
-	@NotEmpty
-	@JsonProperty
-	private String videoDetailPath;
-    }
-
-    @EqualsAndHashCode
-    @ToString
-    @Data
-    public class RestServerConfiguration {
-        @NotEmpty
-        @JsonProperty
-        private String host;
-
-        @NotEmpty
-        @JsonProperty
-        private int port;
-
-        @NotEmpty
-        @JsonProperty
-        private String contextPath ;
-
-        @NotEmpty
-        @JsonProperty
-        private String searchServicePath;
-
-        @NotEmpty
-        @JsonProperty
-        private String detailServicePath;
     }
 
 }

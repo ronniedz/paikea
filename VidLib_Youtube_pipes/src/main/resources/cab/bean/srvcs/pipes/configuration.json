@@ -8,7 +8,7 @@
 	"restServerConfiguration" : {
 		"host" : "localhost",
 		"port": 7070,
-		"contextPath": "pipes",
+		"contextPath": "/pipes",
 		"searchServicePath": "/search",
 		"detailServicePath": "/detail"
 	},

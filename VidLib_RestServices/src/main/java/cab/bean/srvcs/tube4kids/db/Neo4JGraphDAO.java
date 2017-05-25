@@ -15,7 +15,7 @@ import cab.bean.srvcs.tube4kids.core.Video;
 public class Neo4JGraphDAO {
 
     private Driver neo4jDriver;
-    
+
     public Neo4JGraphDAO(Driver neo4jDriver) {
 	this.neo4jDriver = neo4jDriver;
 
@@ -25,22 +25,22 @@ public class Neo4JGraphDAO {
     public Map<String, ?> insert(Video video) {
 	ObjectMapper objectMapper = new ObjectMapper();
 	@SuppressWarnings("unchecked")
-	Map<String, Object> videoAsMap = objectMapper.convertValue(video, Map.class);	
+	Map<String, Object> videoAsMap = objectMapper.convertValue(video, Map.class);
 
 //	Session session = neo4jDriver.session();
-	
-// #################################	
+
+// #################################
 //	Statement statement = new Statement( "MATCH (n) WHERE n.name={myNameParam} RETURN n.age" );
 //	 StatementResult cursor = session.run( statement.withParameters( Values.parameters( "myNameParam", "Bob" )  ) );
 
-	
-	String videoInsertTemplate = 
+
+	String videoInsertTemplate =
 "CREATE (invid: Video {title: {title}, userId: TOINT({userId}), videoId: {videoId}, created: {publishedAt} }) RETURN invid";
 
 //	String j =
 //"CREATE ( invid: Video {title: 'Mod!', userId: TOINT('1'), videoId: 'KrJQimAC91w', created: '2016aac' }) RETURN invid";
 
-	
+
 	String query = String.format(
 		"CREATE ( invid: Video {"
 		+ "title: '%s', "
@@ -55,34 +55,34 @@ public class Neo4JGraphDAO {
 	);
 
 	System.out.println("qry: " + query);
-		
-	
 
-	 
-	 List<Map<String, Object>> list = 
+
+
+
+	 List<Map<String, Object>> list =
 		neo4jDriver.session().run( query ).list(r -> unwrap(r, "v"));
 //	 	neo4jDriver.session().run( videoInsertTemplate, videoAsMap ).list(r -> unwrap(r, "v"));
-	 
+
 	 Map<String, Object> outp = list.get(0);
 	 System.out.print("outp: " + outp);
 //	 Map<String, ?> res = cursor.single().asMap();
 //	 session.close();
-	 
+
 	 return outp;
     }
  /*
 		List<Map<String, Object>> list = session.run(query).list(r -> unwrap(r, "v"));
 
-// #################################	
+// #################################
 //
 //	StatementResult cursor = session.run( "MATCH (n) WHERE n.name = {myNameParam} RETURN (n)",
 //                Values.parameters( "myNameParam", "Bob" ) );
 //
 //	 session.r
-// #################################	
-	
+// #################################
 
-	
+
+
 //	MATCH (video:Video {videoId: row.video_id})
 //	MATCH (user:User {id: TOINT(row.user_id)})
 //	MATCH (genre:Genre {id: TOINT(row.genre_id)})
@@ -103,7 +103,7 @@ public class Neo4JGraphDAO {
     public List<Map<String, Object>> listAllVideo() {
 	Session session = neo4jDriver.session();
 	String query = "MATCH (v:Video)-[:WITH]-(genre:Genre) return v;";
-	
+
 	// StatementResult result = session.run(query);
 
 	List<Map<String, Object>> list = session.run(query).list(r -> unwrap(r, "v"));

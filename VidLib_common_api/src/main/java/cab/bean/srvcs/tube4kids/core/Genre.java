@@ -36,13 +36,13 @@ public class Genre {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id private Long id;
-    
+
     @Column(name = "name", nullable = false)
     private String name;
-    
+
     @Column(name = "created", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp created;
-    
+
     @Column(name = "genre_id", nullable = true)
     private Long genreId;
 
@@ -54,7 +54,7 @@ public class Genre {
 	    targetEntity = cab.bean.srvcs.tube4kids.core.VideoGenre.class
 	    )
     @Cascade({
-	org.hibernate.annotations.CascadeType.SAVE_UPDATE, 
+	org.hibernate.annotations.CascadeType.SAVE_UPDATE,
 	org.hibernate.annotations.CascadeType.DELETE_ORPHAN
     })
     private List<VideoGenre> videoGenres = new ArrayList<VideoGenre>();

@@ -49,7 +49,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 })
 @Data
 public class User implements Principal {
-    
+
     @ManyToMany( fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.ALL )
     @JoinTable(name = "user_role",
 	joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
@@ -63,7 +63,7 @@ public class User implements Principal {
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Playlist> playlists = new HashSet<Playlist>();
-    
+
     @OneToMany(mappedBy="guardian", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Child> children = new HashSet<Child>();
 
@@ -131,12 +131,12 @@ public class User implements Principal {
     public boolean addRole(Role role) {
 	return roles.add(role);
     }
-    
+
     public boolean hasAnyRole(String... rolenames) {
 	 List<String> needles = Arrays.asList(rolenames);
 	return (this.roles.stream().filter(straw -> needles.contains(straw.getName())).count() > 0 );
     }
-    
+
     public boolean hasRole(String role) {
 	return roles.contains(new Role(role));
     }
@@ -146,17 +146,17 @@ public class User implements Principal {
     }
 
     public boolean isMyPlaylist(Playlist needls) {
-//	return needls.getUser().getId() == this.getId(); 
+//	return needls.getUser().getId() == this.getId();
 //	return this.playlists.contains(needls);
 	return isMyPlaylist(needls.getId());
     }
-    
+
     public boolean isMyChild(Long cid) {
 	return this.children.stream().filter(child -> cid.equals(child.getId())).count() > 0;
     }
-    
+
     public boolean isMyChild(Child needls) {
-//	return needls.getGuardian().getId() == this.getId(); 
+//	return needls.getGuardian().getId() == this.getId();
 //	return this.children.contains(needls);
 	return isMyChild(needls.getId());
     }

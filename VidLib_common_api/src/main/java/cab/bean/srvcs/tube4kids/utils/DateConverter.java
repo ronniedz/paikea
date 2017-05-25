@@ -6,7 +6,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 
 public class DateConverter {
-    
+
     public static final DateTimeFormatter parser = ISODateTimeFormat.dateTime();
 
 

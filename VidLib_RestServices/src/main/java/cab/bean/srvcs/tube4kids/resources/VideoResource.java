@@ -36,7 +36,7 @@ import cab.bean.srvcs.tube4kids.utils.StringTool;
 
 @Path("/video")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.MEMBER_ROLE}) 
+@RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.MEMBER_ROLE})
 public class VideoResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoResource.class);
 
@@ -54,7 +54,7 @@ public class VideoResource extends BaseResource {
 
     @GET
     @UnitOfWork
-    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.CHILD_ROLE}) 
+    @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.CHILD_ROLE})
     public Response listVideos() {
 	Object vList = videoDAO.findAll();
 	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
@@ -72,7 +72,7 @@ public class VideoResource extends BaseResource {
     @Path("/{vid}/genre")
     @PATCH
     @UnitOfWork
-    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.CONTENT_MODERATOR_ROLE}) 
+    @RolesAllowed({RoleNames.GUARDIAN_ROLE, RoleNames.CONTENT_MODERATOR_ROLE})
     public Response addGenre(@PathParam("vid") String vid, Long[] genreIds, @Auth User user) {
 
 	ResponseData dat = new ResponseData();
@@ -98,7 +98,7 @@ public class VideoResource extends BaseResource {
 
 		dat
 		 .setSuccess(true)
-		 .setEntity(o); 
+		 .setEntity(o);
 	    }
 	} catch (Exception nsee) {
 	    dat
@@ -111,7 +111,7 @@ public class VideoResource extends BaseResource {
     @Path("/{id}")
     @DELETE
     @UnitOfWork
-    @RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.CONTENT_MODERATOR_ROLE}) 
+    @RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.CONTENT_MODERATOR_ROLE})
     public Response deleteVideo(@PathParam("id") String id, @Auth User user) {
 	ResponseData dat = new ResponseData();
 	Video video = videoDAO.delete(id);
@@ -120,7 +120,7 @@ public class VideoResource extends BaseResource {
 
     @POST
     @UnitOfWork
-    @RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.CONTENT_MODERATOR_ROLE}) 
+    @RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.CONTENT_MODERATOR_ROLE})
     public Response createVideos(List<Video> videos, @Auth User user) {
 
 	String vids =  StringTool.joinMap(videos, ",", vidIn -> vidIn.getVideoId());

@@ -21,11 +21,11 @@ public class SearchQuery {
     @JsonProperty
     @QueryParam("pageToken")
     private String pageToken;
-    
+
     @JsonProperty
     @QueryParam("maxResults")
     private int maxResults;
-    
+
     @JsonProperty
     @QueryParam("etag")
     private String etag;

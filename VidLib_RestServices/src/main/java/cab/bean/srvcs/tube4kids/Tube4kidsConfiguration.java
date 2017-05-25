@@ -1,5 +1,7 @@
 package cab.bean.srvcs.tube4kids;
 
+import cab.bean.srvcs.tube4kids.config.RestServerConfiguration;
+import cab.bean.srvcs.tube4kids.config.YoutubeResourceConfiguration;
 import cab.bean.srvcs.tube4kids.core.Template;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,6 +19,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -38,35 +41,35 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     @NotNull
     @JsonProperty
     private Neo4JRestServerConfiguration neo4jConf = new Neo4JRestServerConfiguration();
-    
+
     @NotEmpty
     private String template;
-    
-    
+
+
     @NotEmpty
     private String testUrl;
-    
+
     @NotEmpty
     private String defaultName = "Guest";
 
     @Valid
     @NotNull
     private DataSourceFactory database = new DataSourceFactory();
-    
+
     @Valid
     @NotNull
     private URL proxySearchUrl;
-    
+
     @Valid
     @NotNull
     private URL proxyDetailUrl;
-    
+
     @NotNull
     private Map<String, Map<String, String>> viewRendererConfiguration = Collections.emptyMap();
 
     @JsonProperty
     private GraphiteReporterFactory graphiteReporterFactory = new GraphiteReporterFactory();
-    
+
     @NotNull
     @JsonProperty
     private AssetsConfiguration assets;
@@ -75,7 +78,7 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     @NotNull
     @JsonProperty
     public final GoogleAPIClientConfiguration googleAPIClientConfiguration = new GoogleAPIClientConfiguration();
-    
+
     @NotNull
     @JsonProperty
     public final JWTConfiguration jwtConfiguration = new JWTConfiguration();
@@ -85,24 +88,41 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
       return assets;
     }
 
+    @NotNull
+    public RestServerConfiguration restServerConfiguration;
+
+    @NotNull
+    public YoutubeResourceConfiguration youtubeResource;
+
     @JsonProperty
+    public RestServerConfiguration getRestServerConfiguration() {
+	return restServerConfiguration;
+    }
+
+    public void setRestServerConfiguration(RestServerConfiguration conf) throws MalformedURLException {
+	this.restServerConfiguration = conf;
+	final URL baseUrl =new URL("http" , conf.getHost(), conf.getPort(), conf.getContextPath());
+	proxySearchUrl = new URL(baseUrl, conf.getSearchServicePath());
+	proxyDetailUrl = new URL(baseUrl, conf.getDetailServicePath());
+    }
+
+    @JsonProperty
+    public YoutubeResourceConfiguration getYoutubeResourceConfiguration() {
+	return youtubeResource;
+    }
+
+    public void setYoutubeResourceConfiguration(YoutubeResourceConfiguration conf) throws MalformedURLException {
+	this.youtubeResource = conf;
+	new URL("http" , conf.getHost(), conf.getContextPath());
+    }
+
     public URL getProxySearchUrl() {
 	return proxySearchUrl;
-    }
-    
-    @JsonProperty
-    public void setProxySearchUrl(URL proxyUrl) {
-	this.proxySearchUrl = proxyUrl;
     }
 
     @JsonProperty
     public URL getProxyDetailUrl() {
         return proxyDetailUrl;
-    }
-
-    @JsonProperty
-    public void setProxyDetailUrl(URL proxyDetailUrl) {
-        this.proxyDetailUrl = proxyDetailUrl;
     }
 
     @JsonProperty
@@ -162,7 +182,7 @@ public class Tube4kidsConfiguration extends Configuration  implements AssetsBund
     public void setGraphiteReporterFactory(GraphiteReporterFactory graphiteReporterFactory) {
         this.graphiteReporterFactory = graphiteReporterFactory;
     }
-    
+
     public Driver getNeo4jDriver() {
 	return  GraphDatabase.driver(
 	    neo4jConf.getURI(),
