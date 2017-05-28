@@ -15,7 +15,13 @@
 conponent_dirs="utility-deps rdbms-deps"
 
 function build_client {
-    cd VidLib_RestClient/broadbean/ && npm i && npm run build
+    cd VidLib_RestClient/broadbean/
+    echo "Running 'npm i' ..."
+    echo ""
+    npm i
+    echo "Running 'npm run build' ..."
+    echo ""
+    npm run build
     cd ../..
 }
 
@@ -106,7 +112,7 @@ if [ "$CODE" -eq "0" ]; then
 
 	cd ..
 
-    if [[ ! -z $1 ]];
+    if [[ ! -z $1 && "$1" == 'client' ]];
     then
         build_client
     fi
