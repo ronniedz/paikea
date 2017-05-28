@@ -59,18 +59,19 @@ class AddVideoOptions extends Component {
   }
 
   renderVideoItemTitles(videoitems) {
-    const litype = videoitems.length < 5
-      ? (ea) => (
-        <li key={ea.videoId}>
-          <b>{ea.title}</b>
-          <img role="presentation" src={ea.defaultThumbnail} />
-        </li>
-      )
-      : (ea) => (
-        <li key={ea.videoId}>
-          {ea.title}
-        </li>
-      )
+    const thumbchild = (ea) => (
+      <li key={ea.videoId}>
+        <b>{ea.title}</b>
+        <img role="presentation" src={ea.defaultThumbnail} />
+      </li>
+    )
+    const titlechild = (ea) => (
+      <li key={ea.videoId}>
+        {ea.title}
+      </li>
+    )
+
+    const litype = videoitems.length < 5 ? thumbchild : titlechild
 
     return (
       <ul>
