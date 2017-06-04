@@ -68,8 +68,11 @@ export function * handleExternalAuthenticators() {
     if (authuser) {
       const formData = new URLSearchParams()
       formData.append('id_token', authuser.id_token)
-      const authResult = yield call(request, auth.endpoint, { body: formData, ...head.auth })
-      beanToken(authResult.data)
+
+      if (!beanToken()) {
+        const authResult = yield call(request, auth.endpoint, { body: formData, ...head.auth })
+        beanToken(authResult.data)
+      }
 
       const childrenURL = userchildren.endpoint
       const childrenResults = yield call(request, childrenURL, { headers: authTokenHeader() })
