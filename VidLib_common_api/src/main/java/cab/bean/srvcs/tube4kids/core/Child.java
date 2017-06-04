@@ -31,7 +31,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @NamedQueries({
     @NamedQuery(
 	    name = "cab.bean.srvcs.tube4kids.core.Child.findAll",
-	    query = "SELECT p FROM Child p"
+	    query = "SELECT c FROM Child c"
+    ),
+    @NamedQuery(
+	    name = "cab.bean.srvcs.tube4kids.core.Child.findByGuardian",
+	    query = "SELECT c FROM Child c where c.guardian = :user"
     )
 })
 @EqualsAndHashCode(exclude= {"playlists", "guardian"} )

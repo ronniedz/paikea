@@ -73,10 +73,14 @@ public class ChildDAO extends AbstractDAO<Child> {
 	return o;
     }
 
+    public List<Child> findChildrenOf(User user) {
+	return list(namedQuery("cab.bean.srvcs.tube4kids.core.Child.findByGuardian").setParameter("user", user));
+    }
+
     public List<Child> findAll() {
 	return list(namedQuery("cab.bean.srvcs.tube4kids.core.Child.findAll"));
     }
-
+    
     public Optional<Child> findById(Long id) {
 	return Optional.ofNullable(get(id));
     }

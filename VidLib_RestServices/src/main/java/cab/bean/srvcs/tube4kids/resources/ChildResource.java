@@ -153,8 +153,14 @@ public class ChildResource extends BaseResource {
     @UnitOfWork
     @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE } )
      public Response listChildren(@Auth User user) {
-        List<Child> list = childDAO.findAll();
-	return doGET(new ResponseData(list).setSuccess(list != null)).build();
+	
+	return doGET(
+		new ResponseData(
+			user.hasAnyRole(RoleNames.ADMIN)
+            		? childDAO.findAll()
+            		: childDAO.findChildrenOf(user)
+		)
+		.setSuccess(true)).build();
     }
 
 }

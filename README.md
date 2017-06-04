@@ -46,7 +46,9 @@ _____
  	- The relevant collections are: `cache_control_dat` and the ones prefixed with `vcache_`
  + MySQL or MariaDb
  	- For user and the application bound video library
- 	
+ + Install Chromium for Karma clientside testing
+ 	- https://chromium.googlesource.com/chromium/src/+/lkcr/docs/linux_build_instructions.md
+ 		
  + **Postponed ...** Neo4J
  	- For recommendations, user interaction feedback, as an alternative to RDBMS join traversals. This will support the rating/voting type queries.
 
