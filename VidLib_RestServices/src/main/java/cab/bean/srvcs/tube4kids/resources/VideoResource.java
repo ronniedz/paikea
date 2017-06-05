@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import cab.bean.srvcs.tube4kids.api.YouTubeVideoDetailResponse;
 import cab.bean.srvcs.tube4kids.auth.RoleNames;
+import cab.bean.srvcs.tube4kids.core.AgeGroup;
 import cab.bean.srvcs.tube4kids.core.User;
 import cab.bean.srvcs.tube4kids.core.Video;
 import cab.bean.srvcs.tube4kids.core.VideoGenre;
@@ -56,6 +57,23 @@ public class VideoResource extends BaseResource {
     @UnitOfWork
     @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.MEMBER_ROLE, RoleNames.CHILD_ROLE})
     public Response listVideos() {
+	Object vList = videoDAO.findAll();
+	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
+    }
+
+    @GET
+    @UnitOfWork
+    @RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.CHILD_ROLE})
+    public Response searchVideos(String keyword) {
+	Object vList = videoDAO.findAll();
+	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
+    }
+
+    @GET @Path("/age/{aid}")
+    @UnitOfWork
+    @RolesAllowed({RoleNames.MEMBER_ROLE, RoleNames.CHILD_ROLE})
+    public Response searchVideos(@PathParam("aid") Long aid) {
+	// AgeGroup age
 	Object vList = videoDAO.findAll();
 	return doGET(new ResponseData(vList).setSuccess(vList != null)).build();
     }

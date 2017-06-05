@@ -31,6 +31,13 @@
 
 	<dependencies>
 
+		<!-- Common libraries, helpers and utils -->
+		<dependency>
+		  <groupId>cab.bean.srvcs.tube4kids</groupId>
+		  <artifactId>VidLib_common_api</artifactId>
+		  <version>0.1</version>
+		</dependency>
+
 		<dependency>
 		    <groupId>org.apache.camel</groupId>
 		    <artifactId>camel-http4</artifactId>
@@ -42,20 +49,13 @@
 			<artifactId>jcypher</artifactId>
 			<version>3.5.0</version>
 		</dependency>
-
-		<!-- Common libraries, helpers and utils -->
-		<dependency>
-		  <groupId>cab.bean.srvcs.tube4kids</groupId>
-		  <artifactId>VidLib_common_api</artifactId>
-		  <version>0.1</version>
-		</dependency>
 		
-		<dependency>
+<!-- 		<dependency>
 		  <groupId>cab.bean.srvcs.tube4kids</groupId>
 		  <artifactId>utility-deps</artifactId>
 			<type>pom</type>
 		</dependency>
-	
+ -->	
 
 		<dependency>
 			<groupId>org.apache.camel</groupId>

@@ -14,31 +14,41 @@
 		<version>1.0-dev</version>
 	</parent>
 
+<properties>
+
+</properties>
 	<dependencies>
+
+			<!-- CODE HELPERS/UTILS -->
+
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>${joda-time.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
+
+		<!-- JUnit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			</dependency>
+
+		<!-- BeanUtils. Here for all subprojects -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.4</version>
 		</dependency>
-
-		<dependency>
-	  	<groupId>commons-io</groupId>
-	    <artifactId>commons-io</artifactId>
-	    <version>2.5</version>
-		</dependency>
-
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>2.9.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-		</dependency>
-
 		<!-- JPA annotations -->
 		<dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>
@@ -50,11 +60,11 @@
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 
-		<!-- Validations -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-		</dependency>
+			<!-- Validations -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+			</dependency>
 
 		<dependency>
 			<groupId>javax.ws.rs</groupId>

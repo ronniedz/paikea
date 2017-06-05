@@ -34,24 +34,84 @@
 		<!-- Used by Camel/ActiveMQ and googleAPI -->
 		<jackson.version>1.9.13</jackson.version>
 		<derby.version>10.12.1.1</derby.version>
-		<lombok.version>1.16.8</lombok.version>
+
+		
+		<beanutils.version>1.9.2</beanutils.version>
+		<commons-lang3.version>3.4</commons-lang3.version>
+    <commons-io.version>2.5</commons-io.version>
+		<lombok.version>1.16.16</lombok.version>
+		<joda-time.version>2.9.3</joda-time.version>
+
+			<hibernate.version>5.2.8.Final</hibernate.version>
+			<hibernate-validator.version>5.3.4.Final</hibernate-validator.version>
+		
+		<!-- Logging -->
+		<slf4j.version>1.7.13</slf4j.version>
+		<log4j.version>1.2.17</log4j.version>
+		<!-- Testing -->
+		<junit.version>4.12</junit.version>
 	</properties>
+
+
+		<dependencies>
+
+	</dependencies>
 
 	<dependencyManagement>
 
 		<dependencies>
 
+
+
+			<!-- logging -->
 			<dependency>
-				<groupId>org.projectlombok</groupId>
-				<artifactId>lombok</artifactId>
-				<version>${lombok.version}</version>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>cab.bean.srvcs.tube4kids</groupId>
-				<artifactId>utility-deps</artifactId>
-				<version>1.0</version>
-				<type>pom</type>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<!-- BeanUtils. Here for all subprojects -->
+			<dependency>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>${beanutils.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
+			</dependency>
+
+			<!-- JUnit -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava-collections</artifactId>
+				<version>r03</version>
 			</dependency>
 
 			<dependency>
@@ -83,13 +143,14 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-validator</artifactId>
-				<version>5.2.3.Final</version>
+				<version>${hibernate-validator.version}</version>
+			<!-- 	<scope>compile</scope> -->
 			</dependency>
 
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>5.2.3.Final</version>
+				<version>${hibernate.version}</version>
 			</dependency>
 
 		</dependencies>
@@ -99,7 +160,8 @@
 	<modules>
 		<module>VidLib_common_api</module>
 		<module>VidLib_Youtube_pipes</module>
-		
+
+		<module>VidLib_RestServices</module>
 	</modules>
 
 	<build>

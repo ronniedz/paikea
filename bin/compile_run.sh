@@ -37,7 +37,7 @@ runtime_dirs="run logs"
 QUEUE_PORT=7070
 RESTSERVER_PORT=8080
 CONFIG_FILE=config.yml
-
+RETRY=5
 
 source "$BUILD_DIR/functions.sh"
 
@@ -63,16 +63,9 @@ init_dirs $runtime_dirs
 
 stop_servers
 
-## install common
-mvn clean install
+compile_queue && run_queue
 
-install_deps	
-
-# compile_queue && run_queue
-
-run_queue
-
-if is_port_listening $QUEUE_PORT ; then
+if is_port_listening $QUEUE_PORT $RETRY; then
 
 	compile_rest_server && run_rest_server
 
@@ -87,3 +80,4 @@ fi
 
 
 cd $CWD
+

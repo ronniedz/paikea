@@ -88,12 +88,12 @@ function build_client {
     cd -
 }
 
+
+
 ## compile queue
 function compile_queue {
-    cd "${PAIKEA_HOME}/VidLib_Youtube_pipes"
-	mvn clean compile install
+    mvn clean install -pl VidLib_Youtube_pipes -am
 	let RESPCODE=$?
-	cd -
 	if [[ $RESPCODE -gt 0 ]] ; then
 		echo "Failed to compile."
 	else
@@ -104,13 +104,11 @@ function compile_queue {
 
 ## run queue
 function run_queue {
-#	mvn camel:run 2>&1 >> $QUEUE_LOG &
-	mvn -pl VidLib_Youtube_pipes camel:run 2>&1 >> $QUEUE_LOG &
-	QUEUE_PID=$!
-	echo $QUEUE_PID > $QUEUE_PID_FILE
-
+    mvn camel:run -pl VidLib_Youtube_pipes 2>&1 >> $QUEUE_LOG &
+    let QUEUE_PID=$!
+    echo -n $QUEUE_PID > $QUEUE_PID_FILE
 	echo "Starting 'Camel Router' (pid: ${QUEUE_PID}) ..."
-	
+
 	## Store PID
 	return $QUEUE_PID
 }
@@ -118,7 +116,10 @@ function run_queue {
 ## Check that port is updated
 function is_port_listening {
 	let port_num=$1
-	let max_tries=3
+	let max_tries=4
+    if  [ ! -z $2 ]; then
+        max_tries=$2
+    fi
 	let nap_len=$(($max_tries+1))
 	NET_CMD="cat < /dev/null > /dev/tcp/localhost/${port_num} > /dev/null ; echo -n \$?"
 	echo "Checking port... ${port_num}"
@@ -152,11 +153,8 @@ function is_port_listening {
 
 ## compile rest_server
 function compile_rest_server {
-    cd "${PAIKEA_HOME}/VidLib_RestServices"
-	## Build server
-	mvn clean package
+    mvn package -pl VidLib_RestServices -am
 	let RESPCODE=$?
-	cd -
 	if [[ $RESPCODE -gt 0 ]] ; then
 		echo "Failed to compile."
 	else
@@ -169,16 +167,14 @@ function compile_rest_server {
 function run_rest_server {
     cd "${PAIKEA_HOME}/VidLib_RestServices"
 
-#	jar_file=`find ./target -name 'VidLib_RestServices*.jar | grep -v 'source'' | xargs echo | tr ' ' ':'`
+    jar_file=$(find ./target -name VidLib_RestServices\*.jar | grep -v 'source') && \
+    java -Dfile.encoding=UTF-8 -jar $jar_file server $CONFIG_FILE 2>&1 >> $RESTSRV_LOG &
+    RSERVER_PID=$!
 
-	jar_file=$(find ./target -name VidLib_RestServices\*.jar | grep -v 'source')
-	echo "Starting Rest Server (pid: ${RSERVER_PID}) - Running!"
-	
-	## Start server
-	java -Dfile.encoding=UTF-8 -jar $jar_file server $CONFIG_FILE 2>&1 >> $RESTSRV_LOG &
-	RSERVER_PID=$!
-	## Store PID
-	echo -n ${RSERVER_PID} > $RESTSRV_PID_FILE
+    echo "Starting Rest Server (pid: ${RSERVER_PID}) - Running!"
+
+    ## Store PID
+    echo -n ${RSERVER_PID} > $RESTSRV_PID_FILE
     cd -
 }
 

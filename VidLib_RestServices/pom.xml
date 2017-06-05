@@ -29,7 +29,11 @@
         <project.youtube.analytics.version>v1-rev24-1.17.0-rc</project.youtube.analytics.version>
         <project.http.version>1.18.0-rc</project.http.version>
     		<!--  / YouTube properties -->
-    <dropwizard.version>1.0.0-rc3</dropwizard.version>
+    <dropwizard.version>1.1.1</dropwizard.version>
+ 
+   <dropwizard-configurable-assets.version>1.0.5</dropwizard-configurable-assets.version>
+	    <dropwizard-auth-jwt.version>1.1.0-0</dropwizard-auth-jwt.version>
+			<hibernate-jpa-2.1.version>1.0.0.Final</hibernate-jpa-2.1.version>
         
     </properties>
 
@@ -80,10 +84,11 @@
 </dependency>
  -->
 
-<dependency>
-    <groupId>joda-time</groupId>
-    <artifactId>joda-time</artifactId>
-</dependency>
+		<dependency>
+		  <groupId>cab.bean.srvcs.tube4kids</groupId>
+		  <artifactId>VidLib_common_api</artifactId>
+		  <version>0.1</version>
+		</dependency>
     
 <!-- https://mvnrepository.com/artifact/org.neo4j.driver/neo4j-java-driver -->
 <dependency>
@@ -129,81 +134,14 @@
 			    <version>6.0.3</version>
 			</dependency>
 
-		<dependency>
-		  <groupId>cab.bean.srvcs.tube4kids</groupId>
-		  <artifactId>VidLib_common_api</artifactId>
-		  <version>0.1</version>
-			<exclusions>
-
-<!-- 
-				<exclusion>
-			  		<artifactId>utility-deps</artifactId>
-			  		<groupId>cab.bean.srvcs.tube4kids</groupId>
-		  	</exclusion>
- -->
-
-				<exclusion>
-				    <groupId>javax.ws.rs</groupId>
-				    <artifactId>javax.ws.rs-api</artifactId>
-				</exclusion>
-			
-				<exclusion>
-				    <groupId>com.fasterxml.jackson.jaxrs</groupId>
-				    <artifactId>jackson-jaxrs-json-provider</artifactId>
-				</exclusion>
-				
-				<!--  JPA annotations -->
-				<exclusion>
-					<groupId>org.hibernate.javax.persistence</groupId>
-					<artifactId>hibernate-jpa-2.1-api</artifactId>
-				</exclusion>
-				
-				<exclusion>
-				  <groupId>org.hibernate</groupId>
-				  <artifactId>hibernate-validator</artifactId>
-				</exclusion>
-				
-				<exclusion>
-					<artifactId>jackson-jaxrs-base</artifactId>
-					<groupId>com.fasterxml.jackson.jaxrs</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<!-- BeanUtils. Here for all subprojects -->
-		<dependency>
-	    <groupId>commons-beanutils</groupId>
-	    <artifactId>commons-beanutils</artifactId>
-	    <version>1.9.2</version>
-		</dependency>
-
-		
-	<!-- CODE HELPERS/UTILS -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.16.8</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<!--  JPA annotations -->
-		<dependency>
-			<groupId>org.hibernate.javax.persistence</groupId>
-			<artifactId>hibernate-jpa-2.1-api</artifactId>
-			<version>1.0.0.Final</version>
-		</dependency>
-
 	<!-- JSON WebToken DEPENDENCIES -->
 
 	<dependency>
 	    <groupId>com.github.toastshaman</groupId>
 	    <artifactId>dropwizard-auth-jwt</artifactId>
-	    <version>1.0.2-0</version>
+	    <version>${dropwizard-auth-jwt.version}</version>
 	</dependency>
+
 
 <!-- 
 		<dependency>
@@ -257,46 +195,47 @@ compile("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.7.2")
             <artifactId>dropwizard-assets</artifactId>
          </dependency>
 			 -->
-			
-				<dependency>
-  <groupId>io.dropwizard-bundles</groupId>
-  <artifactId>dropwizard-configurable-assets-bundle</artifactId>
-  <version>1.0.5</version>
-</dependency>
-        
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-http2</artifactId>
-                    </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-hibernate</artifactId>
-                    </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-migrations</artifactId>
-		        </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-views-freemarker</artifactId>
-		        </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-views-mustache</artifactId>
-		        </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-metrics-graphite</artifactId>
-		        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-testing</artifactId>
-		            <scope>test</scope>
-        </dependency>
+
+	<dependency>
+		<groupId>io.dropwizard-bundles</groupId>
+		<artifactId>dropwizard-configurable-assets-bundle</artifactId>
+		<version>${dropwizard-configurable-assets.version}</version>
+	</dependency>
+
+
+	<dependency>
+		<groupId>io.dropwizard</groupId>
+		<artifactId>dropwizard-http2</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.dropwizard</groupId>
+		<artifactId>dropwizard-hibernate</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.dropwizard</groupId>
+		<artifactId>dropwizard-migrations</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.dropwizard</groupId>
+		<artifactId>dropwizard-views-freemarker</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.dropwizard</groupId>
+		<artifactId>dropwizard-views-mustache</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.dropwizard</groupId>
+		<artifactId>dropwizard-metrics-graphite</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>com.h2database</groupId>
+		<artifactId>h2</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>io.dropwizard</groupId>
+		<artifactId>dropwizard-testing</artifactId>
+		<scope>test</scope>
+	</dependency>
         <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-inmemory</artifactId>
@@ -463,23 +402,4 @@ compile("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.7.2")
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
