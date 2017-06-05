@@ -2,9 +2,7 @@ package cab.bean.srvcs.tube4kids.db;
 
 import cab.bean.srvcs.tube4kids.core.Video;
 import io.dropwizard.hibernate.AbstractDAO;
-
 import org.hibernate.SessionFactory;
-
 import java.util.List;
 import java.util.Optional;
 

@@ -16,14 +16,14 @@ import lombok.ToString;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@SuppressWarnings("deprecation")
 @Entity
 @Table(name = "token")
 @NamedQueries({
     @NamedQuery(
             name = "cab.bean.srvcs.tube4kids.core.Token.findBySubject",
             query = "SELECT t FROM Token t where t.subject = :subject"
-    ),
-
+    )
 })
 @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)

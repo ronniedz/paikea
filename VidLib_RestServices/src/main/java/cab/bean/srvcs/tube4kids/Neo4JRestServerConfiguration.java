@@ -64,12 +64,9 @@ public class Neo4JRestServerConfiguration {
 
 	public URI getURI() {
 	    URI uri = null;
-	    System.out.println("host: " + host + " / path: " + path + " / port: " + port);
 	    try {
-
 		//  new URI( scheme, userInfo,  host, port, path, query, fragment)
 		uri = new URI(protocol, null, host, port, path, null, null);
-
 	    } catch (URISyntaxException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();

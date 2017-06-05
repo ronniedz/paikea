@@ -1,7 +1,6 @@
 package cab.bean.srvcs.tube4kids.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
-
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -9,11 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.hibernate.SessionFactory;
-
 import cab.bean.srvcs.tube4kids.core.User;
-
 import com.mysql.cj.api.x.Collection;
 
 public class UserDAO extends AbstractDAO<User> {
