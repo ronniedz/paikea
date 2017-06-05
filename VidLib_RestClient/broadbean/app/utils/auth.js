@@ -7,71 +7,24 @@ import {
   auth,
 } from 'siteconfig'
 
-let tokenData
+let tokenData,
+  storekey = 'beancab'
+
+
 export const beanToken = (data) => {
-  if (data) { tokenData = data }
+  if (data && window) {
+    tokenData = data
+    localStorage.setItem(storekey, JSON.stringify(tokenData))
+    return tokenData
+  }
+  
+  tokenData = JSON.parse(localStorage.getItem(storekey))
+
+  if(tokenData) {
+    const expiresAt = new Date().getTime() + (tokenData.expires_in * 1000)
+    if (new Date(expiresAt) < new Date()) {
+      return false
+    }
+  }
   return tokenData
 }
-
-/*
-
-function prepareAuthRequest(token, cb) {
-  sendAuthRequest(auth.endpoint, {
-    id_token: token ,
-    ...head.auth,
-  })
-}
-
-
-function sendAuthRequest(url, options) {
-  request(url, options)
-    .then((res) => console.log('res', res))
-}
-
-
-export default {
-  beanlogin(token) {
-    return new Promise( (resolve, reject) => {
-      // if (localStorage.token) {
-      //   resolve(true)
-      // }
-
-      prepareAuthRequest(token, (res) => {
-        if (res.authenticated) {
-          localStorage.token = res.token
-          resolve(true)
-        } else {
-          resolve(false)
-        }
-      })
-    })
-
-},
-  getToken: function () {
-    return localStorage.token
-  },
-
-  logout: function (cb) {
-    delete localStorage.token
-    if (cb) cb()
-  },
-
-  loggedIn: function () {
-    return !!localStorage.token
-  },
-}
-
-
-function pretendRequest(email, pass, cb) {
-  setTimeout(() => {
-    if (email === 'garrickajo@gmail.com' && pass === 'HOW_TO_SAFELY_IMPLEMENT_PASSWORD?') {
-      cb({
-        authenticated: true,
-        token: Math.random().toString(36).substring(7)
-      })
-    } else {
-      cb({ authenticated: false })
-    }
-  }, 500)
-}
-*/

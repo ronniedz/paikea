@@ -55,7 +55,11 @@ class BeanModal extends Component {
     const { content } = this.state
     const mergedstate = { ...this.state, content: { ...content, ...initstate } }
     return (
-      <Modal style={mergedstate} {...{ isOpen }} className={styles.beanModal}>
+      <Modal
+        style={mergedstate} {...{ isOpen }}
+        className={styles.beanModal}
+        contentLabel=""
+      >
         {children}
       </Modal>
     )
