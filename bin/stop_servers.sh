@@ -8,7 +8,8 @@ then
 		if  [ -f  "$pidfile" ];
 		then
 			echo "Killing $pidfile"
-			kill -KILL "`cat ${pidfile}`" && echo "Stopped"
+			tpid="`cat ${pidfile}`"
+			kill -KILL $tpid && echo "Stopped $tpid"
 			sleep 1
 			rm ${pidfile}
 		fi
@@ -19,7 +20,8 @@ else
 		for pidfile in ${RUNPID[@]};
 		do
 			echo "Killing $pidfile"
-			kill -KILL "`cat ${pidfile}`" && echo "Stopped"
+			tpid="`cat ${pidfile}`"
+			kill -KILL $tpid && echo "Stopped $tpid"
 			sleep 1
 			rm ${pidfile}
 		done

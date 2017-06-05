@@ -167,14 +167,17 @@ function compile_rest_server {
 function run_rest_server {
     cd "${PAIKEA_HOME}/VidLib_RestServices"
 
-    jar_file=$(find ./target -name VidLib_RestServices\*.jar | grep -v 'source') && \
-    java -Dfile.encoding=UTF-8 -jar $jar_file server $CONFIG_FILE 2>&1 >> $RESTSRV_LOG &
-    RSERVER_PID=$!
+    jar_file=$(find ./target -name VidLib_RestServices\*.jar | grep -v 'source')
+    if [[ ! -z $jar_file ]]; then
+        java -Dfile.encoding=UTF-8 -jar $jar_file server $CONFIG_FILE 2>&1 >> $RESTSRV_LOG &
+        RSERVER_PID=$!
 
-    echo "Starting Rest Server (pid: ${RSERVER_PID}) - Running!"
+        echo "Starting Rest Server (pid: ${RSERVER_PID}) - Running!"
 
-    ## Store PID
-    echo -n ${RSERVER_PID} > $RESTSRV_PID_FILE
+        ## Store PID
+        echo -n ${RSERVER_PID} > $RESTSRV_PID_FILE
+
+    fi
     cd -
 }
 
@@ -184,8 +187,9 @@ function stop_servers {
     if [ "$RUNPID" ]; then
         for pidfile in ${RUNPID[@]};
         do
-            echo "Killing $pidfile"
-            kill -KILL "`cat ${pidfile}`" && rm ${pidfile} && echo "Stopped"
+            echo "Stopping process $pidfile"
+            tpid="`cat ${pidfile}`"
+            kill -KILL $tpid && rm ${pidfile} && echo "Stopped $tpid"
             sleep 1
         done
     fi

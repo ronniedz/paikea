@@ -59,9 +59,9 @@ check_options $@
 ## Create logs/ and run/ directories if missing
 init_dirs $runtime_dirs
 
-## Confirm the port is not in use
-
 stop_servers
+
+mvn clean
 
 compile_queue && run_queue
 
