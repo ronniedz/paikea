@@ -151,7 +151,7 @@ public class ChildResource extends BaseResource {
     @UnitOfWork
     @RolesAllowed({RoleNames.ADMIN_ROLE, RoleNames.GUARDIAN_ROLE } )
      public Response listChildren(@Auth User user) {
-	
+
 	return doGET(
 		new ResponseData(
 			user.hasAnyRole(RoleNames.ADMIN)

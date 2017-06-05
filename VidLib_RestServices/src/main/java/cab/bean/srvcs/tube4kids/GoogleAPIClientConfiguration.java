@@ -6,7 +6,7 @@ import cab.bean.srvcs.tube4kids.auth.FederationConfig;
 
 /** Constants from: com.google.api-client::google-api-client::1.22.0 */
 public class GoogleAPIClientConfiguration extends FederationConfig {
-    
+
     /** Encoded URL of Google's end-user authorization server. */
     public static final String AUTHORIZATION_SERVER_URL = "https://accounts.google.com/o/oauth2/auth";
 
