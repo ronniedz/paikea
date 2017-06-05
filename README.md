@@ -89,6 +89,6 @@ git clone git@bitbucket.org:dietary_builders/youtube-rider.git [destination]
 Execute:
 
  1. This will install libraries and compile the source:
- 	- `./build_run.sh`
+ 	- `./bin/compile_run.sh`
  + Stop the services with:
-	- `./stop_servers.sh`
+	- `./bin/stop_servers.sh`
