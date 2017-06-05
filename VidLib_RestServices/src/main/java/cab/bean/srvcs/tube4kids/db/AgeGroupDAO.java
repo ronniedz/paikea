@@ -31,6 +31,7 @@ public class AgeGroupDAO extends AbstractDAO<AgeGroup> {
 	return rep;
     }
 
+    @SuppressWarnings("unchecked")
     public List<AgeGroup> findAll() {
         return list(namedQuery("cab.bean.srvcs.tube4kids.core.AgeGroup.findAll"));
     }

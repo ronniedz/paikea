@@ -1,35 +1,30 @@
 package cab.bean.srvcs.tube4kids;
 
-import cab.bean.srvcs.tube4kids.config.RestServerConfiguration;
-import cab.bean.srvcs.tube4kids.config.YoutubeResourceConfiguration;
-import cab.bean.srvcs.tube4kids.core.Template;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableMap;
-
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.metrics.graphite.GraphiteReporterFactory;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.neo4j.driver.v1.GraphDatabase;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.neo4j.driver.v1.AuthTokens;
-import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+
+import cab.bean.srvcs.tube4kids.config.RestServerConfiguration;
+import cab.bean.srvcs.tube4kids.config.YoutubeResourceConfiguration;
+import cab.bean.srvcs.tube4kids.core.Template;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
 
 
 public class Tube4kidsConfiguration extends Configuration  implements AssetsBundleConfiguration {

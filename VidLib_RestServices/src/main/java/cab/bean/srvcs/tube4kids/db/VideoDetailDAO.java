@@ -8,8 +8,6 @@ import org.hibernate.SessionFactory;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
-
 public class VideoDetailDAO extends AbstractDAO<Video> {
 
     public VideoDetailDAO(SessionFactory factory) {
@@ -34,6 +32,7 @@ public class VideoDetailDAO extends AbstractDAO<Video> {
 	return rep;
     }
 
+    @SuppressWarnings("unchecked")
     public List<Video> findAll() {
         return list(namedQuery("cab.bean.srvcs.tube4kids.core.Video.findAll"));
     }

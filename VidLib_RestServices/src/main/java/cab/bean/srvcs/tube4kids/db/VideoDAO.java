@@ -1,18 +1,15 @@
 package cab.bean.srvcs.tube4kids.db;
 
-import cab.bean.srvcs.tube4kids.core.Video;
 import io.dropwizard.hibernate.AbstractDAO;
-
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import javax.ws.rs.core.Response;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
+
+import cab.bean.srvcs.tube4kids.core.Video;
 
 public class VideoDAO extends AbstractDAO<Video> {
 

@@ -3,10 +3,6 @@
  */
 package cab.bean.srvcs.tube4kids.core;
 
-import java.util.List;
-
-import javax.persistence.Embedded;
-
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
@@ -17,6 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 /**
  * @author ronalddennison
  */
+@SuppressWarnings("deprecation")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 @EqualsAndHashCode(of  = {"videoId"})

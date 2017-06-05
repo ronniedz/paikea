@@ -5,12 +5,8 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
 import cab.bean.srvcs.tube4kids.config.RestServerConfiguration;
 import cab.bean.srvcs.tube4kids.config.YoutubeResourceConfiguration;
 

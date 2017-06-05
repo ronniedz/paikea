@@ -4,7 +4,6 @@ import io.dropwizard.hibernate.UnitOfWork;
 
 import java.util.List;
 
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;

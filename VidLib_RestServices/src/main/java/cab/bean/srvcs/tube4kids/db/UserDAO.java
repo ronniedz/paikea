@@ -1,23 +1,20 @@
 package cab.bean.srvcs.tube4kids.db;
 
-import cab.bean.srvcs.tube4kids.core.User;
 import io.dropwizard.hibernate.AbstractDAO;
-
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.SessionFactory;
-
-import com.mysql.cj.api.x.Collection;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import org.hibernate.SessionFactory;
+
+import cab.bean.srvcs.tube4kids.core.User;
+
+import com.mysql.cj.api.x.Collection;
 
 public class UserDAO extends AbstractDAO<User> {
 

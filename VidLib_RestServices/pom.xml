@@ -8,7 +8,7 @@
     <artifactId>VidLib_RestServices</artifactId>
     <version>1.0.0</version>
     <groupId>cab.bean.srvcs.tube4kids</groupId>
-    <name>Video Rest Service. A Front-End to Youtube Queue service.</name>
+    <name>Paikea Rest Service</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,10 +25,11 @@
         <maven.site.deploy.skip>true</maven.site.deploy.skip>
 
         <!--  YouTube properties -->
-        <project.youtube.version>v3-rev107-1.18.0-rc</project.youtube.version>
+<!--         <project.youtube.version>v3-rev107-1.18.0-rc</project.youtube.version>
         <project.youtube.analytics.version>v1-rev24-1.17.0-rc</project.youtube.analytics.version>
         <project.http.version>1.18.0-rc</project.http.version>
-    		<!--  / YouTube properties -->
+ -->    		<!--  / YouTube properties -->
+    		
     <dropwizard.version>1.1.1</dropwizard.version>
  
    <dropwizard-configurable-assets.version>1.0.5</dropwizard-configurable-assets.version>
@@ -96,14 +97,6 @@
     <artifactId>neo4j-java-driver</artifactId>
     <version>1.1.0-M06</version>
 </dependency>
-
-		<!-- Google-api-client for Token verification-->
-<!-- 		<dependency>
-	    <groupId>com.google.api-client</groupId>
-	    <artifactId>google-api-client</artifactId>
-	    <version>1.22.0</version>
-		</dependency>
- -->
 
 <dependency>
     <groupId>net.iot-solutions.graphdb</groupId>

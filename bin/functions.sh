@@ -187,7 +187,7 @@ function stop_servers {
     if [ "$RUNPID" ]; then
         for pidfile in ${RUNPID[@]};
         do
-            echo "Stopping process $pidfile"
+            echo "Shutting down process $pidfile"
             tpid="`cat ${pidfile}`"
             kill -KILL $tpid && rm ${pidfile} && echo "Stopped $tpid"
             sleep 1

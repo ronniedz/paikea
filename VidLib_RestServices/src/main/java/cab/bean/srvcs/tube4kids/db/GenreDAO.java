@@ -1,14 +1,14 @@
 package cab.bean.srvcs.tube4kids.db;
 
-import cab.bean.srvcs.tube4kids.core.Child;
-import cab.bean.srvcs.tube4kids.core.Genre;
 import io.dropwizard.hibernate.AbstractDAO;
+
+import java.util.List;
+import java.util.Optional;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import java.util.List;
-import java.util.Optional;
+import cab.bean.srvcs.tube4kids.core.Genre;
 
 public class GenreDAO extends AbstractDAO<Genre> {
     public GenreDAO(SessionFactory factory) {

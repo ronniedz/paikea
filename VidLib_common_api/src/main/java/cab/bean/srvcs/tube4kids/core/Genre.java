@@ -47,6 +47,7 @@ public class Genre {
     private Long genreId;
 
     // ------------------ JOINS ----------------------- //
+    @SuppressWarnings("deprecation")
     @JsonIgnore
     @OneToMany(
 	    cascade = {CascadeType.PERSIST, CascadeType.MERGE},

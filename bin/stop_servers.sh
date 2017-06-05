@@ -7,7 +7,7 @@ then
 		pidfile="run/paikea_${servicen}.pid"
 		if  [ -f  "$pidfile" ];
 		then
-			echo "Killing $pidfile"
+			echo "Shutting down process $pidfile"
 			tpid="`cat ${pidfile}`"
 			kill -KILL $tpid && echo "Stopped $tpid"
 			sleep 1
@@ -19,7 +19,7 @@ else
 	if [ "$RUNPID" ]; then
 		for pidfile in ${RUNPID[@]};
 		do
-			echo "Killing $pidfile"
+			echo "Shutting down process $pidfile"
 			tpid="`cat ${pidfile}`"
 			kill -KILL $tpid && echo "Stopped $tpid"
 			sleep 1

@@ -1,9 +1,7 @@
 package cab.bean.srvcs.tube4kids;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -12,11 +10,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 //import org.neo4j.driver.v1.AuthTokens;
 //import org.neo4j.driver.v1.Driver;
 //import org.neo4j.driver.v1.GraphDatabase;
-
-
-
-
-
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

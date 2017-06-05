@@ -1,26 +1,20 @@
 package cab.bean.srvcs.tube4kids.core;
 
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import cab.bean.srvcs.tube4kids.utils.StringTool;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
-import cab.bean.srvcs.tube4kids.utils.StringTool;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Embeddable
 @RequiredArgsConstructor
